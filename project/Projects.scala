@@ -33,7 +33,9 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(typesafeConfig, slf4jApi ,logbackCore, logbackClassic))
+      compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic))
+    .settings(excludeScalaLib: _*)
+
 
   lazy val agentApi = Project("agent-api",file("agent-api"))
     .settings(basicSettings: _*)
@@ -41,7 +43,7 @@ object Projects extends Build {
     .settings(libraryDependencies ++=
       provided(typesafeConfig, slf4jApi))
     .settings(excludeScalaLib: _*)
-//    .settings(notAggregateInAssembly: _*)
+    .settings(notAggregateInAssembly: _*)
 
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
 }

@@ -25,7 +25,7 @@ import Release.{settings => releaseSettings }
 
 object Settings {
 
-  val JavaVersion = "1.6"
+  val JavaVersion = "1.8"
   val ScalaVersion = "2.11.7"
 
   lazy val basicSettings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(

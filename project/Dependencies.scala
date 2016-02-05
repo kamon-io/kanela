@@ -27,6 +27,7 @@ object Dependencies {
   val logbackCore     = "ch.qos.logback"  % "logback-core"      % "1.1.3"
   val logbackClassic  = "ch.qos.logback"  % "logback-classic"   % "1.1.3"
   val typesafeConfig  = "com.typesafe"    % "config"            % "1.3.0"
+  val javaslang       = "com.javaslang"   % "javaslang"         % "2.0.0-RC3"
 
   def compile   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")
   def provided  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")

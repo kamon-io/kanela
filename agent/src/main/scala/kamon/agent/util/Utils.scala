@@ -15,6 +15,10 @@
 
 package kamon.agent.util
 
+import java.util.function.Supplier
+
+import kamon.api.instrumentation.KamonInstrumentation
+
 object Utils {
   def withTimeSpent[A](thunk: ⇒ A)(timeSpent: Long ⇒ Unit): A = {
     val start = System.nanoTime()

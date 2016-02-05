@@ -21,7 +21,7 @@ import net.bytebuddy.agent.builder.AgentBuilder.Listener
 import net.bytebuddy.description.`type`.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
 
-case class InstrumentationListener() extends Listener {
+case class InstrumentationListener1() extends Listener {
 
   val log = LazyLogger()
 

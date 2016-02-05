@@ -18,7 +18,7 @@ package kamon.api.instrumentation
 
 import java.lang.instrument.Instrumentation
 
-import kamon.api.instrumentation.listener.InstrumentationListener
+import kamon.api.instrumentation.listener.InstrumentationListener1
 import kamon.api.instrumentation.mixin.{ MixinClassVisitorWrapper, MixinDescription }
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer
@@ -32,7 +32,7 @@ import net.bytebuddy.pool.TypePool
 
 import scala.collection.mutable
 
-abstract class KamonInstrumentation {
+abstract class KamonInstrumentation1 {
   private var elementMatcher: ElementMatcher[_ >: TypeDescription] = _
   private val mixins = mutable.ListBuffer[MixinDescription]()
   private val transformers = mutable.ListBuffer[Transformer]()
@@ -44,7 +44,7 @@ abstract class KamonInstrumentation {
   //TODO:configure listener
   def register(instrumentation: Instrumentation): Unit = {
     val builder = new AgentBuilder.Default()
-      .withListener(InstrumentationListener())
+      .withListener(InstrumentationListener1())
       .`type`(elementMatcher)
 
     mixins.foreach { mixin ⇒
