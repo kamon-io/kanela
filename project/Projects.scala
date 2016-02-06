@@ -33,7 +33,7 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic))
+      compile(bytebuddy, javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic))
     .settings(excludeScalaLib: _*)
 
 
@@ -41,7 +41,7 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
-      provided(typesafeConfig, slf4jApi))
+      provided(typesafeConfig, slf4jApi, bytebuddy))
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
