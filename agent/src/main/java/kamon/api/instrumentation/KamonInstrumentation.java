@@ -3,7 +3,7 @@ package kamon.api.instrumentation;
 import javaslang.Function2;
 import javaslang.collection.List;
 import javaslang.control.Option;
-import kamon.api.instrumentation.listener.InstrumentationListener1;
+import kamon.api.instrumentation.listener.InstrumentationListener;
 import kamon.instrumentation.mixin.MixinDescription;
 import kamon.instrumentation.mixin.MixinClassVisitorWrapper;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -30,7 +30,7 @@ public abstract class KamonInstrumentation {
 
     public void register(Instrumentation instrumentation) {
         Identified agentBuilder = new AgentBuilder.Default()
-                .withListener(new InstrumentationListener1())
+                .withListener(new InstrumentationListener())
                 .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("")));
 
         mixins.forEach(mixin ->
