@@ -4,8 +4,8 @@ import javaslang.Function2;
 import javaslang.collection.List;
 import javaslang.control.Option;
 import kamon.api.instrumentation.listener.InstrumentationListener;
-import kamon.instrumentation.mixin.MixinDescription;
 import kamon.instrumentation.mixin.MixinClassVisitorWrapper;
+import kamon.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class KamonInstrumentation {
-    private Option<ElementMatcher> elementMatcher = Option.none();
+    private Option<ElementMatcher<? super TypeDescription>> elementMatcher = Option.none();
     private List<MixinDescription> mixins = List.empty();
     private List<Transformer> transformers = List.empty();
 
@@ -33,7 +33,7 @@ public abstract class KamonInstrumentation {
     public void register(Instrumentation instrumentation) {
         Identified agentBuilder = new AgentBuilder.Default()
                 .with(new InstrumentationListener())
-                .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("")));
+                .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
 
         mixins.forEach(mixin ->
                 agentBuilder
@@ -43,14 +43,14 @@ public abstract class KamonInstrumentation {
         transformers.forEach(transformer -> agentBuilder.transform(transformer).installOn(instrumentation));
     }
 
-    private Transformer withTransformer(Function2<Builder, TypeDescription, Builder> f) {return f::apply;}
+    private Transformer withTransformer(Function2<Builder, TypeDescription, Builder> f) { return f::apply; }
 
     public void addTransformation(Function2<Builder, TypeDescription, Builder> f) {
      transformers.append(withTransformer(f));
     }
 
-    public void forTypes(Supplier<ElementMatcher> f) { elementMatcher = Option.of(f.get());}
-    public void forType(Supplier<ElementMatcher> f) {forTypes(f);}
+    public void forTypes(Supplier<ElementMatcher<? super TypeDescription>> f) { elementMatcher = Option.of(f.get());}
+    public void forType(Supplier<ElementMatcher<? super TypeDescription>> f) {forTypes(f);}
     public void forTargetType(Supplier<String> f) {forType((() -> named(f.get())));}
     public void forSubtypeOf(Supplier<String> f){forType(() -> isSubTypeOf(typePool.describe(f.get()).resolve()).and(not(isInterface())));}
     public void addMixin(Supplier<Class<?>> f) {mixins.append(MixinDescription.of(elementMatcher.get(),f.get()));}
