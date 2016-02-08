@@ -56,8 +56,6 @@ object Assembly {
     art.copy(`classifier` = Some("assembly"))
   }
 
-  addArtifact(artifact in (Compile, assembly), assembly)
-
   lazy val notAggregateInAssembly = Seq(aggregate in assembly := false)
   lazy val excludeScalaLib = Seq(assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false))
 }

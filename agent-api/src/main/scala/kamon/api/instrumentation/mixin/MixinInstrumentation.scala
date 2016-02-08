@@ -20,7 +20,7 @@ import kamon.api.instrumentation.initializer
 import net.bytebuddy.description.`type`.TypeDescription
 import net.bytebuddy.jar.asm._
 import net.bytebuddy.jar.asm.commons.{ AdviceAdapter, Method, RemappingMethodAdapter, SimpleRemapper }
-import net.bytebuddy.jar.asm.tree._
+//import net.bytebuddy.jar.asm.tree._
 import net.bytebuddy.matcher.ElementMatcher
 import scala.language.existentials
 
@@ -68,21 +68,21 @@ class MixinClassVisitor(mixin: MixinDescription, classVisitor: ClassVisitor) ext
   }
 
   override def visitEnd(): Unit = {
-    val constructor: (Any) ⇒ Boolean = method ⇒ method.asInstanceOf[MethodNode].name.equals(ConstructorDescriptor)
-    val cr = new ClassReader(mixin.bytes)
-    val cn = new ClassNode
-    cr.accept(cn, ClassReader.EXPAND_FRAMES)
-
-    cn.fields.foreach(_.asInstanceOf[FieldNode].accept(this))
-    cn.methods.filterNot(constructor).foreach {
-      method ⇒
-        val mn: MethodNode = method.asInstanceOf[MethodNode]
-        val exceptions = new Array[String](mn.exceptions.size())
-        val mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions)
-
-        mn.instructions.resetLabels()
-        mn.accept(new RemappingMethodAdapter(mn.access, mn.desc, mv, new SimpleRemapper(cn.name, className.getInternalName)))
-    }
+    //    val constructor: (Any) ⇒ Boolean = method ⇒ method.asInstanceOf[MethodNode].name.equals(ConstructorDescriptor)
+    //    val cr = new ClassReader(mixin.bytes)
+    //    val cn = new ClassNode
+    //    cr.accept(cn, ClassReader.EXPAND_FRAMES)
+    //
+    //    cn.fields.foreach(_.asInstanceOf[FieldNode].accept(this))
+    //    cn.methods.filterNot(constructor).foreach {
+    //      method ⇒
+    //        val mn: MethodNode = method.asInstanceOf[MethodNode]
+    //        val exceptions = new Array[String](mn.exceptions.size())
+    //        val mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions)
+    //
+    //        mn.instructions.resetLabels()
+    //        mn.accept(new RemappingMethodAdapter(mn.access, mn.desc, mv, new SimpleRemapper(cn.name, className.getInternalName)))
+    //    }
     super.visitEnd()
   }
 

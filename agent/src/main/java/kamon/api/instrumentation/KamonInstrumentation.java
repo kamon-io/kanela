@@ -9,6 +9,8 @@ import kamon.instrumentation.mixin.MixinClassVisitorWrapper;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
+import net.bytebuddy.description.ByteCodeElement;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -25,12 +27,12 @@ public abstract class KamonInstrumentation {
     private List<Transformer> transformers = List.empty();
 
     protected static final TypePool typePool = TypePool.Default.ofClassPath();
-    protected static final ElementMatcher.Junction NotDeclaredByObject = not(isDeclaredBy(Object.class));
-    protected static final ElementMatcher.Junction NotTakesArguments = not(takesArguments(0));
+    protected static final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
+    protected static final ElementMatcher.Junction<MethodDescription> NotTakesArguments = not(takesArguments(0));
 
     public void register(Instrumentation instrumentation) {
         Identified agentBuilder = new AgentBuilder.Default()
-                .withListener(new InstrumentationListener())
+                .with(new InstrumentationListener())
                 .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("")));
 
         mixins.forEach(mixin ->

@@ -33,7 +33,7 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(bytebuddy, javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic) ++
+      compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic) ++
       test(scalatest))
     .settings(excludeScalaLib: _*)
 
