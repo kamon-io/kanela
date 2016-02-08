@@ -28,30 +28,26 @@ class KamonInstrumentationSpec extends KamonInstrumentation {
 
   forSubtypeOf("java.sql.Connection")
 
-  var a = (builder: DynamicType.Builder[_], t: TypeDescription) ⇒ {
+  addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
     builder
       .method(named("prepareStatement").and(KamonInstrumentation.NotTakesArguments))
       .intercept(to(ConnectionInterceptor).filter(KamonInstrumentation.NotDeclaredByObject))
   }
 
-  def addTransformation(builder: DynamicType.Builder[_], t: TypeDescription) =
-    builder
-      .method(named("prepareStatement").and(takesArguments(0)))
-      .intercept(to(ConnectionInterceptor).filter(KamonInstrumentation.NotDeclaredByObject))
+}
 
-  object ConnectionInterceptor {
-    @RuntimeType
-    @throws[SQLException]
-    def prepareStatement(@SuperCall callable: Callable[PreparedStatementExtension], @Argument(0) sql: String): Any = {
-      val prepareStatement = callable.call()
-      prepareStatement.setSql(sql)
-      prepareStatement
-    }
-
+object ConnectionInterceptor {
+  @RuntimeType
+  @throws[SQLException]
+  def prepareStatement(@SuperCall callable: Callable[PreparedStatementExtension], @Argument(0) sql: String): Any = {
+    val prepareStatement = callable.call()
+    prepareStatement.setSql(sql)
+    prepareStatement
   }
 
-  trait PreparedStatementExtension {
-    def getSql: String
-    def setSql(sql: String): Unit
-  }
+}
+
+trait PreparedStatementExtension {
+  def getSql: String
+  def setSql(sql: String): Unit
 }
