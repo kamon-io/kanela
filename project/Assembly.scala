@@ -49,7 +49,7 @@ object Assembly {
         ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
     )
-  )
+  ) ++ addArtifact(artifact in (Compile, assembly), assembly)
 
   artifact in (Compile, assembly) := {
     val art = (artifact in (Compile, assembly)).value
