@@ -1,4 +1,4 @@
-package kamon.instrumentation.mixin;
+package kamon.agent.api.impl.instrumentation.mixin;
 
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;

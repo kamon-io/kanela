@@ -1,4 +1,4 @@
-package kamon.agent.api.instrumentation;
+package kamon.agent;
 
 import java.lang.instrument.Instrumentation;
 

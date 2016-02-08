@@ -16,12 +16,13 @@
 
 package kamon.api.instrumentation.mixin
 
-import kamon.api.instrumentation.initializer
+import kamon.agent.api.instrumentation.initializer
 import net.bytebuddy.description.`type`.TypeDescription
 import net.bytebuddy.jar.asm._
-import net.bytebuddy.jar.asm.commons.{ AdviceAdapter, Method, RemappingMethodAdapter, SimpleRemapper }
+import net.bytebuddy.jar.asm.commons.{ AdviceAdapter, Method }
 //import net.bytebuddy.jar.asm.tree._
 import net.bytebuddy.matcher.ElementMatcher
+
 import scala.language.existentials
 
 case class MixinDescription(implementation: Type,
@@ -48,7 +49,6 @@ object MixinDescription {
 }
 
 class MixinClassVisitor(mixin: MixinDescription, classVisitor: ClassVisitor) extends ClassVisitor(Opcodes.ASM5, classVisitor) {
-  import scala.collection.JavaConversions._
 
   val ConstructorDescriptor: String = "<init>"
   var className: Type = _

@@ -1,8 +1,8 @@
-package kamon.instrumentation.mixin;
+package kamon.agent.api.impl.instrumentation.mixin;
 
 import javaslang.control.Option;
 import javaslang.control.Try;
-import kamon.api.instrumentation.initializer;
+import kamon.agent.api.instrumentation.initializer;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
 

@@ -1,4 +1,4 @@
-package kamon.instrumentation.mixin;
+package kamon.agent.api.impl.instrumentation.mixin;
 
 import javaslang.collection.List;
 import net.bytebuddy.jar.asm.*;

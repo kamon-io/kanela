@@ -1,4 +1,4 @@
-package kamon.instrumentation.mixin;
+package kamon.agent.api.impl.instrumentation.mixin;
 
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;

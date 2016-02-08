@@ -42,7 +42,7 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
-      provided(typesafeConfig, slf4jApi, bytebuddy))
+      provided(javaslang, typesafeConfig, slf4jApi))
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 

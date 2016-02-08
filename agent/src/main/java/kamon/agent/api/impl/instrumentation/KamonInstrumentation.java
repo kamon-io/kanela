@@ -1,11 +1,11 @@
-package kamon.api.instrumentation;
+package kamon.agent.api.impl.instrumentation;
 
 import javaslang.Function2;
 import javaslang.collection.List;
 import javaslang.control.Option;
-import kamon.api.instrumentation.listener.InstrumentationListener;
-import kamon.instrumentation.mixin.MixinClassVisitorWrapper;
-import kamon.instrumentation.mixin.MixinDescription;
+import kamon.agent.api.impl.instrumentation.listener.InstrumentationListener;
+import kamon.agent.api.impl.instrumentation.mixin.MixinClassVisitorWrapper;
+import kamon.agent.api.impl.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
