@@ -42,7 +42,7 @@ object Assembly {
           "Can-Retransform-Classes" -> "true")
     },
     assemblyShadeRules in assembly := Seq(
-        ShadeRule.rename("net.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
