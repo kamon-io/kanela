@@ -1,4 +1,4 @@
-package kamon.api.instrumentation;
+package kamon.agent.api.instrumentation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

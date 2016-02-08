@@ -14,9 +14,9 @@
  * =========================================================================================
  */
 
-package kamon.api.instrumentation.listener
+package kamon.agent.api.instrumentation.listener
 
-import kamon.api.instrumentation.logger.LazyLogger
+import kamon.agent.api.instrumentation.logger.LazyLogger
 import net.bytebuddy.agent.builder.AgentBuilder.Listener
 import net.bytebuddy.description.`type`.TypeDescription
 import net.bytebuddy.dynamic.DynamicType

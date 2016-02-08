@@ -13,7 +13,7 @@
  * =========================================================================================
  */
 
-package kamon.api.instrumentation.logger
+package kamon.agent.api.instrumentation.logger
 
 import org.slf4j.{ Logger ⇒ SLF4JLogger }
 
