@@ -1,4 +1,4 @@
-package kamon.agent;
+package kamon.agent.api.instrumentation;
 
 
 import com.typesafe.config.Config;

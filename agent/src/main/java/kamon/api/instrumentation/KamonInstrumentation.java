@@ -4,7 +4,6 @@ import javaslang.Function2;
 import javaslang.collection.List;
 import javaslang.control.Option;
 import kamon.api.instrumentation.listener.InstrumentationListener;
-import kamon.api.instrumentation.listener.InstrumentationListener1;
 import kamon.instrumentation.mixin.MixinDescription;
 import kamon.instrumentation.mixin.MixinClassVisitorWrapper;
 import net.bytebuddy.agent.builder.AgentBuilder;
