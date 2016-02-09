@@ -48,8 +48,10 @@ object Assembly {
         ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
-    )
-  ) ++ addArtifact(artifact in (Compile, assembly), assembly)
+    ),
+    // logLevel in assembly := Level.Debug,
+    unmanagedJars in Compile += file("agent/lib/byte-buddy-1.2.0.jar")
+  ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {})
 
   artifact in (Compile, assembly) := {
     val art = (artifact in (Compile, assembly)).value

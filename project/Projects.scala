@@ -46,5 +46,16 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
+  lazy val agentTest = Project("agent-test",file("agent-test"))
+    .dependsOn(agentApi)
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(libraryDependencies ++=
+      provided(javaslang, typesafeConfig, slf4jApi))
+    .settings(excludeScalaLib: _*)
+    .settings(noPublishing: _*)
+    .settings(notAggregateInAssembly: _*)
+    .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
+
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
 }

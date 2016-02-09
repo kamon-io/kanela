@@ -24,7 +24,9 @@ public abstract class KamonInstrumentation {
     protected static final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = null;
     protected static final ElementMatcher.Junction<MethodDescription> NotTakesArguments = null;
 
-    public void register(Instrumentation instrumentation) { }
+    public void register(Instrumentation instrumentation) {
+        throw new RuntimeException("This instrumentation must be redefined by the Kamon Agent");
+    }
 
     private AgentBuilder.Transformer withTransformer(Function2<DynamicType.Builder, TypeDescription, DynamicType.Builder> f) { return null; }
 
@@ -32,7 +34,9 @@ public abstract class KamonInstrumentation {
 
     public void forTypes(Supplier<ElementMatcher<? super TypeDescription>> f) { }
     public void forType(Supplier<ElementMatcher<? super TypeDescription>> f) { }
-    public void forTargetType(Supplier<String> f) { }
+    public void forTargetType(Supplier<String> f) {
+        throw new RuntimeException("This instrumentation must be redefined by the Kamon Agent");
+    }
     public void forSubtypeOf(Supplier<String> f){ }
     public void addMixin(Supplier<Class<?>> f) { }
 

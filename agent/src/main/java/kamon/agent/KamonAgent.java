@@ -1,6 +1,8 @@
 package kamon.agent;
 
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.net.URISyntaxException;
 
 public class KamonAgent {
        /**
@@ -14,8 +16,8 @@ public class KamonAgent {
      * @throws Exception
      */
 //    @throws(classOf[Exception])
-    public static void premain(String args,  Instrumentation instrumentation){
-        InstrumentationLoader.load(instrumentation);
+    public static void premain(String args,  Instrumentation instrumentation) throws IOException, URISyntaxException {
+        InstrumentationLoader.load(args, instrumentation);
 //        withTimeSpent(InstrumentationLoader.load(instrumentation)) {
 //            timeSpent ⇒
 //            log.info(s"Premain startup complete in $timeSpent ms");
@@ -32,7 +34,7 @@ public class KamonAgent {
      * @throws Exception
      */
 //    @throws(classOf[Exception])
-    public static void agentmain(String args, Instrumentation instrumentation) {
+    public static void agentmain(String args, Instrumentation instrumentation) throws IOException, URISyntaxException {
 //        log.debug(s"agentmain method invoked with args: $args and inst: $instrumentation")
         premain(args, instrumentation);
     }
