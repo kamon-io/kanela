@@ -33,7 +33,8 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic) ++
+      // For now we need to add Byte Buddy with SBT to get its jar appropriate import with Assembly
+      compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic, bytebuddy) ++
       test(scalatest))
     .settings(excludeScalaLib: _*)
 
@@ -42,7 +43,7 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
-      provided(javaslang, typesafeConfig, slf4jApi))
+      provided(javaslang, typesafeConfig, slf4jApi, bytebuddy))
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 

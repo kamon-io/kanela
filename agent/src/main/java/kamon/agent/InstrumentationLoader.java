@@ -3,14 +3,12 @@ package kamon.agent;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import javaslang.control.Option;
 import kamon.agent.api.impl.instrumentation.KamonInstrumentation;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.modifier.Visibility;
-import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +18,7 @@ import java.util.jar.JarFile;
 
 public class InstrumentationLoader {
     private static final Config factory = ConfigFactory.load();
+    private static final Logger logger = LoggerFactory.getLogger(InstrumentationLoader.class);
 
     public static void load(String args, Instrumentation instrumentation) throws IOException, URISyntaxException {
 
@@ -39,26 +38,33 @@ public class InstrumentationLoader {
     }
 
     protected static void loadInstrumentationAPI(Instrumentation instrumentation) {
-        final AgentBuilder agentBuilder = createAgentBuilder();
+        final AgentBuilder agentBuilder = createAgentBuilder(instrumentation);
 
         agentBuilder
                 .type(ElementMatchers.named("kamon.agent.api.instrumentation.KamonInstrumentation"))
                 .transform((builder, typeDescription) -> builder
-                        .method(ElementMatchers.named("register"))
-                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
-                        .method(ElementMatchers.named("withTransformer"))
-                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
-                        .defineField("elementMatcher", Option.class, Visibility.PRIVATE))
-                .installOn(instrumentation);
+                                .implement(KamonInstrumentation.class)
+//                        .method(ElementMatchers.named("register"))
+//                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
+//                        .method(ElementMatchers.named("withTransformer"))
+//                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
+//                        .defineField("elementMatcher", Option.class, Visibility.PRIVATE)
+//                        .defineField("mixins", List.class, Visibility.PRIVATE)
+//                        .defineField("transformers", Option.class, Visibility.PRIVATE)
+//                        .defineField("typePool", TypePool.class, PROTECTED, STATIC, FINAL)
+//                        .defineField("NotDeclaredByObject", ElementMatcher.Junction.class, PROTECTED, STATIC, FINAL)
+//                        .defineField("NotTakesArguments", ElementMatcher.Junction.class, PROTECTED, STATIC, FINAL))
+                ).installOn(instrumentation);
     }
 
-    private static AgentBuilder createAgentBuilder() {
+    private static AgentBuilder createAgentBuilder(Instrumentation instrumentation) {
         // Disable a bunch of stuff and turn on redefine as the only option
-        final ByteBuddy byteBuddy = new ByteBuddy().with(Implementation.Context.Disabled.Factory.INSTANCE);
+        final ByteBuddy byteBuddy = new ByteBuddy(); // .with(Implementation.Context.Disabled.Factory.INSTANCE);
 
         return new AgentBuilder.Default()
+//                .enableBootstrapInjection(new File("/var/agent"), instrumentation)
                 .with(byteBuddy)
-                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                .with(AgentBuilder.InitializationStrategy.SelfInjection.EAGER)
                 .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE);
     }
@@ -76,13 +82,12 @@ public class InstrumentationLoader {
 
             if (!file.isFile()) {
                 throw new IllegalStateException("The file " + file.getAbsolutePath() + " is not a file");
-
             }
             if (!file.canRead()) {
                 throw new IllegalStateException("The file " + file.getAbsolutePath() + " cannot be read");
-
             }
             JarFile jarFile = new JarFile(file);
+            logger.info(String.format("Appending %s to Bootstrap Class Loader", file.getName()));
             inst.appendToBootstrapClassLoaderSearch(jarFile);
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -92,7 +97,17 @@ public class InstrumentationLoader {
     private static File getJar(String arg) throws URISyntaxException, IOException {
         File file;
         if (arg == null) {
-            System.out.println("There isn't a path specified to the interceptor JAR as a javaagent argument. Trying to use the agent.");
+            logger.warn("There isn't a path specified to the interceptor JAR as argument. Trying to use the kamon agent's jar.");
+
+            /*
+            Esto rompe porque después aparecen tipos definidos en 2 class loader distinto:
+            *******************
+            Error message: loader constraint violation: when resolving interface method
+            "kamon.agent.libs.net.bytebuddy.agent.builder.AgentBuilder.with(Lkamon/agent/libs/net/bytebuddy/agent/builder/AgentBuilder$InitializationStrategy;)Lkamon/agent/libs/net/bytebuddy/agent/builder/AgentBuilder;"
+            the class loader (instance of sun/misc/Launcher$AppClassLoader) of the current class, kamon/agent/InstrumentationLoader, and the class loader (instance of <bootloader>) for the method's defining class,
+            kamon/agent/libs/net/bytebuddy/agent/builder/AgentBuilder, have different Class objects for the type kamon/agent/libs/net/bytebuddy/agent/builder/AgentBuilder$InitializationStrategy used in the signature
+            *******************
+             */
             file = new File(KamonAgent.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getCanonicalFile();
         } else {
             file = new File(arg).getCanonicalFile();
