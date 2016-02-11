@@ -1,4 +1,4 @@
-package kamon.agent.api.impl.instrumentation.mixin;
+package kamon.agent.api.instrumentation.mixin;
 
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
@@ -7,9 +7,9 @@ import net.bytebuddy.jar.asm.ClassVisitor;
 
 public class MixinClassVisitorWrapper implements AsmVisitorWrapper {
 
-    private final MixinDescription mixin;
+    private final MixinDescription2 mixin;
 
-    public MixinClassVisitorWrapper(MixinDescription mixin) {
+    public MixinClassVisitorWrapper(MixinDescription2 mixin) {
         this.mixin = mixin;
     }
 

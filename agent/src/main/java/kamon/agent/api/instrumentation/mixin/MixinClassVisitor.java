@@ -1,4 +1,4 @@
-package kamon.agent.api.impl.instrumentation.mixin;
+package kamon.agent.api.instrumentation.mixin;
 
 import javaslang.collection.List;
 import net.bytebuddy.jar.asm.*;
@@ -14,9 +14,9 @@ public class MixinClassVisitor extends ClassVisitor {
 
     private Type className;
     private static final String ConstructorDescriptor = "<init>";
-    private MixinDescription mixin;
+    private MixinDescription2 mixin;
 
-    public MixinClassVisitor(MixinDescription mixin, ClassVisitor classVisitor) {
+    public MixinClassVisitor(MixinDescription2 mixin, ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
     }

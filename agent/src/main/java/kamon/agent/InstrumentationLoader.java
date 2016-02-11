@@ -3,9 +3,10 @@ package kamon.agent;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import kamon.agent.api.impl.instrumentation.KamonInstrumentation;
+import kamon.agent.api.instrumentation.KamonInstrumentation1;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class InstrumentationLoader {
         Config config = factory.getConfig("kamon.agent");
         config.getStringList("instrumentations").forEach(clazz -> {
             try {
-                ((KamonInstrumentation) Class.forName(clazz).newInstance()).register(instrumentation);
+                ((KamonInstrumentation1) Class.forName(clazz).newInstance()).register(instrumentation);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -43,17 +44,17 @@ public class InstrumentationLoader {
         agentBuilder
                 .type(ElementMatchers.named("kamon.agent.api.instrumentation.KamonInstrumentation"))
                 .transform((builder, typeDescription) -> builder
-                                .implement(KamonInstrumentation.class)
-//                        .method(ElementMatchers.named("register"))
-//                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
-//                        .method(ElementMatchers.named("withTransformer"))
-//                        .intercept(MethodDelegation.to(KamonInstrumentation.class))
+//                                .implement(KamonInstrumentation.class)
+                        .method(ElementMatchers.named("register"))
+                        .intercept(MethodDelegation.to(KamonInstrumentation1.class))
+                        .method(ElementMatchers.named("withTransformer"))
+                        .intercept(MethodDelegation.to(KamonInstrumentation1.class))
 //                        .defineField("elementMatcher", Option.class, Visibility.PRIVATE)
 //                        .defineField("mixins", List.class, Visibility.PRIVATE)
 //                        .defineField("transformers", Option.class, Visibility.PRIVATE)
 //                        .defineField("typePool", TypePool.class, PROTECTED, STATIC, FINAL)
 //                        .defineField("NotDeclaredByObject", ElementMatcher.Junction.class, PROTECTED, STATIC, FINAL)
-//                        .defineField("NotTakesArguments", ElementMatcher.Junction.class, PROTECTED, STATIC, FINAL))
+//                        .defineField("NotTakesArguments", ElementMatcher.Junction.class, PROTECTED, STATIC, FINAL)
                 ).installOn(instrumentation);
     }
 

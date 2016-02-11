@@ -1,11 +1,11 @@
-package kamon.agent.api.impl.instrumentation;
+package kamon.agent.api.instrumentation;
 
 import javaslang.Function2;
 import javaslang.collection.List;
 import javaslang.control.Option;
-import kamon.agent.api.impl.instrumentation.listener.InstrumentationListener;
-import kamon.agent.api.impl.instrumentation.mixin.MixinClassVisitorWrapper;
-import kamon.agent.api.impl.instrumentation.mixin.MixinDescription;
+import kamon.agent.api.instrumentation.listener.InstrumentationListener;
+import kamon.agent.api.instrumentation.mixin.MixinClassVisitorWrapper;
+import kamon.agent.api.instrumentation.mixin.MixinDescription2;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
@@ -21,9 +21,9 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-public abstract class KamonInstrumentation {
+public abstract class KamonInstrumentation1 {
     private Option<ElementMatcher<? super TypeDescription>> elementMatcher = Option.none();
-    private List<MixinDescription> mixins = List.empty();
+    private List<MixinDescription2> mixins = List.empty();
     private List<Transformer> transformers = List.empty();
 
     protected static final TypePool typePool = TypePool.Default.ofClassPath();
@@ -53,6 +53,6 @@ public abstract class KamonInstrumentation {
     public void forType(Supplier<ElementMatcher<? super TypeDescription>> f) {forTypes(f);}
     public void forTargetType(Supplier<String> f) {forType((() -> named(f.get())));}
     public void forSubtypeOf(Supplier<String> f){forType(() -> isSubTypeOf(typePool.describe(f.get()).resolve()).and(not(isInterface())));}
-    public void addMixin(Supplier<Class<?>> f) {mixins.append(MixinDescription.of(elementMatcher.get(),f.get()));}
+    public void addMixin(Supplier<Class<?>> f) {mixins.append(MixinDescription2.of(elementMatcher.get(),f.get()));}
 
  }

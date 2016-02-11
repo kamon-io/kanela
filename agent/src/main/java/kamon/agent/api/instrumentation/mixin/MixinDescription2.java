@@ -1,4 +1,4 @@
-package kamon.agent.api.impl.instrumentation.mixin;
+package kamon.agent.api.instrumentation.mixin;
 
 import javaslang.control.Option;
 import javaslang.control.Try;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MixinDescription {
+public class MixinDescription2 {
 
     private final Type implementation;
     private final List<String> interfaces;
@@ -21,11 +21,11 @@ public class MixinDescription {
     private final Option<String> mixinInit;
     private final ElementMatcher targetTypes;
 
-    public MixinDescription(Type implementation,
-                            List<String> interfaces,
-                            byte[] bytes,
-                            Option<String> mixinInit,
-                            ElementMatcher targetTypes) {
+    public MixinDescription2(Type implementation,
+                             List<String> interfaces,
+                             byte[] bytes,
+                             Option<String> mixinInit,
+                             ElementMatcher targetTypes) {
         this.implementation = implementation;
         this.interfaces = interfaces;
         this.bytes = bytes;
@@ -33,11 +33,11 @@ public class MixinDescription {
         this.targetTypes = targetTypes;
     }
 
-    public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
+    public static MixinDescription2 of(ElementMatcher targetTypes, Class<?> clazz) {
         Type implementation = Type.getType(clazz);
         List<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toList());
         Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(initializer.class)).findFirst().get().getName());
-        return new MixinDescription(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
+        return new MixinDescription2(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
     }
 
     private static byte[] getBytesFrom(Class<?> implementation) {

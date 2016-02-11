@@ -28,7 +28,7 @@ object Projects extends Build {
     .aggregate(agent, agentApi)
 
   lazy val agent = Project("agent",file("agent"))
-    .dependsOn(agentApi)
+//    .dependsOn(agentApi)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)

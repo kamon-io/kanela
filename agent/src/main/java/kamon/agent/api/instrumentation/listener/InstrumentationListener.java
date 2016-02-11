@@ -1,4 +1,4 @@
-package kamon.agent.api.impl.instrumentation.listener;
+package kamon.agent.api.instrumentation.listener;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;

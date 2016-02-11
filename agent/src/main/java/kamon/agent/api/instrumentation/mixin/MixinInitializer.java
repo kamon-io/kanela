@@ -1,4 +1,4 @@
-package kamon.agent.api.impl.instrumentation.mixin;
+package kamon.agent.api.instrumentation.mixin;
 
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;
@@ -10,11 +10,11 @@ public class MixinInitializer extends AdviceAdapter {
     private static final String ConstructorDescriptor = "<init>";
 
     private final Type typeClass;
-    private final MixinDescription mixinDescription;
+    private final MixinDescription2 mixinDescription;
     private Boolean cascadingConstructor;
 
 
-    protected MixinInitializer(MethodVisitor mv, int access, String name, String desc, Type typeClass, MixinDescription mixinDescription) {
+    protected MixinInitializer(MethodVisitor mv, int access, String name, String desc, Type typeClass, MixinDescription2 mixinDescription) {
         super(Opcodes.ASM5, mv, access, name, desc);
         this.typeClass = typeClass;
         this.mixinDescription = mixinDescription;
