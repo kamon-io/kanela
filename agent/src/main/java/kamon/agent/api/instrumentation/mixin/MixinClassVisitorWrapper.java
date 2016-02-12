@@ -7,9 +7,9 @@ import net.bytebuddy.jar.asm.ClassVisitor;
 
 public class MixinClassVisitorWrapper implements AsmVisitorWrapper {
 
-    private final MixinDescription2 mixin;
+    private final MixinDescription mixin;
 
-    public MixinClassVisitorWrapper(MixinDescription2 mixin) {
+    public MixinClassVisitorWrapper(MixinDescription mixin) {
         this.mixin = mixin;
     }
 

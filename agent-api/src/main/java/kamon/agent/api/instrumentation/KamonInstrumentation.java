@@ -20,9 +20,9 @@ public abstract class KamonInstrumentation {
     private List<MixinDescription> mixins = null;
     private List<AgentBuilder.Transformer> transformers = null;
 
-    protected static final TypePool typePool = null;
-    protected static final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = null;
-    protected static final ElementMatcher.Junction<MethodDescription> NotTakesArguments = null;
+    protected final TypePool typePool = null;
+    protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = null;
+    protected final ElementMatcher.Junction<MethodDescription> TakesArguments = null;
 
     public void register(Instrumentation instrumentation) {
         throw new RuntimeException("This instrumentation must be redefined by the Kamon Agent");
@@ -39,5 +39,6 @@ public abstract class KamonInstrumentation {
     }
     public void forSubtypeOf(Supplier<String> f){ }
     public void addMixin(Supplier<Class<?>> f) { }
+    public void addInterceptorForMethod(ElementMatcher.Junction<MethodDescription> junction , Supplier<Class<?>> f){}
 
 }

@@ -30,6 +30,8 @@ object Dependencies {
   val javaslang       = "com.javaslang"     % "javaslang"         % "2.0.0-RC3"
   val bytebuddy       = "net.bytebuddy"     % "byte-buddy"        % "1.2.0"
   val scalatest       = "org.scalatest"    %% "scalatest"         % "2.2.6"
+  val mockito         = "org.mockito"       % "mockito-core"      % "2.0.42-beta"
+  val lombok          = "org.projectlombok" % "lombok"            % "1.16.6"
 
 
   def compile   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")

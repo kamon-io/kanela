@@ -25,17 +25,17 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(noPublishing: _*)
-    .aggregate(agent, agentApi)
+    .aggregate(agent, agentApi, agentBootstrap)
 
   lazy val agent = Project("agent",file("agent"))
-//    .dependsOn(agentApi)
+    .dependsOn(agentApi)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      // For now we need to add Byte Buddy with SBT to get its jar appropriate import with Assembly
       compile(javaslang, typesafeConfig, slf4jApi ,logbackCore, logbackClassic, bytebuddy) ++
-      test(scalatest))
+      test(scalatest, mockito) ++
+      provided(lombok))
     .settings(excludeScalaLib: _*)
 
 
@@ -46,6 +46,16 @@ object Projects extends Build {
       provided(javaslang, typesafeConfig, slf4jApi, bytebuddy))
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
+
+  lazy val agentBootstrap = Project("agent-bootstrap",file("agent-bootstrap"))
+    .dependsOn(agent)
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(libraryDependencies ++=
+      provided(javaslang, typesafeConfig, slf4jApi, bytebuddy))
+    .settings(excludeScalaLib: _*)
+    .settings(notAggregateInAssembly: _*)
+
 
   lazy val agentTest = Project("agent-test",file("agent-test"))
     .dependsOn(agentApi)

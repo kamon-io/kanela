@@ -1,21 +1,18 @@
-package kamon.agent.api.impl.instrumentation
+package kamon.agent.api.instrumentation
 
-import java.lang.instrument.{ ClassDefinition, ClassFileTransformer, Instrumentation }
+import java.lang.instrument.Instrumentation
 import java.sql.SQLException
 import java.util.concurrent.Callable
-import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
-import java.util.jar.JarFile
-import javaslang.{ Function2 ⇒ JFunction2 }
+import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
+import javaslang.{Function2 => JFunction2}
 
-import net.bytebuddy.description.`type`.TypeDescription
-import net.bytebuddy.dynamic.DynamicType
-import net.bytebuddy.implementation.MethodDelegation.to
-import net.bytebuddy.implementation.bind.annotation.{ Argument, RuntimeType, SuperCall }
+import net.bytebuddy.implementation.bind.annotation.{Argument, RuntimeType, SuperCall}
 import net.bytebuddy.matcher.ElementMatchers._
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
-import utils.FakeInstrumentation
+import org.mockito.Mockito._
+import org.scalatest.{Matchers, WordSpecLike}
 
-class KamonInstrumentationSpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
+
+class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
   implicit def toJavaSupplier[A](f: ⇒ A): JSupplier[A] = new JSupplier[A] {
     override def get(): A = f
@@ -31,21 +28,26 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers with BeforeAnd
 
   "should validate that there is an element selected by elementMatcher" in {
     val kamonInstrumentation = new KamonInstrumentation() {}
+    val fakeInstrumentation = mock(classOf[Instrumentation])
 
     intercept[RuntimeException] {
-      kamonInstrumentation.register(FakeInstrumentation)
+      kamonInstrumentation.register(fakeInstrumentation)
     }
   }
 
-  class ConnectionInstrumentationPrototype extends KamonInstrumentation() {
+  class ConnectionInstrumentationPrototype extends KamonInstrumentation {
 
     forSubtypeOf("java.sql.Connection")
 
-    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
-      builder
-        .method(named("prepareStatement").and(KamonInstrumentation.NotTakesArguments))
-        .intercept(to(ConnectionInterceptor).filter(KamonInstrumentation.NotDeclaredByObject))
-    }
+    addMixin(classOf[MixinTest])
+
+    addInterceptorForMethod(named("prepareStatement").and(TakesArguments) ,classOf[InterceptorTest])
+
+    //    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
+    //      builder
+    //        .method(named("prepareStatement").and(TakesArguments))
+    //        .intercept(to(ConnectionInterceptor).filter(NotDeclaredByObject))
+    //    }
   }
 }
 
@@ -58,6 +60,26 @@ object ConnectionInterceptor {
     prepareStatement
   }
 }
+
+class MixinTest extends Serializable {
+  var a:String = _
+
+  @initializer
+  def init() = this.a = "Pepe"
+}
+
+class InterceptorTest {
+  @before
+  def before() ={
+
+  }
+
+  @after
+  def after() = {
+
+  }
+}
+
 
 trait PreparedStatementExtension {
   def getSql: String

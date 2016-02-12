@@ -14,9 +14,9 @@ public class MixinClassVisitor extends ClassVisitor {
 
     private Type className;
     private static final String ConstructorDescriptor = "<init>";
-    private MixinDescription2 mixin;
+    private MixinDescription mixin;
 
-    public MixinClassVisitor(MixinDescription2 mixin, ClassVisitor classVisitor) {
+    public MixinClassVisitor(MixinDescription mixin, ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
     }
