@@ -4,9 +4,12 @@ import kamon.agent.util.log.LazyLogger;
 
 import java.lang.instrument.Instrumentation;
 
+import static java.text.MessageFormat.format;
+import static kamon.agent.util.AgentUtil.withTimeSpent;
+
 public class KamonAgent {
 
-    private static final LazyLogger logger = LazyLogger.create(InstrumentationLoader.class);
+    private static final LazyLogger log = LazyLogger.create(InstrumentationLoader.class);
 
     /**
      * JVM hook to statically load the javaagent at startup.
@@ -19,13 +22,8 @@ public class KamonAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        logger.info(() -> String.format("Start Pre Main method invoked with args: %s and inst: %s", args, instrumentation.toString()));
-        InstrumentationLoader.load(instrumentation);
-        logger.info(() -> "End Pre Main method");
-//        withTimeSpent(InstrumentationLoader.load(instrumentation)) {
-//            timeSpent ⇒
-//            log.info(s"Premain startup complete in $timeSpent ms");
-        }
+        withTimeSpent(() -> InstrumentationLoader.load(instrumentation), (timeSpent) -> log.info(() -> format("Premain startup complete in {0} ms", timeSpent)));
+    }
 
 
     /**
@@ -38,9 +36,7 @@ public class KamonAgent {
      * @param instrumentation
      * @throws Exception
      */
-//    @throws(classOf[Exception])
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        logger.debug(() -> String.format("agentmain method invoked with args: %s and inst: %s", args, instrumentation.toString()));
         premain(args, instrumentation);
     }
 }
