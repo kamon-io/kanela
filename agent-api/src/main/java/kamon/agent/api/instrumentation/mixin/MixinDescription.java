@@ -1,12 +1,16 @@
 package kamon.agent.api.instrumentation.mixin;
 
 import javaslang.control.Option;
+import javaslang.control.Try;
+import kamon.agent.api.instrumentation.initializer;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
+import utils.AgentApiUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MixinDescription {
 
@@ -29,36 +33,29 @@ public class MixinDescription {
     }
 
     public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
-        return null;
+        Type implementation = Type.getType(clazz);
+        List<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toList());
+        Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(initializer.class)).findFirst().get().getName());
+        return new MixinDescription(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
     }
 
     private static byte[] getBytesFrom(Class<?> implementation) {
-        return null;
+        ClassLoader loader = implementation.getClassLoader();
+        String resourceName = implementation.getName().replace('.','/') + ".class";
+        InputStream stream = loader.getResourceAsStream(resourceName);
+        return Try.of(() -> AgentApiUtils.streamToByteArray(stream)).getOrElseThrow(() -> new RuntimeException(""));
     }
 
 
     public List<String> getInterfaces() {
-        return null;
+        return interfaces;
     }
 
     public byte[] getBytes() {
-        return null;
+        return bytes;
     }
 
     public Option<String> getMixinInit() {
-        return null;
-    }
-
-    /**
-     * TODO:move to Utils or something like that
-     *
-     * method converts {@link InputStream} Object into byte[] array.
-     *
-     * @param stream the {@link InputStream} Object.
-     * @return the byte[] array representation of received {@link InputStream} Object.
-     * @throws IOException if an error occurs.
-     */
-    private static byte[] streamToByteArray(InputStream stream) throws IOException {
-        return null;
+        return mixinInit;
     }
 }

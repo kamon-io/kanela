@@ -3,14 +3,13 @@ package kamon.agent.api.instrumentation
 import java.lang.instrument.Instrumentation
 import java.sql.SQLException
 import java.util.concurrent.Callable
-import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
-import javaslang.{Function2 => JFunction2}
+import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
+import javaslang.{ Function2 ⇒ JFunction2 }
 
-import net.bytebuddy.implementation.bind.annotation.{Argument, RuntimeType, SuperCall}
+import net.bytebuddy.implementation.bind.annotation.{ Argument, RuntimeType, SuperCall }
 import net.bytebuddy.matcher.ElementMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpecLike}
-
+import org.scalatest.{ Matchers, WordSpecLike }
 
 class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
@@ -41,7 +40,7 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
     addMixin(classOf[MixinTest])
 
-    addInterceptorForMethod(named("prepareStatement").and(TakesArguments) ,classOf[InterceptorTest])
+    addInterceptorForMethod(named("prepareStatement").and(TakesArguments), classOf[InterceptorTest])
 
     //    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
     //      builder
@@ -62,7 +61,7 @@ object ConnectionInterceptor {
 }
 
 class MixinTest extends Serializable {
-  var a:String = _
+  var a: String = _
 
   @initializer
   def init() = this.a = "Pepe"
@@ -70,7 +69,7 @@ class MixinTest extends Serializable {
 
 class InterceptorTest {
   @before
-  def before() ={
+  def before() = {
 
   }
 
@@ -79,7 +78,6 @@ class InterceptorTest {
 
   }
 }
-
 
 trait PreparedStatementExtension {
   def getSql: String

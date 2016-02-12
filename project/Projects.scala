@@ -28,7 +28,7 @@ object Projects extends Build {
     .aggregate(agent, agentApi, agentBootstrap)
 
   lazy val agent = Project("agent",file("agent"))
-    .dependsOn(agentApi)
+    .dependsOn(agentApi % "compile->compile;test->test")
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
@@ -48,7 +48,7 @@ object Projects extends Build {
     .settings(notAggregateInAssembly: _*)
 
   lazy val agentBootstrap = Project("agent-bootstrap",file("agent-bootstrap"))
-    .dependsOn(agent)
+    .dependsOn(agent % "compile->compile;test->test")
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=

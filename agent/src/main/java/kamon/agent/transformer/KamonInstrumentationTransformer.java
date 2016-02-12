@@ -1,6 +1,7 @@
 package kamon.agent.transformer;
 
-import kamon.agent.util.Util;
+import kamon.agent.util.AgentUtil;
+import utils.AgentApiUtils;
 
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -13,22 +14,24 @@ import java.util.jar.JarFile;
 public class KamonInstrumentationTransformer {
 
     public static void replaceKamonInstrumentation(Instrumentation instrumentation) throws IOException {
-        JarFile bootstrapJar = new JarFile(Util.load("agent-bootstrap"));
+        JarFile bootstrapJar = new JarFile(AgentUtil.load("agent-bootstrap"));
         JarEntry jarEntry = bootstrapJar.getJarEntry("kamon/agent/api/instrumentation/KamonInstrumentation.class");
-        byte[] bytes = Util.streamToByteArray(bootstrapJar.getInputStream(jarEntry));
-        instrumentation.addTransformer(new KamonInstrumentationFileTransformer(bytes), true);
+        byte[] bytes = AgentApiUtils.streamToByteArray(bootstrapJar.getInputStream(jarEntry));
+        instrumentation.addTransformer(new ApiClassFileTransformer("kamon/agent/api/instrumentation/KamonInstrumentation", bytes), true);
     }
 
-    static final class KamonInstrumentationFileTransformer implements ClassFileTransformer {
+    private static final class ApiClassFileTransformer implements ClassFileTransformer {
         private final byte[] bytes;
+        private final String className;
 
-        KamonInstrumentationFileTransformer(byte[] bytes) {
+        ApiClassFileTransformer(String className, byte[] bytes) {
+            this.className = className;
             this.bytes = bytes;
         }
 
         @Override
         public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-            if ("kamon/agent/api/instrumentation/KamonInstrumentation".equals(className)) {
+            if (this.className.equals(className)) {
                 return this.bytes;
             }
             return null;
