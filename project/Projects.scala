@@ -48,7 +48,6 @@ object Projects extends Build {
     .settings(notAggregateInAssembly: _*)
 
   lazy val agentTest = Project("agent-test",file("agent-test"))
-    .dependsOn(agent)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=

@@ -1,7 +1,6 @@
 package kamon.agent.api.instrumentation;
 
 import javaslang.Function2;
-import javaslang.collection.List;
 import javaslang.control.Option;
 import kamon.agent.api.instrumentation.interceptor.InterceptorDescription;
 import kamon.agent.api.instrumentation.interceptor.MethodInterceptorVisitorWrapper;
@@ -20,15 +19,17 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class KamonInstrumentation {
     private Option<ElementMatcher<? super TypeDescription>> elementMatcher = Option.none();
-    private List<MixinDescription> mixins = List.empty();
-    private List<InterceptorDescription> interceptors = List.empty();
-    private List<Transformer> transformers = List.empty();
+    private List<MixinDescription> mixins = new ArrayList<>();
+    private List<InterceptorDescription> interceptors = new ArrayList<>();
+    private List<Transformer> transformers = new ArrayList<>();
 
     protected final TypePool typePool = TypePool.Default.ofClassPath();
     protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
@@ -52,7 +53,7 @@ public abstract class KamonInstrumentation {
     private Transformer withTransformer(Function2<Builder, TypeDescription, Builder> f) { return f::apply; }
 
     public void addTransformation(Function2<Builder, TypeDescription, Builder> f) {
-        transformers.append(withTransformer(f));
+        transformers.add(withTransformer(f));
     }
 
     public void forTypes(Supplier<ElementMatcher<? super TypeDescription>> f) { elementMatcher = Option.of(f.get());}
@@ -63,9 +64,9 @@ public abstract class KamonInstrumentation {
 
     public void forSubtypeOf(Supplier<String> f){forType(() -> isSubTypeOf(typePool.describe(f.get()).resolve()).and(not(isInterface())));}
 
-    public void addMixin(Supplier<Class<?>> f) {mixins.append(MixinDescription.of(elementMatcher.get(),f.get()));}
+    public void addMixin(Supplier<Class<?>> f) {mixins.add(MixinDescription.of(elementMatcher.get(),f.get()));}
 
     public void addInterceptorForMethod(ElementMatcher.Junction<MethodDescription> junction , Supplier<Class<?>> f) {
-        interceptors.append(new InterceptorDescription(junction,f.get()));
+        interceptors.add(new InterceptorDescription(junction,f.get()));
     }
 }
