@@ -1,16 +1,12 @@
 package kamon.agent;
 
-import kamon.agent.transformer.KamonInstrumentationTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import kamon.agent.util.log.LazyLogger;
 
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.net.URISyntaxException;
 
 public class KamonAgent {
 
-    private static final Logger logger = LoggerFactory.getLogger(InstrumentationLoader.class);
+    private static final LazyLogger logger = LazyLogger.create(InstrumentationLoader.class);
 
     /**
      * JVM hook to statically load the javaagent at startup.
@@ -22,12 +18,10 @@ public class KamonAgent {
      * @param instrumentation
      * @throws Exception
      */
-//    @throws(classOf[Exception])
-    public static void premain(String args,  Instrumentation instrumentation) throws IOException, URISyntaxException {
-        logger.info(String.format("Start Pre Main method invoked with args: %s and inst: %s", args, instrumentation.toString()));
-        KamonInstrumentationTransformer.replaceKamonInstrumentation(instrumentation);
-        InstrumentationLoader.load(args, instrumentation);
-        logger.info("End Pre Main method");
+    public static void premain(String args, Instrumentation instrumentation) throws Exception {
+        logger.info(() -> String.format("Start Pre Main method invoked with args: %s and inst: %s", args, instrumentation.toString()));
+        InstrumentationLoader.load(instrumentation);
+        logger.info(() -> "End Pre Main method");
 //        withTimeSpent(InstrumentationLoader.load(instrumentation)) {
 //            timeSpent ⇒
 //            log.info(s"Premain startup complete in $timeSpent ms");
@@ -45,8 +39,8 @@ public class KamonAgent {
      * @throws Exception
      */
 //    @throws(classOf[Exception])
-    public static void agentmain(String args, Instrumentation instrumentation) throws IOException, URISyntaxException {
-        logger.debug(String.format("agentmain method invoked with args: %s and inst: %s", args, instrumentation.toString()));
+    public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
+        logger.debug(() -> String.format("agentmain method invoked with args: %s and inst: %s", args, instrumentation.toString()));
         premain(args, instrumentation);
     }
 }

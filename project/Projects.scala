@@ -25,10 +25,10 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(noPublishing: _*)
-    .aggregate(agent, agentApi, agentBootstrap)
+    .aggregate(agent, agentApi)
 
   lazy val agent = Project("agent",file("agent"))
-    .dependsOn(agentApi % "compile->compile;test->test")
+    .dependsOn(agentApi)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
@@ -47,18 +47,8 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
-  lazy val agentBootstrap = Project("agent-bootstrap",file("agent-bootstrap"))
-    .dependsOn(agent % "compile->compile;test->test")
-    .settings(basicSettings: _*)
-    .settings(formatSettings: _*)
-    .settings(libraryDependencies ++=
-      provided(javaslang, typesafeConfig, slf4jApi, bytebuddy))
-    .settings(excludeScalaLib: _*)
-    .settings(notAggregateInAssembly: _*)
-
-
   lazy val agentTest = Project("agent-test",file("agent-test"))
-    .dependsOn(agentApi)
+    .dependsOn(agent)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
