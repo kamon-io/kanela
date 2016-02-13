@@ -21,6 +21,6 @@ public class MixinClassVisitorWrapper implements AsmVisitorWrapper {
 
     @Override
     public ClassVisitor wrap(TypeDescription typeDescription, ClassVisitor classVisitor) {
-        return new MixinClassVisitor(mixin, classVisitor);
+        return new MixinClassVisitor(mixin, typeDescription.getInternalName(), classVisitor);
     }
 }

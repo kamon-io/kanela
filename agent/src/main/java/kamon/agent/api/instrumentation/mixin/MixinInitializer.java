@@ -11,7 +11,7 @@ public class MixinInitializer extends AdviceAdapter {
 
     private final Type typeClass;
     private final MixinDescription mixinDescription;
-    private Boolean cascadingConstructor;
+    private boolean cascadingConstructor;
 
 
     protected MixinInitializer(MethodVisitor mv, int access, String name, String desc, Type typeClass, MixinDescription mixinDescription) {
@@ -28,7 +28,8 @@ public class MixinInitializer extends AdviceAdapter {
 
     @Override
     protected void onMethodExit(int opcode) {
-        mixinDescription.getMixinInit().forEach(methodName ->{
+        if (cascadingConstructor) return;
+        mixinDescription.getMixinInit().forEach(methodName -> {
             loadThis();
             invokeVirtual(typeClass, new Method(methodName, "()V"));
         });

@@ -40,7 +40,7 @@ class CustomInstrumentation extends KamonInstrumentation {
     var a: String = _
 
     @initializer
-    def init() = this.a = "papa"
+    def init() = this.a = {println("HeeeeeLooooo");"papa"}
   }
 
   object PepeInterceptor {

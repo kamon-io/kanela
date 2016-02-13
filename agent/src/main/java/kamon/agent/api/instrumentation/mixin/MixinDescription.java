@@ -9,19 +9,19 @@ import utils.AgentApiUtils;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MixinDescription {
 
     private final Type implementation;
-    private final List<String> interfaces;
+    private final Set<String> interfaces;
     private final byte[] bytes;
     private final Option<String> mixinInit;
     private final ElementMatcher targetTypes;
 
     public MixinDescription(Type implementation,
-                            List<String> interfaces,
+                            Set<String> interfaces,
                             byte[] bytes,
                             Option<String> mixinInit,
                             ElementMatcher targetTypes) {
@@ -34,7 +34,7 @@ public class MixinDescription {
 
     public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
         Type implementation = Type.getType(clazz);
-        List<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toList());
+        Set<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toSet());
         Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(initializer.class)).findFirst().get().getName());
         return new MixinDescription(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
     }
@@ -47,7 +47,7 @@ public class MixinDescription {
     }
 
 
-    public List<String> getInterfaces() {
+    public Set<String> getInterfaces() {
         return interfaces;
     }
 

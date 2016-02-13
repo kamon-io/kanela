@@ -41,8 +41,7 @@ public abstract class KamonInstrumentation {
                 .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
 
         mixins.forEach(mixin ->
-                agentBuilder.transform((builder, typeDescription) -> builder.visit(new MixinClassVisitorWrapper(mixin)))
-                        .installOn(instrumentation));
+                agentBuilder.transform((builder, typeDescription) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));
 
         interceptors.forEach(interceptor -> agentBuilder.transform((builder, typeDescription) ->
                 builder.visit(new ForDeclaredMethods().method(interceptor.getMethodMatcher(), new MethodInterceptorVisitorWrapper(interceptor)))));
