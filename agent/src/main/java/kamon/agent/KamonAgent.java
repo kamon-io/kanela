@@ -22,7 +22,7 @@ public class KamonAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        withTimeSpent(() -> InstrumentationLoader.load(instrumentation), (timeSpent) -> log.info(() -> format("Premain startup complete in {0} ms", timeSpent)));
+        withTimeSpent(() -> InstrumentationLoader.load(instrumentation, new KamonAgentConfig()), (timeSpent) -> log.info(() -> format("Premain startup complete in {0} ms", timeSpent)));
     }
 
 

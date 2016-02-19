@@ -2,24 +2,50 @@ package kamon.agent
 
 import java.lang.instrument.Instrumentation
 
+import kamon.agent.api.instrumentation.KamonInstrumentationFake
 import org.mockito.Mockito
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
+import org.mockito.Mockito.{ mock, when }
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
-class InstrumentationLoaderSpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
+import scala.collection.JavaConversions._
+
+class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   //  "should redefine API KamonInstrumentation by the agent" in {
 
-  "should run InstrumentationLoader correctly with empty config < kamon.agent.instrumentations >" in {
-    val instrumentationMock = Mockito.mock(classOf[Instrumentation])
-    InstrumentationLoader.load(instrumentationMock)
+  "with the config empty < kamon.agent.instrumentations >" should "not break" in {
+    val instrumentationMock = mock(classOf[Instrumentation])
+    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List.empty[String])
+
+    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+
+    Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
   }
 
-  // TODO: necesitamos pasarle al InstrumentationLoader.load la config por parametro, asi testeamos con distinta config
-  // Ademas no tiene que romper por que no encuentre la configuración, o por no poder parsearla bien,
-  // con lo cual podemos tener un objeto ConfigAgent que parsee la configuracion
-  "should not break by an unknown Instrumentation" in {
-    //    val instrumentationMock = Mockito.mock(classOf[Instrumentation])
-    //    InstrumentationLoader.load(instrumentationMock)
+  "with an unknown instrumentation" should "not break" in {
+    val instrumentationMock = mock(classOf[Instrumentation])
+    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
+
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List("UnknownInstrumentation"))
+
+    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+
+    Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
+  }
+
+  "with an existing instrumentation" should "register it correctly" in {
+    val instrumentationMock = mock(classOf[Instrumentation])
+    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
+
+    when(kamonAgentConfigMock.getInstrumentations) thenReturn List("kamon.agent.api.instrumentation.KamonInstrumentationFake")
+
+    val registeringCounter = KamonInstrumentationFake.registeringCounter
+
+    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+
+    Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
+    KamonInstrumentationFake.registeringCounter should be(registeringCounter + 1)
   }
 
 }
