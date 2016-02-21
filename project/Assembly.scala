@@ -44,16 +44,16 @@ object Assembly {
     assemblyShadeRules in assembly := Seq(
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
-    ),
+        ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll
+        //ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
+        //ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
+        //ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
+    )
     // logLevel in assembly := Level.Debug,
-    unmanagedJars in Compile += file("agent/lib/byte-buddy-1.2.0.jar")
-  ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {})
+    // unmanagedJars in Compile += file("agent/lib/byte-buddy-1.2.0.jar")
+  ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {}) ++ assemblyArtifact
 
-  artifact in (Compile, assembly) := {
+  lazy val assemblyArtifact = artifact in (Compile, assembly) := {
     val art = (artifact in (Compile, assembly)).value
     art.copy(`classifier` = Some("assembly"))
   }

@@ -25,7 +25,13 @@ object Publish {
     organization := "io.kamon",
     pomIncludeRepository := { x => false },
     publishMavenStyle := true,
-    publishArtifact in Test := false
+
+    // To avoid javadoc
+    publishArtifact in Test := false,
+    publishArtifact in (Compile, packageDoc) := false,
+    publishArtifact in packageDoc := false,
+    sources in (Compile,doc) := Seq.empty
+
   )
 
   def kamonRepo = Some(Resolver.sftp("Kamon Snapshots Repository", "snapshots.kamon.io", "/var/local/snapshots-repo"))
