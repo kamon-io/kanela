@@ -44,10 +44,11 @@ object Assembly {
     assemblyShadeRules in assembly := Seq(
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll
-        //ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
-        //ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
-        //ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
+        ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
+        //ShadeRule.rename("^logback.configurationFile$" -> "kamon.agent.libs.logback.configurationFile.@0").inAll
     )
     // logLevel in assembly := Level.Debug,
     // unmanagedJars in Compile += file("agent/lib/byte-buddy-1.2.0.jar")

@@ -33,10 +33,10 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(javaslang, typesafeConfig, bytebuddy) ++
-        //optional(logbackCore, logbackClassic) ++
+      compile(javaslang, typesafeConfig, bytebuddy, logbackCore, logbackClassic, slf4jApi) ++
+        optional() ++
         test(scalatest, mockito) ++
-        provided(lombok, slf4jApi, logbackCore, logbackClassic))
+        provided(lombok)) // , /*slf4jApi, logbackCore, logbackClassic*/))
     .settings(excludeScalaLib: _*)
 
 
@@ -52,7 +52,8 @@ object Projects extends Build {
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
-      provided(javaslang, typesafeConfig, slf4jApi))
+      compile(slf4jApi, logbackCore, logbackClassic) ++
+      provided(javaslang, typesafeConfig, kamonAgent))
     .settings(excludeScalaLib: _*)
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)

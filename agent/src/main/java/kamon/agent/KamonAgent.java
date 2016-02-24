@@ -9,7 +9,7 @@ import static kamon.agent.util.AgentUtil.withTimeSpent;
 
 public class KamonAgent {
 
-    private static final LazyLogger log = LazyLogger.create(InstrumentationLoader.class);
+    private static final LazyLogger log = LazyLogger.create(KamonAgent.class);
 
     /**
      * JVM hook to statically load the javaagent at startup.

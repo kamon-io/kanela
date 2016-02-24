@@ -1,13 +1,16 @@
 package app.kamon
 
 import app.kamon.instrumentation.Pepe
+import org.slf4j.LoggerFactory
 
 object MainWithAgent {
 
+  def logger = LoggerFactory.getLogger(MainWithAgent.getClass)
+
   def main(args: Array[String]) {
-    println("Start Run Agent Test")
+    logger.info("Start Run Agent Test")
     new Pepe().hello()
-    println("Exit Run Agent Test")
+    logger.info("Exit Run Agent Test")
   }
 
 }
