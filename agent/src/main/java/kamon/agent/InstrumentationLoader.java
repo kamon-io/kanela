@@ -13,7 +13,7 @@ public class InstrumentationLoader {
         kamonAgentConfig.getInstrumentations().forEach(clazz -> {
             try {
                 log.info(() -> "Start loading instrumentation class: " + clazz);
-                ((KamonInstrumentation) Class.forName(clazz).newInstance()).register(instrumentation);
+                ((KamonInstrumentation) Class.forName(clazz, true, ClassLoader.getSystemClassLoader()).newInstance()).register(instrumentation);
                 log.info(() -> "End loading instrumentation class: " + clazz);
             } catch (Throwable e) {
                 e.printStackTrace();

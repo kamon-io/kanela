@@ -9,7 +9,7 @@ import static kamon.agent.util.AgentUtil.withTimeSpent;
 
 public class KamonAgent {
 
-    private static final LazyLogger log = LazyLogger.create(KamonAgent.class);
+    private static volatile LazyLogger log = LazyLogger.create(KamonAgent.class);
 
     /**
      * JVM hook to statically load the javaagent at startup.
@@ -22,7 +22,9 @@ public class KamonAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        withTimeSpent(() -> InstrumentationLoader.load(instrumentation, new KamonAgentConfig()), (timeSpent) -> log.info(() -> format("Premain startup complete in {0} ms", timeSpent)));
+        withTimeSpent(() -> {
+            InstrumentationLoader.load(instrumentation, new KamonAgentConfig());
+        }, (timeSpent) -> log.info(() -> format("Premain startup complete in {0} ms", timeSpent)));
     }
 
 
@@ -40,4 +42,3 @@ public class KamonAgent {
         premain(args, instrumentation);
     }
 }
-

@@ -36,8 +36,8 @@ object Assembly {
           "Implementation-Version" -> version,
           "Implementation-Vendor-Id" -> vendor,
           "Implementation-Vendor" -> vendor,
-          "Premain-Class" -> "kamon.agent.KamonAgent",
-          "Agent-Class" -> "kamon.agent.KamonAgent",
+          "Premain-Class" -> "kamon.agent.KamonPremain",
+          "Agent-Class" -> "kamon.agent.KamonPremain",
           "Can-Redefine-Classes" -> "true",
           "Can-Retransform-Classes" -> "true")
     },
@@ -48,10 +48,14 @@ object Assembly {
         ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
-        //ShadeRule.rename("^logback.configurationFile$" -> "kamon.agent.libs.logback.configurationFile.@0").inAll
     )
-    // logLevel in assembly := Level.Debug,
-    // unmanagedJars in Compile += file("agent/lib/byte-buddy-1.2.0.jar")
+//    assemblyMergeStrategy in assembly := {
+//      case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.discard
+//      case "META-INF/log4j-provider.properties" => MergeStrategy.first
+//      case x =>
+//        val oldStrategy = (assemblyMergeStrategy in assembly).value
+//        oldStrategy(x)
+//    }
   ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {}) ++ assemblyArtifact
 
   lazy val assemblyArtifact = artifact in (Compile, assembly) := {

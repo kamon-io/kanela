@@ -1,13 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration>
 <configuration>
+    <!--<statusListener class="kamon.agent.libs.ch.qos.logback.core.status.NopStatusListener"/>-->
     <appender name="CONSOLE" class="kamon.agent.libs.ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="kamon.agent.libs.ch" level="warn" />
+
+    <appender name="FILE" class="kamon.agent.libs.ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="kamon.agent.libs.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--<fileNamePattern>${kamon-agent.base.dir}/kmaon-agent.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+            <!-- rollover daily -->
+            <fileNamePattern>kamon-agent-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- keep 10 days' worth of history -->
+            <maxHistory>10</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <!-- or whenever the file size reaches 10MB -->
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="kamon.agent.libs.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="kamon.agent.libs.ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE" />
+    </appender>
+
+    <logger name="kamon.agent" level="info" />
+
     <root level="info">
         <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC"/>
     </root>
 </configuration>

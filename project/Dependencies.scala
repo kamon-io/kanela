@@ -32,6 +32,7 @@ object Dependencies {
   val scalatest       = "org.scalatest"    %% "scalatest"         % "2.2.6"
   val mockito         = "org.mockito"       % "mockito-core"      % "2.0.42-beta"
   val lombok          = "org.projectlombok" % "lombok"            % "1.16.6"
+
   val kamonAgent      = "io.kamon"          % "agent_2.11"        % "0.1-SNAPSHOT" classifier "assembly"
 
 

@@ -9,11 +9,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by cristian on 18/02/16.
- */
 public class KamonAgentConfig {
-    //private static final Config factory = ConfigFactory.load();
     private static final LazyLogger log = LazyLogger.create(InstrumentationLoader.class);
 
     @Getter
