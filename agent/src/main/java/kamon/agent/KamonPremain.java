@@ -1,5 +1,7 @@
 package kamon.agent;
 
+import kamon.agent.api.banner.KamonAgentBanner;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -18,7 +20,8 @@ public class KamonPremain {
                 // this is ok, running integration test in IDE
                 mainEntryPointClass = Class.forName("kamon.agent.KamonAgent", true, KamonPremain.class.getClassLoader());
             } else {
-                System.out.println("Appending Kamon Agent to BootstrapClassLoader...");
+//                System.out.println("Appending Kamon Agent to BootstrapClassLoader...");
+                KamonAgentBanner.printBanner(System.out);
                 instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(kamonAgentJar));
                 mainEntryPointClass = Class.forName("kamon.agent.KamonAgent", true, null);
             }
