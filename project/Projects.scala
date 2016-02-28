@@ -48,6 +48,15 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
+  lazy val agentUtils = Project("agent-utils",file("agent-utils"))
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(libraryDependencies ++=
+      compile(slf4jApi, logbackCore, logbackClassic) ++
+      provided(javaslang, kamonAgent))
+    .settings(excludeScalaLib: _*)
+    .settings(notAggregateInAssembly: _*)
+
   lazy val agentTest = Project("agent-test",file("agent-test"))
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
