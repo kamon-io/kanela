@@ -1,7 +1,9 @@
 package kamon.agent.util.log;
 
 
+import kamon.agent.AgentLogger;
 import org.slf4j.Logger;
+
 import java.util.function.Supplier;
 
 /**
@@ -87,11 +89,11 @@ public class LazyLogger {
     }
 
     public static LazyLogger create(String name) {
-        return new LazyLogger(org.slf4j.LoggerFactory.getLogger(name));
+        return new LazyLogger(AgentLogger.create(name));
     }
 
     public static LazyLogger create(Class clazz) {
-        return new LazyLogger(org.slf4j.LoggerFactory.getLogger(clazz.getName()));
+        return new LazyLogger(AgentLogger.create(clazz.getName()));
     }
 
 }
