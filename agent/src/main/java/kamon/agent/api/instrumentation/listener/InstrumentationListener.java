@@ -8,6 +8,7 @@ import net.bytebuddy.dynamic.DynamicType;
 public class InstrumentationListener implements AgentBuilder.Listener {
 
     private static LazyLogger log = LazyLogger.create(InstrumentationListener.class);
+
     @Override
     public void onTransformation(TypeDescription typeDescription, DynamicType dynamicType) {
         log.info(() -> "onTransformation: "  + typeDescription.toString());

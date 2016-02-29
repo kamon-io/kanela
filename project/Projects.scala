@@ -66,7 +66,7 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
-    .settings(kamonAgentSettings: _*)
+   // .settings(kamonAgentSettings: _*)
     .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
 
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)

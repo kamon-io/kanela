@@ -18,6 +18,8 @@ public class AgentLogger {
         } finally {
             if (initLogbackConfigFile != null) {
                 System.setProperty("logback.configurationFile", initLogbackConfigFile);
+            }else{
+                System.clearProperty("logback.configurationFile");
             }
         }
     }

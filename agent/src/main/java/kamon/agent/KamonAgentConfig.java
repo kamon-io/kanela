@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KamonAgentConfig {
+    //private static final Config factory = ConfigFactory.load();
     private static final LazyLogger log = LazyLogger.create(InstrumentationLoader.class);
 
     @Getter

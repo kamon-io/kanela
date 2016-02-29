@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-import kamon.sbt.plugin.SbtKamon
+//import kamon.sbt.plugin.SbtKamon
 import sbt._
 import Keys._
 import com.typesafe.sbt.SbtScalariform
@@ -59,7 +59,7 @@ object Settings {
   lazy val assemblySettings = Assembly.settings
   lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
   lazy val excludeScalaLib = Assembly.excludeScalaLib
-  lazy val kamonAgentSettings = SbtKamon.defaultKamonSettings
+  //lazy val kamonAgentSettings = SbtKamon.defaultKamonSettings
 
   def formattingPreferences =
     FormattingPreferences()
