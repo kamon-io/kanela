@@ -13,14 +13,8 @@ public class AgentLogger {
     private static final String LOGBACK_CONFIGURATION_FILE= "logback.configurationFile";
 
     public static Logger create(Supplier<Logger> loggerFactory) { return withLogbackConfiguration(loggerFactory::get);}
-
-    public static Logger create(String name) {
-        return create(() -> org.slf4j.LoggerFactory.getLogger(name));
-    }
-
-    public static Logger create(Class clazz) {
-        return create(() -> org.slf4j.LoggerFactory.getLogger(clazz));
-    }
+    public static Logger create(String name) { return withLogbackConfiguration(() -> org.slf4j.LoggerFactory.getLogger(name));}
+    public static Logger create(Class clazz) { return withLogbackConfiguration(() -> org.slf4j.LoggerFactory.getLogger(clazz));}
 
     private static Logger withLogbackConfiguration(Supplier<Logger> loggerFactory){
         final Map<String,String> systemProperties = new HashMap<>();
@@ -31,6 +25,7 @@ public class AgentLogger {
             System.setProperty(LOGBACK_CONFIGURATION_FILE, KAMON_AGENT_LOGBACK);
 
             return loggerFactory.get();
+
         } finally {
             System.getProperties().remove(LOGBACK_CONFIGURATION_FILE);
             systemProperties.forEach(System::setProperty);
