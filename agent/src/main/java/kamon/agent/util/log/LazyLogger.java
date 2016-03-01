@@ -1,7 +1,10 @@
 package kamon.agent.util.log;
 
 
+import javaslang.control.Match;
 import kamon.agent.AgentLogger;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.Logger;
 
 import java.util.function.Supplier;
@@ -10,90 +13,96 @@ import java.util.function.Supplier;
  * Lazy Logger implementing {@link Logger}, which supports lazy evaluation of messages.<br>
  * The message to be logged must be inside a {@link Supplier} which will be evaluated only if the level of debug is enabled.
  */
+@ToString
+@EqualsAndHashCode
 public class LazyLogger {
 
-    private final Logger underlying;
+    private LazyLogger(){}
 
-    public LazyLogger(Logger underlying) {
-        this.underlying = underlying;
+    private static Boolean isTraceEnabled(final Object source) {
+        return LazyLogger.logger(source).isTraceEnabled();
     }
 
-    private Boolean isTraceEnabled() { return underlying.isTraceEnabled();}
-
-    public void trace(Supplier<String> msg) {
-        if (isTraceEnabled()) {
-            underlying.trace(msg.get());
+    public static void trace(final Object source, final Supplier<String> msg) {
+        if (isTraceEnabled(source)) {
+            LazyLogger.logger(source).trace(msg.get());
         }
     }
 
-    public void trace(Supplier<String> msg, Throwable t) {
-        if (isTraceEnabled()) {
-            underlying.trace(msg.get(), t);
+    public static void trace(final Object source, final Supplier<String> msg, Throwable t) {
+        if (isTraceEnabled(source)) {
+            LazyLogger.logger(source).trace(msg.get(), t);
         }
     }
 
-    private Boolean isDebugEnabled() { return underlying.isDebugEnabled();}
+    private static Boolean isDebugEnabled(final Object source) {
+        return LazyLogger.logger(source).isDebugEnabled();
+    }
 
-    public void debug(Supplier<String> msg) {
-        if (isDebugEnabled()) {
-            underlying.debug(msg.get());
+    public static void debug(final Object source, final Supplier<String> msg) {
+        if (isDebugEnabled(source)) {
+            LazyLogger.logger(source).debug(msg.get());
         }
     }
 
-    public void debug(Supplier<String> msg, Throwable t) {
-        if (isDebugEnabled()) {
-            underlying.debug(msg.get(), t);
+    public static void debug(final Object source, final Supplier<String> msg, final Throwable t) {
+        if (isDebugEnabled(source)) {
+            LazyLogger.logger(source).debug(msg.get(), t);
         }
     }
 
-    private Boolean isInfoEnabled() { return underlying.isInfoEnabled();}
+    private static Boolean isInfoEnabled(final Object source) {
+        return LazyLogger.logger(source).isInfoEnabled();
+    }
 
-    public void info(Supplier<String> msg) {
-        if (isInfoEnabled()) {
-            underlying.info(msg.get());
+    public static void info(final Object source, final Supplier<String> msg) {
+        if (isInfoEnabled(source)) {
+            LazyLogger.logger(source).info(msg.get());
         }
     }
 
-    public void info(Supplier<String> msg, Throwable t) {
-        if (isInfoEnabled()) {
-            underlying.info(msg.get(), t);
+    public static void info(final Object source, final Supplier<String> msg, final Throwable t) {
+        if (isInfoEnabled(source)) {
+            LazyLogger.logger(source).info(msg.get(), t);
         }
     }
 
-    private Boolean isWarnEnabled() { return underlying.isWarnEnabled();}
+    private static Boolean isWarnEnabled(final Object source) {
+        return LazyLogger.logger(source).isWarnEnabled();
+    }
 
-    public void warn(Supplier<String> msg) {
-        if (isWarnEnabled()) {
-            underlying.warn(msg.get());
+    public static void warn(final Object source, final Supplier<String> msg) {
+        if (isWarnEnabled(source)) {
+            LazyLogger.logger(source).warn(msg.get());
         }
     }
 
-    public void warn(Supplier<String> msg, Throwable t) {
-        if (isWarnEnabled()) {
-            underlying.warn(msg.get(), t);
+    public static void warn(final Object source, final Supplier<String> msg, final Throwable t) {
+        if (isWarnEnabled(source)) {
+            LazyLogger.logger(source).warn(msg.get(), t);
         }
     }
 
-    private Boolean isErrorEnabled() { return underlying.isErrorEnabled();}
+    private static Boolean isErrorEnabled(final Object source) {
+        return  LazyLogger.logger(source).isErrorEnabled();
+    }
 
-    public void error(Supplier<String> msg) {
-        if (isErrorEnabled()) {
-            underlying.error(msg.get());
+    public static void error(final Object source, final Supplier<String> msg) {
+        if (isErrorEnabled(source)) {
+            LazyLogger.logger(source).error(msg.get());
         }
     }
 
-    public void error(Supplier<String> msg, Throwable t) {
-        if (isErrorEnabled()) {
-            underlying.error(msg.get(), t);
+    public static void error(final Object source, final Supplier<String> msg, final Throwable t) {
+        if (isErrorEnabled(source)) {
+            LazyLogger.logger(source).error(msg.get(), t);
         }
     }
 
-    public static LazyLogger create(String name) {
-        return new LazyLogger(AgentLogger.create(name));
-    }
+    private static org.slf4j.Logger logger(final Object source) {
+        return Match.of(source).whenType(Class.class).then(AgentLogger::create)
+                               .whenType(String.class).then(AgentLogger::create)
+                               .getOrElse(AgentLogger.create(source.getClass()));
 
-    public static LazyLogger create(Class clazz) {
-        return new LazyLogger(AgentLogger.create(clazz.getName()));
     }
-
 }
