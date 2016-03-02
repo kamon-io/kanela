@@ -30,8 +30,9 @@ public class KamonAgentBanner {
             padding += " ";
         }
 
-        printStream.println(AnsiOutput.toString(AnsiColor.GREEN, KAMON_AGENT,
-                AnsiColor.DEFAULT, padding, AnsiStyle.FAINT, version));
+        printStream.println(AnsiColor.ParseColors(":green,n:" + KAMON_AGENT + padding + version));
         printStream.println();
     }
 }
+
+
