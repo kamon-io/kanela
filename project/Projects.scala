@@ -36,7 +36,7 @@ object Projects extends Build {
       compile(javaslang, typesafeConfig, bytebuddy, logbackCore, logbackClassic, slf4jApi) ++
         optional() ++
         test(scalatest, mockito) ++
-        provided(lombok)) // , /*slf4jApi, logbackCore, logbackClassic*/))
+        provided(lombok))
     .settings(excludeScalaLib: _*)
 
 
@@ -48,16 +48,17 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
-  lazy val agentUtils = Project("agent-utils",file("agent-utils"))
+  lazy val agentScala = Project("agent-scala",file("agent-scala"))
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
       compile(slf4jApi, logbackCore, logbackClassic) ++
-      provided(javaslang, kamonAgent))
+      provided(kamonAgent))
     .settings(excludeScalaLib: _*)
     .settings(notAggregateInAssembly: _*)
 
   lazy val agentTest = Project("agent-test",file("agent-test"))
+    .dependsOn(agentScala)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(libraryDependencies ++=
@@ -66,7 +67,6 @@ object Projects extends Build {
     .settings(excludeScalaLib: _*)
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
-   // .settings(kamonAgentSettings: _*)
     .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
 
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)

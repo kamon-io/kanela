@@ -3,8 +3,6 @@ package kamon.agent.util.log;
 
 import javaslang.control.Match;
 import kamon.agent.AgentLogger;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.slf4j.Logger;
 
 import java.util.function.Supplier;
@@ -13,8 +11,6 @@ import java.util.function.Supplier;
  * Lazy Logger implementing {@link Logger}, which supports lazy evaluation of messages.<br>
  * The message to be logged must be inside a {@link Supplier} which will be evaluated only if the level of debug is enabled.
  */
-@ToString
-@EqualsAndHashCode
 public class LazyLogger {
 
     private LazyLogger(){}

@@ -1,4 +1,4 @@
-package kamon.agent.utils
+package kamon.agent.scala
 
 import java.util.function.{ BiFunction, Supplier }
 
