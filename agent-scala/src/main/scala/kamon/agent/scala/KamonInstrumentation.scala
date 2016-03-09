@@ -1,8 +1,8 @@
 package kamon.agent.scala
 
-import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
+import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
 
-import kamon.agent.libs.javaslang.{Function2 => JFunction2}
+import kamon.agent.libs.javaslang.{ Function2 ⇒ JFunction2 }
 import kamon.agent.libs.net.bytebuddy.agent.builder.AgentBuilder.Transformer
 import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
@@ -27,7 +27,7 @@ trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrume
     }
   }
 
-  def addTransformation(f: ⇒ (Builder[_], TypeDescription) ⇒ Builder[_]):Unit = {
+  def addTransformation(f: ⇒ (Builder[_], TypeDescription) ⇒ Builder[_]): Unit = {
     super.addTransformation(f)
   }
 }

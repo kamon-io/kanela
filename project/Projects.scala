@@ -61,6 +61,7 @@ object Projects extends Build {
     .dependsOn(agentScala)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
+    .settings(agentSettings: _*)
     .settings(libraryDependencies ++=
       compile(slf4jApi, logbackCore, logbackClassic) ++
       provided(javaslang, typesafeConfig, kamonAgent))
