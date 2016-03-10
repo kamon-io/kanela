@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 
 object MainWithAgent {
 
-  val logger = LoggerFactory.getLogger("adfasffs")
+  val logger = LoggerFactory.getLogger(MainWithAgent.getClass)
 
   def main(args: Array[String]) {
     logger.info("Start Run Agent Test")
