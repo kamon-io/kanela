@@ -1,6 +1,7 @@
 package kamon.agent;
 
 import kamon.agent.api.banner.KamonAgentBanner;
+import kamon.agent.util.ClassDumper;
 
 import java.lang.instrument.Instrumentation;
 
@@ -21,7 +22,11 @@ public class KamonAgent {
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         withTimeLogging(() -> {
             KamonAgentBanner.printBanner(System.out);
-            InstrumentationLoader.load(instrumentation, new KamonAgentConfig());
+            final KamonAgentConfig kamonAgentConfig = new KamonAgentConfig();
+            InstrumentationLoader.load(instrumentation, kamonAgentConfig);
+            if (kamonAgentConfig.getDumpEnabled()) {
+                ClassDumper.process(instrumentation, kamonAgentConfig.getDumpDir(), kamonAgentConfig.getClassesPattern());
+            }
         }, "Premain startup complete in");
     }
 

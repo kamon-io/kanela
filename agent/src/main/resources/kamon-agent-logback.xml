@@ -33,7 +33,7 @@
         <appender-ref ref="FILE" />
     </appender>
 
-    <logger name="kamon.agent" level="info" />
+    <logger name="kamon.agent" level="debug" />
 
     <root level="info">
         <appender-ref ref="CONSOLE" />

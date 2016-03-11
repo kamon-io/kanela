@@ -1,6 +1,5 @@
 package kamon.agent.util;
 
-import javaslang.control.Option;
 import kamon.agent.util.log.LazyLogger;
 
 import java.io.File;
@@ -22,38 +21,23 @@ import static kamon.agent.util.AgentUtil.withTimeLogging;
 public class ClassDumper {
 
     // directory where we would write .class files
-    private static String dumpDir = "./target/classes-dump";
+    private static String dumpDir;
 
     // classes with name matching this pattern will be dumped
-    private static Pattern classesRegex = Pattern.compile(".*");
+    private static Pattern classesRegex;
 
-    private static class ClassDumperTransformer implements ClassFileTransformer {
-
-        public byte[] transform(ClassLoader loader, String className,
-                                Class redefinedClass, ProtectionDomain protDomain,
-                                byte[] classBytes) {
-            // check and dump .class file
-            if (isCandidate(className)) {
-                dumpClass(className, classBytes);
-            }
-
-            // we don't mess with .class file, just return null
-            return null;
-        }
-    }
-
-
-    public static void process(Instrumentation inst, Option<String> dumpDirArg, Option<String> classesRegexArg) {
+    public static void process(Instrumentation inst, String dumpDirArg, String classesRegexArg) {
         withTimeLogging(() -> {
 
-            dumpDirArg.forEach(s -> dumpDir = s);
-            classesRegexArg.forEach(s -> classesRegex = Pattern.compile(s));
+            dumpDir = dumpDirArg;
+            classesRegex = Pattern.compile(classesRegexArg);
 
-            LazyLogger.info(ClassDumper.class, () -> "Add Transformer to retrieve bytecode of instrumented classes");
+            LazyLogger.info(ClassDumper.class,
+                    () -> String.format("Add Transformer to retrieve bytecode of instrumented classes [dumpDir = %s, classes = %s]", dumpDir, classesRegexArg));
+
             inst.addTransformer(new ClassDumper.ClassDumperTransformer(), true);
 
-            // by the time we are attached, the classes to be
-            // dumped may have been loaded already. So, check
+            // by the time we are attached, the classes to be dumped may have been loaded already. So, check
             // for candidates in the loaded classes.
             Class[] classes = inst.getAllLoadedClasses();
             List<Class> candidates = new ArrayList<>();
@@ -63,8 +47,7 @@ public class ClassDumper {
                 }
             }
             try {
-                // if we have matching candidates, then
-                // retransform those classes so that we
+                // if we have matching candidates, then retransform those classes so that we
                 // will get callback to transform.
                 if (! candidates.isEmpty()) {
                     Class[] candidateClasses = candidates.toArray(new Class[0]);
@@ -114,6 +97,21 @@ public class ClassDumper {
         } catch (Exception exp) {
             String message = "Error creating dump file for " + className;
             LazyLogger.error(ClassDumper.class, () -> message, exp);
+        }
+    }
+
+    private static class ClassDumperTransformer implements ClassFileTransformer {
+
+        public byte[] transform(ClassLoader loader, String className,
+                                Class redefinedClass, ProtectionDomain protDomain,
+                                byte[] classBytes) {
+            // check and dump .class file
+            if (isCandidate(className)) {
+                dumpClass(className, classBytes);
+            }
+
+            // we don't mess with .class file, just return null
+            return null;
         }
     }
 }

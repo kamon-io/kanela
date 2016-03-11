@@ -1,9 +1,7 @@
 package kamon.agent;
 
 
-import javaslang.control.Option;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
-import kamon.agent.util.ClassDumper;
 import kamon.agent.util.log.LazyLogger;
 
 import java.lang.instrument.Instrumentation;
@@ -18,7 +16,6 @@ public class InstrumentationLoader {
                 e.printStackTrace();
             }
         });
-        ClassDumper.process(instrumentation, Option.none(), Option.some("app.kamon.instrumentation.Pepe.*"));
     }
 }
 
