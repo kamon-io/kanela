@@ -1,20 +1,21 @@
 package kamon.agent.api.instrumentation;
 
-import javaslang.Function2;
+import javaslang.Function3;
 import javaslang.control.Option;
-import kamon.agent.api.instrumentation.interceptor.InterceptorDescription;
-import kamon.agent.api.instrumentation.interceptor.MethodInterceptorVisitorWrapper;
+import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.listener.InstrumentationListener;
 import kamon.agent.api.instrumentation.mixin.MixinClassVisitorWrapper;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.agent.builder.AgentBuilder.Transformer;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper.ForDeclaredMethods;
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
@@ -28,7 +29,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class KamonInstrumentation {
     private Option<ElementMatcher<? super TypeDescription>> elementMatcher = Option.none();
     private List<MixinDescription> mixins = new ArrayList<>();
-    private List<InterceptorDescription> interceptors = new ArrayList<>();
+    private List<AdvisorDescription> interceptors = new ArrayList<>();
     private List<Transformer> transformers = new ArrayList<>();
 
     protected final TypePool typePool = TypePool.Default.ofClassPath();
@@ -41,17 +42,17 @@ public abstract class KamonInstrumentation {
                 .type(elementMatcher.getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
 
         mixins.forEach(mixin ->
-                agentBuilder.transform((builder, typeDescription) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));
+                agentBuilder.transform((builder, typeDescription, classLoader) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));
 
-        interceptors.forEach(interceptor -> agentBuilder.transform((builder, typeDescription) ->
-                builder.visit(new ForDeclaredMethods().method(interceptor.getMethodMatcher(), new MethodInterceptorVisitorWrapper(interceptor)))));
+        interceptors.forEach(interceptor -> agentBuilder.transform((builder, typeDescription, classLoader) ->
+                builder.visit(new ForDeclaredMethods().writerFlags(ClassWriter.COMPUTE_FRAMES).method(interceptor.getMethodMatcher(), Advice.to(interceptor.getInterceptorClass())))).installOn(instrumentation));
 
         transformers.forEach(transformer -> agentBuilder.transform(transformer).installOn(instrumentation));
     }
 
-    private Transformer withTransformer(Function2<Builder, TypeDescription, Builder> f) { return f::apply; }
+    private Transformer withTransformer(Function3<Builder, TypeDescription, ClassLoader, Builder> f) { return f::apply; }
 
-    public void addTransformation(Function2<Builder, TypeDescription, Builder> f) {
+    public void addTransformation(Function3<Builder, TypeDescription, ClassLoader, Builder> f) {
         transformers.add(withTransformer(f));
     }
 
@@ -65,7 +66,7 @@ public abstract class KamonInstrumentation {
 
     public void addMixin(Supplier<Class<?>> f) {mixins.add(MixinDescription.of(elementMatcher.get(),f.get()));}
 
-    public void addInterceptorForMethod(ElementMatcher.Junction<MethodDescription> junction , Supplier<Class<?>> f) {
-        interceptors.add(new InterceptorDescription(junction,f.get()));
+    public void addAdvisor(ElementMatcher.Junction<MethodDescription> methodDescription , Supplier<Class<?>> classSupplier) {
+        interceptors.add(new AdvisorDescription(methodDescription, classSupplier.get()));
     }
 }

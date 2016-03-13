@@ -2,7 +2,7 @@ package kamon.agent.api.instrumentation.mixin;
 
 import javaslang.control.Option;
 import javaslang.control.Try;
-import kamon.agent.api.instrumentation.initializer;
+import kamon.agent.api.instrumentation.Initializer;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
 import utils.AgentApiUtils;
@@ -35,7 +35,7 @@ public class MixinDescription {
     public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
         Type implementation = Type.getType(clazz);
         Set<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toSet());
-        Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(initializer.class)).findFirst().get().getName());
+        Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(Initializer.class)).findFirst().get().getName());
         return new MixinDescription(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
     }
 

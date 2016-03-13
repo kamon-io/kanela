@@ -28,7 +28,7 @@ object Dependencies {
   val logbackClassic  = "ch.qos.logback"    % "logback-classic"   % "1.1.3"
   val typesafeConfig  = "com.typesafe"      % "config"            % "1.3.0"
   val javaslang       = "com.javaslang"     % "javaslang"         % "2.0.0-RC3"
-  val bytebuddy       = "net.bytebuddy"     % "byte-buddy"        % "1.2.0"
+  val bytebuddy       = "net.bytebuddy"     % "byte-buddy"        % "1.3.3"
   val scalatest       = "org.scalatest"    %% "scalatest"         % "2.2.6"
   val mockito         = "org.mockito"       % "mockito-core"      % "2.0.42-beta"
   val lombok          = "org.projectlombok" % "lombok"            % "1.16.6"

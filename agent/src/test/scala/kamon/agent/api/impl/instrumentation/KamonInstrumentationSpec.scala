@@ -40,8 +40,6 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
     addMixin(classOf[MixinTest])
 
-    addInterceptorForMethod(named("prepareStatement").and(TakesArguments), classOf[InterceptorTest])
-
     //    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
     //      builder
     //        .method(named("prepareStatement").and(TakesArguments))
@@ -63,20 +61,8 @@ object ConnectionInterceptor {
 class MixinTest extends Serializable {
   var a: String = _
 
-  @initializer
+  @Initializer
   def init() = this.a = "Pepe"
-}
-
-class InterceptorTest {
-  @before
-  def before() = {
-
-  }
-
-  @after
-  def after() = {
-
-  }
 }
 
 trait PreparedStatementExtension {
