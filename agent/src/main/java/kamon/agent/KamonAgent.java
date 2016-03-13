@@ -1,7 +1,7 @@
 package kamon.agent;
 
 import kamon.agent.api.banner.KamonAgentBanner;
-import kamon.agent.util.ClassDumper;
+import kamon.agent.dump.ClassDumperLoader;
 
 import java.lang.instrument.Instrumentation;
 
@@ -24,9 +24,7 @@ public class KamonAgent {
             KamonAgentBanner.printBanner(System.out);
             final KamonAgentConfig kamonAgentConfig = new KamonAgentConfig();
             InstrumentationLoader.load(instrumentation, kamonAgentConfig);
-            if (kamonAgentConfig.getDumpEnabled()) {
-                ClassDumper.process(instrumentation, kamonAgentConfig.getDumpDir(), kamonAgentConfig.getClassesPattern());
-            }
+            ClassDumperLoader.load(instrumentation, kamonAgentConfig.getDump());
         }, "Premain startup complete in");
     }
 

@@ -1,49 +1,46 @@
-package kamon.agent.util;
+package kamon.agent.dump;
 
 import kamon.agent.util.log.LazyLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static kamon.agent.util.AgentUtil.withTimeLogging;
 
-/**
- * The credit is for @sundararajan
- * @see 'https://blogs.oracle.com/sundararajan/entry/retrieving_class_files_from_a'
- */
-public class ClassDumper {
+public abstract class ClassDumper {
 
     private static final LazyLogger log = LazyLogger.create(ClassDumper.class);
 
     // directory where we would write .class files
-    private static String dumpDir;
+    protected String dumpDir;
 
     // classes with name matching this pattern will be dumped
-    private static Pattern classesRegex;
+    protected Pattern classesRegex;
 
-    public static void process(Instrumentation inst, String dumpDirArg, String classesRegexArg) {
+    protected ClassDumper(String dumpDirArg, String classesRegexArg) {
+        dumpDir = dumpDirArg;
+        classesRegex = Pattern.compile(classesRegexArg);
+    }
+
+    public void install(Instrumentation instrumentation) {
         withTimeLogging(() -> {
 
-            dumpDir = dumpDirArg;
-            classesRegex = Pattern.compile(classesRegexArg);
+            installTransformer(instrumentation);
 
-            log.info(() -> String.format("Add Transformer to retrieve bytecode of instrumented classes [dumpDir = %s, classes = %s]", dumpDir, classesRegexArg));
-
-            inst.addTransformer(new ClassDumper.ClassDumperTransformer(), true);
+            log.info(() -> format("Add Transformer to retrieve bytecode of instrumented classes [dumpDir = %s, classes = %s]", dumpDir, classesRegex.pattern()));
 
             // by the time we are attached, the classes to be dumped may have been loaded already. So, check
             // for candidates in the loaded classes.
-            Class[] classes = inst.getAllLoadedClasses();
+            Class[] classes = instrumentation.getAllLoadedClasses();
             List<Class> candidates = new ArrayList<>();
             for (Class c : classes) {
-                if (isCandidate(c.getName())) {
+                if (this.isCandidate(c.getName())) {
                     candidates.add(c);
                 }
             }
@@ -52,16 +49,20 @@ public class ClassDumper {
                 // will get callback to transform.
                 if (! candidates.isEmpty()) {
                     Class[] candidateClasses = candidates.toArray(new Class[0]);
-                    inst.retransformClasses(candidateClasses);
+                    instrumentation.retransformClasses(candidateClasses);
                 }
             } catch (UnmodifiableClassException exp) {
                 log.error(() -> "Error re-transforming classes", exp);
             }
 
-        }, "Class Dumper complete in");
+        }, "Class Dumper installed in"); // TODO: log this in debug level
     }
 
-    private static boolean isCandidate(String className) {
+    protected abstract void installTransformer(Instrumentation instrumentation);
+
+    public abstract void addClassToDump(String className, byte[] classBytes);
+
+    protected boolean isCandidate(String className) {
         // ignore array classes
         if (className.charAt(0) == '[') {
             return false;
@@ -73,7 +74,7 @@ public class ClassDumper {
         return classesRegex.matcher(className).matches();
     }
 
-    private static void dumpClass(String className, byte[] classBuf) {
+    synchronized protected void dumpClass(String className, byte[] classBuf) {
         try {
             // create package directories if needed
             className = className.replace("/", File.separator);
@@ -93,26 +94,11 @@ public class ClassDumper {
             fos.write(classBuf);
             fos.close();
 
-            final String message = String.format("Dump %s", fileName);
+            final String message = format("Dump %s", fileName);
             log.info(() -> message);
-        } catch (Exception exp) {
+        } catch (Exception exc) {
             String message = "Error creating dump file for " + className;
-            log.error(() -> message, exp);
-        }
-    }
-
-    private static class ClassDumperTransformer implements ClassFileTransformer {
-
-        public byte[] transform(ClassLoader loader, String className,
-                                Class redefinedClass, ProtectionDomain protDomain,
-                                byte[] classBytes) {
-            // check and dump .class file
-            if (isCandidate(className)) {
-                dumpClass(className, classBytes);
-            }
-
-            // we don't mess with .class file, just return null
-            return null;
+            log.error(() -> message, exc);
         }
     }
 }
