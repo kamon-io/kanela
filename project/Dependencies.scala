@@ -23,15 +23,15 @@ object Dependencies {
     "Typesafe Maven Releases" at "http://repo.typesafe.com/typesafe/releases/"
   )
 
-  val slf4jApi        = "org.slf4j"         % "slf4j-api"         % "1.7.13"
-  val logbackCore     = "ch.qos.logback"    % "logback-core"      % "1.1.3"
-  val logbackClassic  = "ch.qos.logback"    % "logback-classic"   % "1.1.3"
+  val slf4jApi        = "org.slf4j"         % "slf4j-api"         % "1.7.19"
+  val logbackCore     = "ch.qos.logback"    % "logback-core"      % "1.1.6"
+  val logbackClassic  = "ch.qos.logback"    % "logback-classic"   % "1.1.6"
   val typesafeConfig  = "com.typesafe"      % "config"            % "1.3.0"
-  val javaslang       = "com.javaslang"     % "javaslang"         % "2.0.0-RC3"
+  val javaslang       = "com.javaslang"     % "javaslang"         % "2.0.0-RC4"
   val bytebuddy       = "net.bytebuddy"     % "byte-buddy"        % "1.3.3"
   val scalatest       = "org.scalatest"    %% "scalatest"         % "2.2.6"
   val mockito         = "org.mockito"       % "mockito-core"      % "2.0.42-beta"
-  val lombok          = "org.projectlombok" % "lombok"            % "1.16.6"
+  val lombok          = "org.projectlombok" % "lombok"            % "1.16.8"
 
   val kamonAgent      = "io.kamon"          % "agent_2.11"        % "0.1-SNAPSHOT" classifier "assembly"
 
