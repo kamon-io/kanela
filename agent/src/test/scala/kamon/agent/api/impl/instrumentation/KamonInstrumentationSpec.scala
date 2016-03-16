@@ -5,6 +5,7 @@ import java.sql.SQLException
 import java.util.concurrent.Callable
 import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
 import javaslang.{ Function2 ⇒ JFunction2 }
+import javaslang.{ Function1 ⇒ JFunction1 }
 
 import net.bytebuddy.implementation.bind.annotation.{ Argument, RuntimeType, SuperCall }
 import net.bytebuddy.matcher.ElementMatchers._
@@ -21,6 +22,11 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
     override def apply(a: A, b: B): C = f(a, b)
   }
 
+  implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] = new JFunction1[A, B] {
+    override def apply(a: A): B = f(a)
+  }
+
+
   implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] = new JBifunction[A, B, C] {
     override def apply(a: A, b: B): C = f(a, b)
   }
@@ -36,9 +42,12 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
   class ConnectionInstrumentationPrototype extends KamonInstrumentation {
 
-    forSubtypeOf("java.sql.Connection")
+    forSubtypeOf2("java.sql.Connection", (builder:InstrumentationDescription.Builder) =>{
+      builder.build()
+    }
+    )
 
-    addMixin(classOf[MixinTest])
+//    addMixin(classOf[MixinTest])
 
     //    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
     //      builder

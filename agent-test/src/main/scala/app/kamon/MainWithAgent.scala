@@ -9,7 +9,9 @@ object MainWithAgent {
 
   def main(args: Array[String]) {
     logger.info("Start Run Agent Test")
-    new Pepe().hello()
+    val pepe = new Pepe()
+    pepe.hello()
+    pepe.bye()
     logger.info("Exit Run Agent Test")
   }
 
