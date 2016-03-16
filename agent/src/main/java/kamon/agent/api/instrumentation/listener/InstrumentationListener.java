@@ -6,8 +6,6 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 
-import java.text.MessageFormat;
-
 import static java.text.MessageFormat.format;
 
 public class InstrumentationListener implements AgentBuilder.Listener {

@@ -23,7 +23,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class KamonInstrumentation {
     private final List<InstrumentationDescription> instrumentationDescriptions = new ArrayList<>();
 
-    protected final TypePool typePool = TypePool.Default.ofClassPath();
+    private final TypePool typePool = TypePool.Default.ofClassPath();
     protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
     protected final ElementMatcher.Junction<MethodDescription> TakesArguments = not(takesArguments(0));
 

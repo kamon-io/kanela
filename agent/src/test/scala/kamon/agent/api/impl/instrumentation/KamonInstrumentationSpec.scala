@@ -42,7 +42,7 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
   class ConnectionInstrumentationPrototype extends KamonInstrumentation {
 
-    forSubtypeOf2("java.sql.Connection", (builder:InstrumentationDescription.Builder) =>{
+    forSubtypeOf("java.sql.Connection", (builder:InstrumentationDescription.Builder) =>{
       builder.build()
     }
     )

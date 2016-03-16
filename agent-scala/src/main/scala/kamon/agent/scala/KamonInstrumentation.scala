@@ -4,9 +4,11 @@ import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
 
 import kamon.agent.api.instrumentation.InstrumentationDescription
 import kamon.agent.libs.javaslang.{ Function1 ⇒ JFunction1, Function2 ⇒ JFunction2, Function3 ⇒ JFunction3 }
-import kamon.agent.libs.net.bytebuddy.agent.builder.AgentBuilder.Transformer
 import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
+import kamon.agent.libs.net.bytebuddy.implementation.MethodDelegation
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 
 trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrumentation {
 
@@ -30,12 +32,6 @@ trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrume
     override def apply(a: A, b: B): C = f(a, b)
   }
 
-  def withTransformer(f: ⇒ (Builder[_], TypeDescription, ClassLoader) ⇒ Builder[_]) = new Transformer {
-    override def transform(builder: Builder[_], typeDescription: TypeDescription, classLoader: ClassLoader): Builder[_] = {
-      f.apply(builder, typeDescription, classLoader)
-    }
-  }
-
   def forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription) = {
     super.forSubtypeOf(name, builder)
   }
@@ -43,7 +39,11 @@ trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrume
   def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription) = {
     super.forTargetType(name, builder)
   }
-  //  def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader) ⇒ Builder[_]): Unit = {
-  //     super.addTransformation(f)
-  //  }
+
+  implicit class PimpInstrumentationBuilder(instrumentationBuilder: InstrumentationDescription.Builder) {
+    def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) = {
+      addTransformation((builder, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
+    }
+    def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader) ⇒ Builder[_]) = instrumentationBuilder.withTransformation(f)
+  }
 }

@@ -70,5 +70,19 @@ object Projects extends Build {
     .settings(notAggregateInAssembly: _*)
     .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
 
+  //should be moved to Kamon repo
+  lazy val kamonServlet = Project("kamon-servlet",file("kamon-servlet"))
+    .dependsOn(agentScala)
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(agentSettings: _*)
+    .settings(libraryDependencies ++=
+      compile(kamonCore, servletApi) ++
+      provided(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+      test(scalatest, mockito, springTest, springWeb, jetty, jettyServlet, httpClient))
+    .settings(excludeScalaLib: _*)
+    .settings(noPublishing: _*)
+    .settings(notAggregateInAssembly: _*)
+
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
 }

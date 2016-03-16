@@ -8,6 +8,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import utils.AgentApiUtils;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class MixinDescription {
     public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
         Type implementation = Type.getType(clazz);
         Set<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toSet());
-        Option<String> mixinInit = Option.of(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(Initializer.class)).findFirst().get().getName());
+        Option<String> mixinInit = Option.ofOptional(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(Initializer.class)).findFirst().map(Method::getName));
         return new MixinDescription(implementation, interfaces, getBytesFrom(clazz), mixinInit, targetTypes);
     }
 
