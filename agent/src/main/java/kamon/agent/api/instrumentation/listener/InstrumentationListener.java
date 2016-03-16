@@ -8,9 +8,11 @@ import net.bytebuddy.dynamic.DynamicType;
 
 public class InstrumentationListener implements AgentBuilder.Listener {
 
+    private static final LazyLogger log = LazyLogger.create(InstrumentationListener.class);
+
     @Override
     public void onTransformation(TypeDescription typeDescription, DynamicType dynamicType) {
-        LazyLogger.info(InstrumentationListener.class, () -> AnsiColor.ParseColors(":yellow,n: onTransformation: "  + typeDescription.toString()));
+        log.info(() -> AnsiColor.ParseColors(":yellow,n: onTransformation: "  + typeDescription.toString()));
     }
 
     @Override
@@ -20,7 +22,7 @@ public class InstrumentationListener implements AgentBuilder.Listener {
 
     @Override
     public void onError(String s, Throwable throwable) {
-        LazyLogger.info(InstrumentationListener.class, () -> AnsiColor.ParseColors(":red,n: onError: "  + s + ". ||| " + throwable.getMessage()));
+        log.info(() -> AnsiColor.ParseColors(":red,n: onError: "  + s + ". ||| " + throwable.getMessage()));
     }
 
     @Override

@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 
 public class KamonAgentConfig {
 
+    private static final LazyLogger log = LazyLogger.create(KamonAgentConfig.class);
+
     @Getter
     private List<String> instrumentations = new ArrayList<>();
     @Getter
@@ -29,13 +31,12 @@ public class KamonAgentConfig {
         try {
             Config config = loadDefaultConfig().getConfig("kamon.agent");
             tryLoad(() -> instrumentations = config.getStringList("instrumentations"),
-                    (ex) -> LazyLogger.warn(KamonAgentConfig.class,
-                            () -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", ex));
+                    (ex) -> log.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", ex));
             tryLoad(() -> dumpEnabled = config.getBoolean("dump.enabled"));
             tryLoad(() -> dumpDir = config.getString("dump.dir"));
             tryLoad(() -> classesPattern = config.getString("dump.classes"));
         } catch(ConfigException.Missing missing) {
-            LazyLogger.warn(KamonAgentConfig.class, () -> "It has not been found any configuration for Kamon Agent.", missing);
+            log.warn(() -> "It has not been found any configuration for Kamon Agent.", missing);
         }
     }
 

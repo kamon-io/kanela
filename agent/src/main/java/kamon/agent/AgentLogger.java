@@ -12,7 +12,6 @@ public class AgentLogger {
     private static final String KAMON_AGENT_LOGBACK = "kamon-agent-logback.xml";
     private static final String LOGBACK_CONFIGURATION_FILE= "logback.configurationFile";
 
-    public static Logger create(Supplier<Logger> loggerFactory) { return withLogbackConfiguration(loggerFactory::get);}
     public static Logger create(String name) { return withLogbackConfiguration(() -> org.slf4j.LoggerFactory.getLogger(name));}
     public static Logger create(Class clazz) { return withLogbackConfiguration(() -> org.slf4j.LoggerFactory.getLogger(clazz));}
 

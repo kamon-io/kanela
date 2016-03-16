@@ -1,6 +1,5 @@
 package kamon.agent.util;
 
-import kamon.agent.KamonAgent;
 import kamon.agent.util.log.LazyLogger;
 
 import java.util.function.Consumer;
@@ -9,6 +8,8 @@ import static java.text.MessageFormat.format;
 
 public class AgentUtil {
 
+    private static final LazyLogger log = LazyLogger.create(AgentUtil.class);
+
     public static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
         long startMillis = System.currentTimeMillis();
         thunk.run();
@@ -16,7 +17,7 @@ public class AgentUtil {
     }
 
     public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk::run, (timeSpent) -> LazyLogger.info(KamonAgent.class, () -> format("{0} {1} ms",message, timeSpent)));
+        withTimeSpent(thunk::run, (timeSpent) -> log.info(() -> format("{0} {1} ms",message, timeSpent)));
     }
 
 //    private void printTransformedClass(byte[] b) {
