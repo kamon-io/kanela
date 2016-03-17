@@ -27,19 +27,19 @@ public class InstrumentationDescription {
         this.transformers = builder.transformers;
     }
 
-    public Option<ElementMatcher<? super TypeDescription>> getElementMatcher() {
+    public Option<ElementMatcher<? super TypeDescription>> elementMatcher() {
         return elementMatcher;
     }
 
-    public List<MixinDescription> getMixins() {
+    public List<MixinDescription> mixins() {
         return mixins;
     }
 
-    public List<AdvisorDescription> getInterceptors() {
+    public List<AdvisorDescription> interceptors() {
         return interceptors;
     }
 
-    public List<AgentBuilder.Transformer> getTransformers() {
+    public List<AgentBuilder.Transformer> transformers() {
         return transformers;
     }
 
@@ -55,12 +55,12 @@ public class InstrumentationDescription {
             return this;
         }
 
-        public Builder withMixin(Supplier<Class<?>> f) {
-            mixins.add(MixinDescription.of(elementMatcher.get(),f.get()));
+        public Builder withMixin(Supplier<Class<?>> clazz) {
+            mixins.add(MixinDescription.of(elementMatcher.get(),clazz.get()));
             return this;
         }
 
-        public Builder wihtAdvisor(ElementMatcher.Junction<MethodDescription> methodDescription , Supplier<Class<?>> classSupplier) {
+        public Builder withAdvisorFor(ElementMatcher.Junction<MethodDescription> methodDescription , Supplier<Class<?>> classSupplier) {
             interceptors.add(new AdvisorDescription(methodDescription, classSupplier.get()));
             return this;
         }

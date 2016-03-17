@@ -10,15 +10,15 @@ import kamon.agent.scala
 
 class CustomInstrumentation extends scala.KamonInstrumentation {
 
-  forSubtypeOf("app.kamon.instrumentation.Pepe") { builder =>
+  forTargetType("app.kamon.instrumentation.Pepe") { builder =>
     builder.withMixin(classOf[MixinTest])
-           .wihtAdvisor(named("hello"), classOf[MethodAdvisor])
+           .withAdvisorFor(named("hello"), classOf[MethodAdvisor])
            .build()
   }
 
 
   forSubtypeOf("app.kamon.instrumentation.Pepe") { builder =>
-    builder.wihtAdvisor(named("bye"), classOf[MethodAdvisor])
+    builder.withAdvisorFor(named("bye"), classOf[MethodAdvisor])
       .build()
   }
 

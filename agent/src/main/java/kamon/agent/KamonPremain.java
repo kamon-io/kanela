@@ -12,19 +12,14 @@ public class KamonPremain {
     public static void premain(String args, Instrumentation instrumentation) {
         try {
 
-            CodeSource codeSource = KamonPremain.class.getProtectionDomain().getCodeSource();
-            File kamonAgentJar = getKamonAgentJar(codeSource);
-            Class<?> mainEntryPointClass;
+            final CodeSource codeSource = KamonPremain.class.getProtectionDomain().getCodeSource();
+            final File kamonAgentJar = getKamonAgentJar(codeSource);
 
-            if (kamonAgentJar == null) {
-                // this is ok, running integration test in IDE
-                mainEntryPointClass = Class.forName("kamon.agent.KamonAgent", true, KamonPremain.class.getClassLoader());
-            } else {
-                instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(kamonAgentJar));
-                mainEntryPointClass = Class.forName("kamon.agent.KamonAgent", true, null);
-            }
+            instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(kamonAgentJar));
 
-            Method premainMethod = mainEntryPointClass.getMethod("premain", String.class, Instrumentation.class);
+            final Class<?> agentClass = Class.forName("kamon.agent.KamonAgent", true, null);
+            final Method premainMethod = agentClass.getMethod("premain", String.class, Instrumentation.class);
+
             premainMethod.invoke(null, args, instrumentation);
 
         } catch (Throwable t) {
@@ -35,7 +30,7 @@ public class KamonPremain {
     }
 
     private static File getKamonAgentJar(CodeSource codeSource) throws Exception {
-        File codeSourceFile = new File(codeSource.getLocation().toURI());
+        final File codeSourceFile = new File(codeSource.getLocation().toURI());
         if (codeSourceFile.getName().endsWith(".jar")) {
             return codeSourceFile;
         }

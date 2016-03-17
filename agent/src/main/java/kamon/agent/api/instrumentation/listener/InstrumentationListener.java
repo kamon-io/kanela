@@ -6,13 +6,17 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 
+import java.text.MessageFormat;
+
+import static java.text.MessageFormat.format;
+
 public class InstrumentationListener implements AgentBuilder.Listener {
 
     private static final LazyLogger log = LazyLogger.create(InstrumentationListener.class);
 
     @Override
     public void onTransformation(TypeDescription typeDescription, DynamicType dynamicType) {
-        log.info(() -> AnsiColor.ParseColors(":yellow,n: onTransformation: "  + typeDescription.toString()));
+        log.info(() -> AnsiColor.ParseColors(format(":yellow,n: Transformed => {0}", typeDescription)));
     }
 
     @Override
@@ -21,8 +25,8 @@ public class InstrumentationListener implements AgentBuilder.Listener {
     }
 
     @Override
-    public void onError(String s, Throwable throwable) {
-        log.info(() -> AnsiColor.ParseColors(":red,n: onError: "  + s + ". ||| " + throwable.getMessage()));
+    public void onError(String error, Throwable cause) {
+        log.info(() -> AnsiColor.ParseColors(format(":red,n: Error => {0} with message {1}", error, cause.getMessage())));
     }
 
     @Override

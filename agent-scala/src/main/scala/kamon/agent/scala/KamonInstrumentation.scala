@@ -37,7 +37,11 @@ trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrume
   }
 
   def forSubtypeOf(name:String)(builder:InstrumentationDescription.Builder => InstrumentationDescription) = {
-    super.forSubtypeOf2(name, builder)
+    super.forSubtypeOf(name, builder)
+  }
+
+  def forTargetType(name:String)(builder:InstrumentationDescription.Builder => InstrumentationDescription) = {
+    super.forTargetType(name, builder)
   }
 //  def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader) ⇒ Builder[_]): Unit = {
 //     super.addTransformation(f)
