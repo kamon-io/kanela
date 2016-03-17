@@ -2,8 +2,8 @@ package app.kamon.instrumentation
 
 import java.util.concurrent.Callable
 
-import kamon.agent.api.instrumentation.{InstrumentationDescription, Initializer}
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodEnter, OnMethodExit}
+import kamon.agent.api.instrumentation.Initializer
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit}
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
 import kamon.agent.scala
@@ -15,7 +15,6 @@ class CustomInstrumentation extends scala.KamonInstrumentation {
            .withAdvisorFor(named("hello"), classOf[MethodAdvisor])
            .build()
   }
-
 
   forSubtypeOf("app.kamon.instrumentation.Pepe") { builder =>
     builder.withAdvisorFor(named("bye"), classOf[MethodAdvisor])
@@ -37,13 +36,15 @@ class CustomInstrumentation extends scala.KamonInstrumentation {
   class MethodAdvisor
   object MethodAdvisor {
     @OnMethodEnter
-    def onMethodEnter():Unit = {
-      println("Esto es MUY GROSOOOOOOOOO --- ENTER")
+    def onMethodEnter():Long = {
+      System.currentTimeMillis()
+//      println("Esto es MUY GROSOOOOOOOOO --- ENTER")
     }
 
     @OnMethodExit
-    def onMethodExit():Unit = {
-      println("Esto es MUY GROSOOOOOOOOO --- EXIT")
+    def onMethodExit(@Enter start:Long):Unit = {
+
+      println("method took " + (System.currentTimeMillis() - start))
     }
   }
 
@@ -64,5 +65,5 @@ class CustomInstrumentation extends scala.KamonInstrumentation {
 
 class Pepe() {
   def hello() = println("Hi, all")
-  def bye() = println("good bye")
+  def bye() = {println("good bye");Thread.sleep(100)}
 }
