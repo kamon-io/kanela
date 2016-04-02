@@ -84,5 +84,19 @@ object Projects extends Build {
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
 
+  lazy val kamonAkka = Project("kamon-akka",file("kamon-akka"))
+    .dependsOn(agentScala)
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(agentSettings: _*)
+    .settings(libraryDependencies ++=
+      compile(kamonCore) ++
+        provided(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+        test(scalatest))
+    .settings(excludeScalaLib: _*)
+    .settings(noPublishing: _*)
+    .settings(notAggregateInAssembly: _*)
+
+
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
 }
