@@ -34,6 +34,7 @@
     </appender>
 
     <logger name="kamon.agent" level="debug" />
+    <logger name="kamon.agent.dump" level="info" />
 
     <root level="info">
         <appender-ref ref="CONSOLE" />

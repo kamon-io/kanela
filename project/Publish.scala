@@ -51,6 +51,7 @@ object Publish {
       <developers>
         <developer><id>ivantopo</id><name>Ivan Topolnjak</name><url>https://twitter.com/ivantopo</url></developer>
         <developer><id>dpsoft</id><name>Diego Parra</name><url>https://twitter.com/diegolparra</url></developer>
+        <developer><id>cristianspinetta</id><name>Cristian Spinetta</name><url>https://twitter.com/c_spinetta</url></developer>
       </developers>
   }
 }

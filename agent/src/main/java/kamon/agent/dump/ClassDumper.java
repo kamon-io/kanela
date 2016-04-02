@@ -95,7 +95,7 @@ public abstract class ClassDumper {
             fos.close();
 
             final String message = format("Dump %s", fileName);
-            log.info(() -> message);
+            log.debug(() -> message);
         } catch (Exception exc) {
             String message = "Error creating dump file for " + className;
             log.error(() -> message, exc);

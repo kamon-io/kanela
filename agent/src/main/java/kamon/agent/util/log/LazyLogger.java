@@ -1,11 +1,13 @@
 package kamon.agent.util.log;
 
 
-import javaslang.control.Match;
 import kamon.agent.AgentLogger;
 import org.slf4j.Logger;
 
 import java.util.function.Supplier;
+
+import static javaslang.API.*;
+import static javaslang.Predicates.*;
 
 /**
  * Lazy Logger implementing {@link Logger}, which supports lazy evaluation of messages.<br>
@@ -100,8 +102,8 @@ public class LazyLogger {
     }
 
     public  static LazyLogger create(final Object source) {
-        return Match.of(source).whenType(Class.class).then((logger) -> new LazyLogger(AgentLogger.create(logger)))
-                               .whenType(String.class).then((logger) -> new LazyLogger(AgentLogger.create(logger)))
-                               .getOrElse(new LazyLogger(AgentLogger.create(source.getClass())));
+        return Match(source).of(Case(instanceOf(Class.class), logger -> new LazyLogger(AgentLogger.create(logger))),
+                Case(instanceOf(String.class), logger -> new LazyLogger(AgentLogger.create(logger))),
+                Case($(), o -> new LazyLogger(AgentLogger.create(source.getClass())) ));
     }
 }
