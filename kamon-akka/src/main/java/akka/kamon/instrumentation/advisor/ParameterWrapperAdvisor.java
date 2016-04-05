@@ -14,23 +14,19 @@
  * =========================================================================================
  */
 
-package kamon.servlet.instrumentation.advisor
+package akka.kamon.instrumentation.advisor;
 
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ Argument, OnMethodEnter, This }
-import kamon.servlet.ServletExtension
-import kamon.servlet.instrumentation.mixin.TraceContextAwareExtension
-import kamon.trace.TraceContextAware
+import akka.actor.Cell;
+import akka.kamon.instrumentation.ActorInstrumentation;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
 
 /**
- * Advisor for javax.servlet.http.HttpServletResponse::setStatus
- * Advisor for javax.servlet.http.HttpServletResponse::sendError
+ *
  */
-class ResponseStatusAdvisor
-object ResponseStatusAdvisor {
-  @OnMethodEnter
-  def onEnter(@This response: TraceContextAwareExtension, @Argument(0) status: Int): Unit = {
-    response.traceContext().collect { ctx ⇒
-      ServletExtension.httpServerMetrics.recordResponse(ctx.name, status.toString)
+public class ParameterWrapperAdvisor {
+    @OnMethodEnter
+    public static void onEnter(@Argument(value = 0, readOnly = false) Cell cell) {
+        cell = new ActorInstrumentation.TraceContextAwareCell(cell);
     }
-  }
 }
