@@ -17,7 +17,7 @@
 package akka.kamon.instrumentation
 
 import akka.actor.dungeon.ChildrenContainer
-import akka.actor.{ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props}
+import akka.actor.{ ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props }
 import akka.dispatch.Envelope
 import akka.dispatch.sysmsg.SystemMessage
 import akka.kamon.instrumentation.advisor._
@@ -25,7 +25,7 @@ import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.akka.instrumentation.mixin.{ActorInstrumentationMixin, EnvelopeInstrumentationMixin, InstrumentedEnvelope, RoutedActorCellInstrumentationMixin}
+import kamon.akka.instrumentation.mixin.{ ActorInstrumentationMixin, EnvelopeInstrumentationMixin, InstrumentedEnvelope, RoutedActorCellInstrumentationMixin }
 import kamon.trace.Tracer
 
 class ActorInstrumentation extends KamonInstrumentation {
@@ -37,13 +37,33 @@ class ActorInstrumentation extends KamonInstrumentation {
   val HandleInvokeFailureMethod: Junction[MethodDescription] = named("handleInvokeFailure")
   val ReplaceWitMethod: Junction[MethodDescription] = named("replaceWith")
 
-  forTargetType("akka.dispatch.Envelope") { builder =>
+  /**
+   * Mix:
+   *
+   * akka.dispatch.Envelope with InstrumentedEnvelope
+   *
+   */
+  forTargetType("akka.dispatch.Envelope") { builder ⇒
     builder
       .withMixin(classOf[EnvelopeInstrumentationMixin])
       .build()
   }
 
-  forTargetType("akka.actor.ActorCell") { builder =>
+  /**
+   * Instruments:
+   *
+   * akka.actor.ActorCell::constructor
+   * akka.actor.ActorCell::invoke
+   * akka.actor.ActorCell::sendMessage
+   * akka.actor.ActorCell::stop
+   * akka.actor.ActorCell::handleInvokeFailure
+   *
+   * Mix:
+   *
+   * akka.actor.ActorCell with kamon.akka.instrumentation.mixin.ActorInstrumentationAware
+   *
+   */
+  forTargetType("akka.actor.ActorCell") { builder ⇒
     builder
       .withMixin(classOf[ActorInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[ActorCellConstructorAdvisor])
@@ -54,7 +74,19 @@ class ActorInstrumentation extends KamonInstrumentation {
       .build()
   }
 
-  forTargetType("akka.actor.UnstartedCell") { builder =>
+  /**
+   * Instruments:
+   *
+   * akka.actor.UnstartedCell::constructor
+   * akka.actor.UnstartedCell::sendMessage
+   * akka.actor.UnstartedCell::replaceWith
+   *
+   * Mix:
+   *
+   * akka.actor.UnstartedCell with kamon.akka.instrumentation.mixin.ActorInstrumentationAware
+   *
+   */
+  forTargetType("akka.actor.UnstartedCell") { builder ⇒
     builder
       .withMixin(classOf[ActorInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[RepointableActorCellConstructorAdvisor])
@@ -63,7 +95,18 @@ class ActorInstrumentation extends KamonInstrumentation {
       .build()
   }
 
-  forTargetType("akka.dispatch.RoutedActorCell") { builder =>
+  /**
+   * Instruments:
+   *
+   * akka.dispatch.RoutedActorCell::constructor
+   * akka.dispatch.RoutedActorCell::sendMessage
+   *
+   * Mix:
+   *
+   * akka.dispatch.RoutedActorCell with kamon.akka.instrumentation.mixin.RouterInstrumentationAware
+   *
+   */
+  forTargetType("akka.dispatch.RoutedActorCell") { builder ⇒
     builder
       .withMixin(classOf[RoutedActorCellInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[RoutedActorCellConstructorAdvisor])
@@ -74,9 +117,9 @@ class ActorInstrumentation extends KamonInstrumentation {
 
 object ActorInstrumentation {
   /**
-    *
-    */
-  class TraceContextAwareCell(underlying:Cell) extends Cell {
+   * Wrap a akka.actor.Cell in order to propagate the current TraceContext when calling sendMessage method
+   */
+  class TraceContextAwareCell(underlying: Cell) extends Cell {
     def self: ActorRef = underlying.self
     def isTerminated: Boolean = underlying.isTerminated
     def getSingleChild(name: String): InternalActorRef = underlying.getSingleChild(name)

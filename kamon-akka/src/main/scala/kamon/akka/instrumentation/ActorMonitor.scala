@@ -16,11 +16,11 @@
 
 package akka.kamon.instrumentation
 
-import akka.actor.{ActorRef, ActorSystem, Cell}
-import akka.kamon.instrumentation.ActorMonitors.{TrackedActor, TrackedRoutee}
+import akka.actor.{ ActorRef, ActorSystem, Cell }
+import akka.kamon.instrumentation.ActorMonitors.{ TrackedActor, TrackedRoutee }
 import kamon.Kamon
 import kamon.akka.instrumentation.mixin.EnvelopeContext
-import kamon.akka.{ActorMetrics, RouterMetrics}
+import kamon.akka.{ ActorMetrics, RouterMetrics }
 import kamon.metric.Entity
 import kamon.trace.Tracer
 import kamon.util.RelativeNanoTimestamp
@@ -28,7 +28,7 @@ import kamon.util.RelativeNanoTimestamp
 trait ActorMonitor {
   def captureEnvelopeContext(): EnvelopeContext
   def processMessageStart(envelopeContext: EnvelopeContext): RelativeNanoTimestamp
-  def processMessageEnd(timestampBeforeProcessing:RelativeNanoTimestamp, envelopeContext: EnvelopeContext): Unit
+  def processMessageEnd(timestampBeforeProcessing: RelativeNanoTimestamp, envelopeContext: EnvelopeContext): Unit
   def processFailure(failure: Throwable): Unit
   def cleanup(): Unit
 }
@@ -97,14 +97,14 @@ object ActorMonitors {
       timestampBeforeProcessing
     }
 
-    def processMessageEnd(timestampBeforeProcessing:RelativeNanoTimestamp, envelopeContext: EnvelopeContext):Unit  = {
-        val timestampAfterProcessing = RelativeNanoTimestamp.now
-        val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
-        val processingTime = timestampAfterProcessing - timestampBeforeProcessing
+    def processMessageEnd(timestampBeforeProcessing: RelativeNanoTimestamp, envelopeContext: EnvelopeContext): Unit = {
+      val timestampAfterProcessing = RelativeNanoTimestamp.now
+      val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
+      val processingTime = timestampAfterProcessing - timestampBeforeProcessing
 
-        actorMetrics.processingTime.record(processingTime.nanos)
-        actorMetrics.timeInMailbox.record(timeInMailbox.nanos)
-        actorMetrics.mailboxSize.decrement()
+      actorMetrics.processingTime.record(processingTime.nanos)
+      actorMetrics.timeInMailbox.record(timeInMailbox.nanos)
+      actorMetrics.mailboxSize.decrement()
     }
     def processFailure(failure: Throwable): Unit = actorMetrics.errors.increment()
     def cleanup(): Unit = Kamon.metrics.removeEntity(entity)

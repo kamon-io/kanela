@@ -18,8 +18,12 @@ package kamon.akka
 
 import com.typesafe.config.Config
 import kamon.Kamon
+import kamon.util.logger.LazyLogger
 
 object AkkaExtension {
+  val log = LazyLogger("kamon.servlet.ServletExtension")
+  log.info("Starting the Kamon(Servlet) extension")
+
   private val akkaConfig = Kamon.config.getConfig("kamon.akka")
 
   val askPatternTimeoutWarning = AskPatternTimeoutWarningSettings.fromConfig(akkaConfig)

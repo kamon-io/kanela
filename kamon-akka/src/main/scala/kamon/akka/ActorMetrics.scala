@@ -19,15 +19,15 @@ import kamon.metric._
 import kamon.metric.instrument.{ Time, InstrumentFactory }
 
 /**
-  *
-  *  Entity recorder for Akka Actors. The metrics being tracked are:
-  *
-  *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
-  *      that message is dequeued for processing.
-  *    - processing-time: Time taken for the actor to process the receive function.
-  *    - mailbox-size: Size of the actor's mailbox.
-  *    - errors: Number or errors seen by the actor's supervision mechanism.
-  */
+ *
+ *  Entity recorder for Akka Actors. The metrics being tracked are:
+ *
+ *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
+ *      that message is dequeued for processing.
+ *    - processing-time: Time taken for the actor to process the receive function.
+ *    - mailbox-size: Size of the actor's mailbox.
+ *    - errors: Number or errors seen by the actor's supervision mechanism.
+ */
 class ActorMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRecorder(instrumentFactory) {
   val timeInMailbox = histogram("time-in-mailbox", Time.Nanoseconds)
   val processingTime = histogram("processing-time", Time.Nanoseconds)
@@ -38,15 +38,15 @@ class ActorMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRe
 object ActorMetrics extends EntityRecorderFactoryCompanion[ActorMetrics]("akka-actor", new ActorMetrics(_))
 
 /**
-  *
-  *  Entity recorder for Akka Routers. The metrics being tracked are:
-  *
-  *    - routing-time: Time taken for the router to process the routing logic.
-  *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
-  *      that message is dequeued for processing.
-  *    - processing-time: Time taken for the actor to process the receive function.
-  *    - errors: Number or errors seen by the actor's supervision mechanism.
-  */
+ *
+ *  Entity recorder for Akka Routers. The metrics being tracked are:
+ *
+ *    - routing-time: Time taken for the router to process the routing logic.
+ *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
+ *      that message is dequeued for processing.
+ *    - processing-time: Time taken for the actor to process the receive function.
+ *    - errors: Number or errors seen by the actor's supervision mechanism.
+ */
 class RouterMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRecorder(instrumentFactory) {
   val routingTime = histogram("routing-time", Time.Nanoseconds)
   val timeInMailbox = histogram("time-in-mailbox", Time.Nanoseconds)
@@ -57,14 +57,14 @@ class RouterMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityR
 object RouterMetrics extends EntityRecorderFactoryCompanion[RouterMetrics]("akka-router", new RouterMetrics(_))
 
 /**
-  *
-  *  Entity recorder for Actor Groups. The metrics being tracked are:
-  *
-  *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
-  *      that message is dequeued for processing.
-  *    - processing-time: Time taken for the actor to process the receive function.
-  *    - errors: Number or errors seen by the actor's supervision mechanism.
-  */
+ *
+ *  Entity recorder for Actor Groups. The metrics being tracked are:
+ *
+ *    - time-in-mailbox: Time spent from the instant when a message is enqueued in a actor's mailbox to the instant when
+ *      that message is dequeued for processing.
+ *    - processing-time: Time taken for the actor to process the receive function.
+ *    - errors: Number or errors seen by the actor's supervision mechanism.
+ */
 class ActorGroupMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRecorder(instrumentFactory) {
   val timeInMailbox = histogram("time-in-mailbox", Time.Nanoseconds)
   val processingTime = histogram("processing-time", Time.Nanoseconds)

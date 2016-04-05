@@ -22,7 +22,7 @@ import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
 
 /**
- *
+ * Advisor for akka.actor.UnstartedCell::replaceWith
  */
 public class ParameterWrapperAdvisor {
     @OnMethodEnter
