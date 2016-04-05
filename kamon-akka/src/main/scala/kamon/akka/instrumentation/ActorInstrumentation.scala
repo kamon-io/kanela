@@ -16,17 +16,13 @@
 
 package akka.kamon.instrumentation
 
-import akka.actor.dungeon.ChildrenContainer
-import akka.actor.{ ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props }
 import akka.dispatch.Envelope
-import akka.dispatch.sysmsg.SystemMessage
 import akka.kamon.instrumentation.advisor._
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.akka.instrumentation.mixin.{ ActorInstrumentationMixin, EnvelopeInstrumentationMixin, InstrumentedEnvelope, RoutedActorCellInstrumentationMixin }
-import kamon.trace.Tracer
+import kamon.akka.instrumentation.mixin.{ActorInstrumentationMixin, EnvelopeInstrumentationMixin, RoutedActorCellInstrumentationMixin}
 
 class ActorInstrumentation extends KamonInstrumentation {
 
@@ -50,7 +46,7 @@ class ActorInstrumentation extends KamonInstrumentation {
   }
 
   /**
-   * Instruments:
+   * Instrument:
    *
    * akka.actor.ActorCell::constructor
    * akka.actor.ActorCell::invoke
@@ -75,7 +71,7 @@ class ActorInstrumentation extends KamonInstrumentation {
   }
 
   /**
-   * Instruments:
+   * Instrument:
    *
    * akka.actor.UnstartedCell::constructor
    * akka.actor.UnstartedCell::sendMessage
@@ -96,7 +92,7 @@ class ActorInstrumentation extends KamonInstrumentation {
   }
 
   /**
-   * Instruments:
+   * Instrument:
    *
    * akka.dispatch.RoutedActorCell::constructor
    * akka.dispatch.RoutedActorCell::sendMessage
@@ -112,39 +108,5 @@ class ActorInstrumentation extends KamonInstrumentation {
       .withAdvisorFor(Constructor, classOf[RoutedActorCellConstructorAdvisor])
       .withAdvisorFor(SendMessageMethod, classOf[SendMessageMethodAdvisor])
       .build()
-  }
-}
-
-object ActorInstrumentation {
-  /**
-   * Wrap a akka.actor.Cell in order to propagate the current TraceContext when calling sendMessage method
-   */
-  class TraceContextAwareCell(underlying: Cell) extends Cell {
-    def self: ActorRef = underlying.self
-    def isTerminated: Boolean = underlying.isTerminated
-    def getSingleChild(name: String): InternalActorRef = underlying.getSingleChild(name)
-    def stop(): Unit = underlying.stop()
-    def numberOfMessages: Int = underlying.numberOfMessages
-    def isLocal: Boolean = underlying.isLocal
-    def props: Props = underlying.props
-    def getChildByName(name: String): Option[ChildStats] = underlying.getChildByName(name)
-    def restart(cause: Throwable): Unit = underlying.restart(cause)
-    def suspend(): Unit = underlying.suspend()
-    def hasMessages: Boolean = underlying.hasMessages
-    def systemImpl: ActorSystemImpl = underlying.systemImpl
-    def resume(causedByFailure: Throwable): Unit = underlying.resume(causedByFailure)
-    def start() = this
-    def childrenRefs: ChildrenContainer = underlying.childrenRefs
-    def parent: InternalActorRef = underlying.parent
-    def system: ActorSystem = underlying.system
-    def sendSystemMessage(msg: SystemMessage): Unit = underlying.sendSystemMessage(msg)
-
-    def sendMessage(msg: Envelope): Unit = {
-      val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
-
-      Tracer.withContext(envelopeContext.context) {
-        underlying.sendMessage(msg)
-      }
-    }
   }
 }

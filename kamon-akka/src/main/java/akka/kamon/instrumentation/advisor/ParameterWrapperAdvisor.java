@@ -27,6 +27,8 @@ import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
 public class ParameterWrapperAdvisor {
     @OnMethodEnter
     public static void onEnter(@Argument(value = 0, readOnly = false) Cell cell) {
-        cell = new ActorInstrumentation.TraceContextAwareCell(cell);
+        cell = new akka.kamon.instrumentation.Wrappers.TraceContextAwareCell(cell);
     }
 }
+
+
