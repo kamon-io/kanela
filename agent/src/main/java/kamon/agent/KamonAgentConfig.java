@@ -17,19 +17,22 @@ public class KamonAgentConfig {
 
     @Getter
     private List<String> instrumentations = new ArrayList<>();
+
+    @Getter
+    private Option<String> withinPackage = Option.none();
+
     @Getter
     private DumpConfig dump;
 
     public KamonAgentConfig() {
-        loadConfig();
-    }
-
-    private void loadConfig() {
         try {
             Config config = loadDefaultConfig().getConfig("kamon.agent");
             Try.run(() -> instrumentations = config.getStringList("instrumentations"))
                     .onFailure(exc -> log.warn(
                             () -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc));
+
+            withinPackage = Option.of(config.getString("within"));
+
             Option<Boolean> dumpEnabled = Try.of(() -> Option.some(config.getBoolean("dump.enabled")) ).getOrElse(Option.none());
             Option<String> dumpDir = Try.of(() -> Option.some(config.getString("dump.dir")) ).getOrElse(Option.none());
             Option<String> classesPattern = Try.of(() -> Option.some(config.getString("dump.classes")) ).getOrElse(Option.none());

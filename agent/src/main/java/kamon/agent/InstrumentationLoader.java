@@ -12,7 +12,7 @@ public class InstrumentationLoader {
     public static void load(Instrumentation instrumentation, KamonAgentConfig kamonAgentConfig) {
         kamonAgentConfig.getInstrumentations().forEach(clazz -> {
             try {
-                ((KamonInstrumentation) Class.forName(clazz, true, ClassLoader.getSystemClassLoader()).newInstance()).register(instrumentation);
+                ((KamonInstrumentation) Class.forName(clazz, false, ClassLoader.getSystemClassLoader()).newInstance()).register(instrumentation);
                 log.info(() -> "Loaded " + clazz + "...");
             } catch (Throwable e) {
                 e.printStackTrace();
@@ -20,4 +20,3 @@ public class InstrumentationLoader {
         });
     }
 }
-

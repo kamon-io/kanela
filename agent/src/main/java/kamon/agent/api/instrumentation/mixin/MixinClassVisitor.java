@@ -1,7 +1,7 @@
 package kamon.agent.api.instrumentation.mixin;
 
 import net.bytebuddy.jar.asm.*;
-import net.bytebuddy.jar.asm.commons.RemappingMethodAdapter;
+import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
 import net.bytebuddy.jar.asm.tree.ClassNode;
 import net.bytebuddy.jar.asm.tree.FieldNode;
@@ -56,8 +56,7 @@ public class MixinClassVisitor extends ClassVisitor {
         ((List<MethodNode>) cn.methods).stream().filter(isConstructor()).forEach(mn -> {
             String[] exceptions = new String[mn.exceptions.size()];
             MethodVisitor mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions);
-            mn.instructions.resetLabels();
-            mn.accept(new RemappingMethodAdapter(mn.access, mn.desc, mv, new SimpleRemapper(cn.name, type.getInternalName())));
+            mn.accept(new MethodRemapper(mv, new SimpleRemapper(cn.name, type.getInternalName())));
         });
 
         super.visitEnd();

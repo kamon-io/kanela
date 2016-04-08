@@ -3,12 +3,14 @@ package kamon.agent.api.instrumentation;
 import javaslang.Function1;
 import kamon.agent.api.instrumentation.listener.InstrumentationListener;
 import kamon.agent.api.instrumentation.mixin.MixinClassVisitorWrapper;
+import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.AgentBuilder.Identified;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper.ForDeclaredMethods;
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
@@ -16,7 +18,9 @@ import net.bytebuddy.pool.TypePool;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -28,7 +32,9 @@ public abstract class KamonInstrumentation {
     protected final ElementMatcher.Junction<MethodDescription> TakesArguments = not(takesArguments(0));
 
     public void register(Instrumentation instrumentation) {
-        final AgentBuilder agentBuilder = new AgentBuilder.Default().with(new InstrumentationListener());
+        final AgentBuilder agentBuilder = new AgentBuilder.Default()
+                .with(new InstrumentationListener())
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE);
         instrumentationDescriptions.forEach((instrumentationDescription) -> installInstrumentations(agentBuilder, instrumentationDescription, instrumentation));
     }
 
@@ -39,7 +45,7 @@ public abstract class KamonInstrumentation {
                 identified.transform((builder, typeDescription, classLoader) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));
 
         instrumentationDescription.interceptors().forEach(interceptor -> identified.transform((builder, typeDescription, classLoader) ->
-                builder.visit(new ForDeclaredMethods().writerFlags(ClassWriter.COMPUTE_FRAMES).method(interceptor.getMethodMatcher(), Advice.to(interceptor.getInterceptorClass())))).installOn(instrumentation));
+                builder.visit(new ForDeclaredMethods().method(interceptor.getMethodMatcher(), Advice.to(interceptor.getInterceptorClass())))).installOn(instrumentation));
 
         instrumentationDescription.transformers().forEach(transformer -> identified.transform(transformer).installOn(instrumentation));
     }

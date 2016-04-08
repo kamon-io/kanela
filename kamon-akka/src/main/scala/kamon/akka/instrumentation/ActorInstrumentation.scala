@@ -33,17 +33,6 @@ class ActorInstrumentation extends KamonInstrumentation {
   val HandleInvokeFailureMethod: Junction[MethodDescription] = named("handleInvokeFailure")
   val ReplaceWitMethod: Junction[MethodDescription] = named("replaceWith")
 
-  /**
-   * Mix:
-   *
-   * akka.dispatch.Envelope with InstrumentedEnvelope
-   *
-   */
-  forTargetType("akka.dispatch.Envelope") { builder ⇒
-    builder
-      .withMixin(classOf[EnvelopeInstrumentationMixin])
-      .build()
-  }
 
   /**
    * Instrument:
@@ -107,6 +96,18 @@ class ActorInstrumentation extends KamonInstrumentation {
       .withMixin(classOf[RoutedActorCellInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[RoutedActorCellConstructorAdvisor])
       .withAdvisorFor(SendMessageMethod, classOf[SendMessageMethodAdvisor])
+      .build()
+  }
+
+  /**
+    * Mix:
+    *
+    * akka.dispatch.Envelope with InstrumentedEnvelope
+    *
+    */
+  forTargetType("akka.dispatch.Envelope") { builder ⇒
+    builder
+      .withMixin(classOf[EnvelopeInstrumentationMixin])
       .build()
   }
 }

@@ -92,7 +92,7 @@ object Projects extends Build {
     .settings(libraryDependencies ++=
       compile(kamonCore) ++
         provided(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
-        test(scalatest))
+        test(scalatest, akkaTestKit, akkaSlf4j))
     .settings(excludeScalaLib: _*)
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
