@@ -18,14 +18,12 @@ import static java.text.MessageFormat.format;
  */
 public class JarCreator {
 
-    private static final LazyLogger log = LazyLogger.create(JarCreator.class);
-
     public static void createJar(String jarName, String inputPath) {
         try {
             final String jarPath = new PathString(jarName).withExtension(".jar").withBase(inputPath).getValue();
             final String sourcePath = new PathString(inputPath).withFinalSlash().withCorrectlySlash().getValue();
 
-            log.debug(() -> format("Creating JAR [jar path = '{0}', input path = '{1}']", jarPath, sourcePath));
+            LazyLogger.debug(() -> format("Creating JAR [jar path = '{0}', input path = '{1}']", jarPath, sourcePath));
 
             Manifest manifest = new Manifest();
             manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
@@ -33,9 +31,9 @@ public class JarCreator {
             add(new File(sourcePath), target, jarPath, sourcePath);
             target.close();
 
-            log.info(() -> AnsiColor.ParseColors(format(":yellow,n:Created Jar with dump classes on {0}", jarPath)));
+            LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n:Created Jar with dump classes on {0}", jarPath)));
         } catch (IOException exc) {
-            log.error(() -> AnsiColor.ParseColors(":red,n:Failed to create the jar file."), exc);
+            LazyLogger.error(() -> AnsiColor.ParseColors(":red,n:Failed to create the jar file."), exc);
         }
     }
 
@@ -51,7 +49,7 @@ public class JarCreator {
         String rawSubdirPath = source.getPath();
         if (!rawSubdirPath.isEmpty()) {
             final String subdirPath = new PathString(rawSubdirPath).withCorrectlySlash().withFinalSlash().withoutBase(sourcePath).getValue();
-            log.debug(() -> format("jar source directory: {0}", subdirPath));
+            LazyLogger.debug(() -> format("jar source directory: {0}", subdirPath));
 
             JarEntry entry = new JarEntry(subdirPath);
             entry.setTime(source.lastModified());
@@ -68,7 +66,7 @@ public class JarCreator {
         try {
 
             final String filePath = new PathString(source.getPath()).withCorrectlySlash().withoutBase(sourcePath).getValue();
-            log.debug(() -> format("jar source file: {0}", filePath));
+            LazyLogger.debug(() -> format("jar source file: {0}", filePath));
 
             JarEntry entry = new JarEntry(filePath);
             entry.setTime(source.lastModified());

@@ -9,8 +9,6 @@ import java.util.LinkedHashMap;
 
 public class ClassDumperOnShutdown extends ClassDumper {
 
-    private static final LazyLogger log = LazyLogger.create(ClassDumperOnShutdown.class);
-
     private Option<Runnable> onFinish = Option.none();
 
     /**
@@ -40,7 +38,7 @@ public class ClassDumperOnShutdown extends ClassDumper {
     public void addClassToDump(String className, byte[] classBytes) {
         byte[] oldBytes = this.classNameToBytes.put(className, classBytes);
         if(oldBytes != null && !Arrays.equals(classBytes, oldBytes)) {
-            log.warn(() -> "WARNING: There exist two different classes with name " + className);
+            LazyLogger.warn(() -> "WARNING: There exist two different classes with name " + className);
         }
     };
 
@@ -53,7 +51,7 @@ public class ClassDumperOnShutdown extends ClassDumper {
                     dumpClassesToDisk(classNameToBytes);
                     onFinish.forEach(Runnable::run);
                 } catch (Exception exc) {
-                    log.error(() -> "The class dumping on shutdown failed", exc);
+                    LazyLogger.error(() -> "The class dumping on shutdown failed", exc);
                 }
             }
 

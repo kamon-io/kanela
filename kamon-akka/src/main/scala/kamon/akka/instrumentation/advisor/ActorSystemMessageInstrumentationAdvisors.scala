@@ -14,20 +14,19 @@
  * =========================================================================================
  */
 
-
 package akka.kamon.instrumentation.advisor
 
 import akka.dispatch.sysmsg.EarliestFirstSystemMessageList
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodEnter, OnMethodExit, This}
-import kamon.trace.{TraceContextAware, Tracer}
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import kamon.trace.{ TraceContextAware, Tracer }
 
 /**
-  * Advisor for akka.actor.RepointableActorRef::point
-  */
+ * Advisor for akka.actor.RepointableActorRef::point
+ */
 class PointMethodAdvisor
 object PointMethodAdvisor {
   @OnMethodEnter
-  def onEnter(@This repointableActorRef: TraceContextAware):Unit ={
+  def onEnter(@This repointableActorRef: TraceContextAware): Unit = {
     Tracer.setCurrentContext(repointableActorRef.traceContext)
   }
 
@@ -36,13 +35,13 @@ object PointMethodAdvisor {
 }
 
 /**
-  * Advisor for akka.actor.ActorCell::invokeAll
-  */
+ * Advisor for akka.actor.ActorCell::invokeAll
+ */
 class InvokeAllMethodAdvisor
 object InvokeAllMethodAdvisor {
   @OnMethodEnter
-  def onEnter(messages: EarliestFirstSystemMessageList):Unit ={
-    if(messages.nonEmpty){
+  def onEnter(messages: EarliestFirstSystemMessageList): Unit = {
+    if (messages.nonEmpty) {
       val ctx = messages.head.asInstanceOf[TraceContextAware].traceContext
       Tracer.setCurrentContext(ctx)
     }

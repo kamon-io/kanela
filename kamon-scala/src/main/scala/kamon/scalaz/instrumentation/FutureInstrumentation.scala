@@ -14,21 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.akka.instrumentation.mixin
+package kamon.scalaz.instrumentation
 
-import akka.kamon.instrumentation.RouterMonitor
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
+import kamon.agent.scala.KamonInstrumentation
 
-/**
- * Mixin for akka.routing.RoutedActorCell
- */
-class RoutedActorCellInstrumentationMixin extends RouterInstrumentationAware {
-  @volatile private var _ri: RouterMonitor = _
+class FutureInstrumentation extends KamonInstrumentation {
 
-  def setRouterInstrumentation(ai: RouterMonitor): Unit = _ri = ai
-  def routerInstrumentation: RouterMonitor = _ri
-}
+  /**
+    * Instrument:
+    *
+    * scalaz.concurrent.Future::apply
+    *
+    */
 
-trait RouterInstrumentationAware {
-  def routerInstrumentation: RouterMonitor
-  def setRouterInstrumentation(ai: RouterMonitor): Unit
+  val ApplyMethod: Junction[MethodDescription] = named("apply")
+
+  forTargetType("scalaz.concurrent.Future$") { builder ⇒
+    builder
+      .withAdvisorFor(ApplyMethod, classOf[ParameterSubstitutionAdvisor])
+      .build()
+  }
 }

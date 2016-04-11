@@ -33,13 +33,17 @@ public abstract class KamonInstrumentation {
 
     public void register(Instrumentation instrumentation) {
         final AgentBuilder agentBuilder = new AgentBuilder.Default()
-                .with(new InstrumentationListener())
-                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE);
+                .disableClassFormatChanges()
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(new InstrumentationListener());
         instrumentationDescriptions.forEach((instrumentationDescription) -> installInstrumentations(agentBuilder, instrumentationDescription, instrumentation));
     }
 
     private void installInstrumentations(AgentBuilder agentBuilder, InstrumentationDescription instrumentationDescription, Instrumentation instrumentation) {
-        final Identified identified = agentBuilder.type(instrumentationDescription.elementMatcher().getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
+        final Identified identified = agentBuilder
+                .ignore(nameMatches("kamon.agent..*"))
+                .type(instrumentationDescription.elementMatcher().getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
+//                .and(nameMatches("akka..*"));
 
         instrumentationDescription.mixins().forEach(mixin ->
                 identified.transform((builder, typeDescription, classLoader) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));
@@ -52,13 +56,13 @@ public abstract class KamonInstrumentation {
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         InstrumentationDescription.Builder builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> named(f.get()));
+        builder.addElementMatcher(() -> failSafe(named(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         InstrumentationDescription.Builder builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> isSubTypeOf(typePool.describe(f.get()).resolve()).and(not(isInterface())));
+        builder.addElementMatcher(() -> failSafe(isSubTypeOf(typePool.describe(f.get()).resolve()).and(not(isInterface()))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 

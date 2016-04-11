@@ -36,18 +36,20 @@ object Assembly {
           "Implementation-Version" -> version,
           "Implementation-Vendor-Id" -> vendor,
           "Implementation-Vendor" -> vendor,
-          "Premain-Class" -> "kamon.agent.KamonPremain",
-          "Agent-Class" -> "kamon.agent.KamonPremain",
+          "Premain-Class" -> "kamon.agent.KamonAgent",
+          "Agent-Class" -> "kamon.agent.KamonAgent",
           "Can-Redefine-Classes" -> "true",
+          "Can-Set-Native-Method-Prefix" -> "true",
           "Can-Retransform-Classes" -> "true")
     },
     assemblyShadeRules in assembly := Seq(
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
+//        ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
+//        ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
+//        ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
+        ShadeRule.rename("org.pmw.tinylog.**" -> "kamon.agent.libs.@0").inAll
     )
 //    assemblyMergeStrategy in assembly := {
 //      case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.discard

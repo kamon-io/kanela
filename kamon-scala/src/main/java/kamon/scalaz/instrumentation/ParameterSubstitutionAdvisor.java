@@ -14,21 +14,19 @@
  * =========================================================================================
  */
 
-package kamon.akka.instrumentation.mixin
+package kamon.scalaz.instrumentation;
 
-import akka.kamon.instrumentation.RouterMonitor
+import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
+
+import java.util.concurrent.ExecutorService;
 
 /**
- * Mixin for akka.routing.RoutedActorCell
+ * Advisor for scalaz.concurrent.Future$::apply
  */
-class RoutedActorCellInstrumentationMixin extends RouterInstrumentationAware {
-  @volatile private var _ri: RouterMonitor = _
-
-  def setRouterInstrumentation(ai: RouterMonitor): Unit = _ri = ai
-  def routerInstrumentation: RouterMonitor = _ri
-}
-
-trait RouterInstrumentationAware {
-  def routerInstrumentation: RouterMonitor
-  def setRouterInstrumentation(ai: RouterMonitor): Unit
+public class ParameterSubstitutionAdvisor {
+    @OnMethodEnter
+    public static void enter(@Argument(value = 1, readOnly = false) ExecutorService es) {
+        es =  new TraceContextAwareExecutorService(es);
+    }
 }

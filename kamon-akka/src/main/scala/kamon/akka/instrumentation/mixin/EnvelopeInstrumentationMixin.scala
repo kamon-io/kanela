@@ -22,7 +22,7 @@ import kamon.util.RelativeNanoTimestamp
 /**
  * Mixin for akka.dispatch.Envelope
  */
-class EnvelopeInstrumentationMixin extends InstrumentedEnvelope {
+class EnvelopeInstrumentationMixin() extends InstrumentedEnvelope {
   @volatile var envelopeContext: EnvelopeContext = _
 
   def setEnvelopeContext(envelopeContext: EnvelopeContext): Unit = this.envelopeContext = envelopeContext
@@ -38,4 +38,3 @@ trait InstrumentedEnvelope {
   def envelopeContext(): EnvelopeContext
   def setEnvelopeContext(envelopeContext: EnvelopeContext): Unit
 }
-

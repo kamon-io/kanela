@@ -16,12 +16,12 @@
 
 package akka.kamon.instrumentation.advisor
 
-import akka.actor.{ActorRef, ActorSystem, Cell, InternalActorRef}
+import akka.actor.{ ActorRef, ActorSystem, Cell, InternalActorRef }
 import akka.dispatch.Envelope
-import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
+import akka.kamon.instrumentation.{ ActorMonitor, RouterMonitor }
 import akka.routing.RoutedActorCell
 import kamon.agent.libs.net.bytebuddy.asm.Advice._
-import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
+import kamon.akka.instrumentation.mixin.{ ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware }
 import kamon.util.RelativeNanoTimestamp
 
 import scala.collection.immutable
@@ -70,14 +70,13 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
 /**
  * Advisor for akka.actor.ActorCell::sendMessage
  * Advisor for akka.actor.UnstartedCell::sendMessage
- * Advisor for akka.dispatch.RoutedActorCell::sendMessage
  */
 class SendMessageMethodAdvisor
 object SendMessageMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodEnter
   def onEnter(@This cell: Cell,
     @Argument(0) envelope: Envelope): Unit = {
-      envelope.asInstanceOf[InstrumentedEnvelope].setEnvelopeContext(actorInstrumentation(cell).captureEnvelopeContext())
+    envelope.asInstanceOf[InstrumentedEnvelope].setEnvelopeContext(actorInstrumentation(cell).captureEnvelopeContext())
   }
 }
 
@@ -132,7 +131,7 @@ object RepointableActorCellConstructorAdvisor {
 }
 
 /**
- * Advisor for akka.dispatch.RoutedActorCell::constructor
+ * Advisor for akka.routing.RoutedActorCell::constructor
  */
 class RoutedActorCellConstructorAdvisor
 object RoutedActorCellConstructorAdvisor {
@@ -143,10 +142,10 @@ object RoutedActorCellConstructorAdvisor {
 }
 
 /**
- * Advisor for akka.dispatch.RoutedActorCell::constructor
+ * Advisor for akka.routing.RoutedActorCell::sendMessage
  */
 class SendMessageMethodAdvisorForRouter
-object SendMessageMethodAdvisorForRouter extends ActorInstrumentationSupport {
+object SendMessageMethodAdvisorForRouter {
 
   def routerInstrumentation(cell: Cell): RouterMonitor = cell.asInstanceOf[RouterInstrumentationAware].routerInstrumentation
 

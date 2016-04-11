@@ -33,7 +33,7 @@ object Projects extends Build {
     .settings(formatSettings: _*)
     .settings(assemblySettings: _*)
     .settings(libraryDependencies ++=
-      compile(javaslang, typesafeConfig, bytebuddy, logbackCore, logbackClassic, slf4jApi) ++
+      compile(tinylog, javaslang, typesafeConfig, bytebuddy) ++
         optional() ++
         test(scalatest, mockito) ++
         provided(lombok))
@@ -86,6 +86,7 @@ object Projects extends Build {
 
   lazy val kamonAkka = Project("kamon-akka",file("kamon-akka"))
     .dependsOn(agentScala)
+    .dependsOn(kamonScala)
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(agentSettings: _*)
@@ -97,6 +98,18 @@ object Projects extends Build {
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
 
+  lazy val kamonScala = Project("kamon-scala",file("kamon-scala"))
+    .dependsOn(agentScala)
+    .settings(basicSettings: _*)
+    .settings(formatSettings: _*)
+    .settings(agentSettings: _*)
+    .settings(libraryDependencies ++=
+      compile(kamonCore) ++
+        provided(javaslang, typesafeConfig, slf4jApi, kamonAgent, scalazConcurrent) ++
+        test(scalatest, akkaTestKit, akkaSlf4j))
+    .settings(excludeScalaLib: _*)
+    .settings(noPublishing: _*)
+    .settings(notAggregateInAssembly: _*)
 
   val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
 }

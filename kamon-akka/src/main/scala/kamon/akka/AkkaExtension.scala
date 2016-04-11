@@ -21,8 +21,8 @@ import kamon.Kamon
 import kamon.util.logger.LazyLogger
 
 object AkkaExtension {
-  val log = LazyLogger("kamon.servlet.ServletExtension")
-  log.info("Starting the Kamon(Servlet) extension")
+  val log = LazyLogger("kamon.akka.AkkaExtension")
+  log.info("Starting the Kamon(Akka) extension")
 
   private val akkaConfig = Kamon.config.getConfig("kamon.akka")
 

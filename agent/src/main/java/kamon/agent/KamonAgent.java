@@ -26,7 +26,7 @@ public class KamonAgent {
         withTimeLogging(() -> {
             KamonAgentBanner.printBanner(System.out);
             final KamonAgentConfig kamonAgentConfig = new KamonAgentConfig();
-            instrumentation.addTransformer(new DebugClassloaderTransformer());
+//            instrumentation.addTransformer(new DebugClassloaderTransformer());
             InstrumentationLoader.load(instrumentation, kamonAgentConfig);
             ClassDumperLoader.load(instrumentation, kamonAgentConfig.getDump());
         }, "Premain startup complete in");
@@ -37,9 +37,9 @@ public class KamonAgent {
         @Override
         public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
-            if("akka.dispatch.Envelope".contains(className)) {
+//            if("akka.dispatch.Envelope".contains(className)) {
                 System.out.println("className:" + className + " from classloader: " + loader);
-            }
+//            }
             return null;
         }
     }

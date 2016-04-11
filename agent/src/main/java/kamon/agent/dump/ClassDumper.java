@@ -15,8 +15,6 @@ import static kamon.agent.util.AgentUtil.withTimeLogging;
 
 public abstract class ClassDumper {
 
-    private static final LazyLogger log = LazyLogger.create(ClassDumper.class);
-
     // directory where we would write .class files
     protected String dumpDir;
 
@@ -33,7 +31,7 @@ public abstract class ClassDumper {
 
             installTransformer(instrumentation);
 
-            log.info(() -> format("Add Transformer to retrieve bytecode of instrumented classes [dumpDir = %s, classes = %s]", dumpDir, classesRegex.pattern()));
+            LazyLogger.info(() -> format("Add Transformer to retrieve bytecode of instrumented classes [dumpDir = %s, classes = %s]", dumpDir, classesRegex.pattern()));
 
             // by the time we are attached, the classes to be dumped may have been loaded already. So, check
             // for candidates in the loaded classes.
@@ -52,7 +50,7 @@ public abstract class ClassDumper {
                     instrumentation.retransformClasses(candidateClasses);
                 }
             } catch (UnmodifiableClassException exp) {
-                log.error(() -> "Error re-transforming classes", exp);
+                LazyLogger.error(() -> "Error re-transforming classes", exp);
             }
 
         }, "Class Dumper installed in"); // TODO: log this in debug level
@@ -95,10 +93,10 @@ public abstract class ClassDumper {
             fos.close();
 
             final String message = format("Dump %s", fileName);
-            log.debug(() -> message);
+            LazyLogger.debug(() -> message);
         } catch (Exception exc) {
             String message = "Error creating dump file for " + className;
-            log.error(() -> message, exc);
+            LazyLogger.error(() -> message, exc);
         }
     }
 }

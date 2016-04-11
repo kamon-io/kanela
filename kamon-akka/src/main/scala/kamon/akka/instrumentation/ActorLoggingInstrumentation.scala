@@ -16,56 +16,43 @@
 
 package akka.kamon.instrumentation
 
-import akka.kamon.instrumentation.advisor.{ InvokeAllMethodAdvisor, PointMethodAdvisor }
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, Super}
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.instrumentation.mixin.TraceContextMixin
 
-class ActorSystemMessageInstrumentation extends KamonInstrumentation {
-
-  val PointMethod: Junction[MethodDescription] = named("point")
-  val InvokeAllMethod: Junction[MethodDescription] = named("invokeAll$1")
+class ActorLoggingInstrumentation extends KamonInstrumentation {
 
   /**
    * Instrument:
    *
-   * akka.actor.RepointableActorRef::point
-   *
-   * Mix:
-   *
-   * akka.actor.RepointableActorRef with kamon.trace.TraceContextAware
+   *  akka.dispatch.Dispatchers::lookup
    *
    */
-  forTargetType("akka.actor.RepointableActorRef") { builder ⇒
-    builder
-      .withMixin(classOf[TraceContextMixin])
-      .withAdvisorFor(PointMethod, classOf[PointMethodAdvisor])
-      .build()
-  }
 
-  /**
-   * Mix:
-   *
-   * akka.dispatch.sysmsg.SystemMessage with kamon.trace.TraceContextAware
-   *
-   */
-  forSubtypeOf("akka.dispatch.sysmsg.SystemMessage") { builder ⇒
+  forSubtypeOf("akka.event.Logging.LogEvent") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
       .build()
   }
 
-  /**
-   * Instrument:
-   *
-   * akka.actor.ActorCell::invokeAll$1
-   *
-   */
-  forTargetType("akka.actor.ActorCell") { builder ⇒
+  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
+
+  forSubtypeOf("akka.event.slf4j.Slf4jLogger") { builder ⇒
     builder
-      .withAdvisorFor(InvokeAllMethod, classOf[InvokeAllMethodAdvisor])
+      .withTransformationFor(WithMdcMethod, classOf[WithMdcMethodTransformer])
       .build()
+  }
+}
+
+class WithMdcMethodTransformer
+object WithMdcMethodTransformer {
+  @RuntimeType
+  def withMdcInvocation(@Super runnable: Runnable): Unit = {
+    //    Tracer.withContext(logEvent.asInstanceOf[TraceContextAware].traceContext) {
+    //      MdcKeysSupport.withMdc(runnable.run())
+    //}
   }
 }
