@@ -16,15 +16,13 @@
 
 package akka.kamon.instrumentation.advisor
 
-import akka.actor.{ ActorRef, ActorSystem, Cell, InternalActorRef }
+import akka.actor.{ActorRef, ActorSystem, Cell, InternalActorRef}
 import akka.dispatch.Envelope
-import akka.kamon.instrumentation.{ ActorMonitor, RouterMonitor }
+import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
 import akka.routing.RoutedActorCell
-import kamon.agent.libs.net.bytebuddy.asm.Advice._
-import kamon.akka.instrumentation.mixin.{ ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware }
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodExit, _}
+import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
 import kamon.util.RelativeNanoTimestamp
-
-import scala.collection.immutable
 
 trait ActorInstrumentationSupport {
   def actorInstrumentation(cell: Cell): ActorMonitor = cell.asInstanceOf[ActorInstrumentationAware].actorInstrumentation
@@ -61,9 +59,13 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodExit
   def onExit(@This cell: Cell,
     @Enter timestampBeforeProcessing: RelativeNanoTimestamp,
-    @Argument(0) envelope: Envelope): Unit = {
+    @Argument(0) envelope: Envelope,
+    @Thrown failure: Throwable): Unit = {
 
     actorInstrumentation(cell).processMessageEnd(timestampBeforeProcessing, envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
+
+    if(failure != null)
+      actorInstrumentation(cell).processFailure(failure)
   }
 }
 
@@ -97,25 +99,6 @@ object StopMethodAdvisor extends ActorInstrumentationSupport {
 }
 
 /**
- * Advisor for akka.actor.ActorCell::handleInvokeFailure
- */
-class HandleInvokeFailureMethodAdvisor
-object HandleInvokeFailureMethodAdvisor extends ActorInstrumentationSupport {
-  @OnMethodEnter
-  def onEnter(@This cell: Cell,
-    @Argument(0) childrenNotToSuspend: immutable.Iterable[ActorRef],
-    @Argument(1) failure: Throwable): Unit = {
-
-    actorInstrumentation(cell).cleanup()
-
-    // The Stop can't be captured from the RoutedActorCell so we need to put this piece of cleanup here.
-    if (cell.isInstanceOf[RoutedActorCell]) {
-      cell.asInstanceOf[RouterInstrumentationAware].routerInstrumentation.cleanup()
-    }
-  }
-}
-
-/**
  * Advisor for akka.actor.UnstartedCell::constructor
  */
 class RepointableActorCellConstructorAdvisor
@@ -135,8 +118,8 @@ object RepointableActorCellConstructorAdvisor {
  */
 class RoutedActorCellConstructorAdvisor
 object RoutedActorCellConstructorAdvisor {
-  @OnMethodExit
-  def onExit(@This cell: RoutedActorCell): Unit = {
+  @OnMethodExit(onThrowable = false)
+  def onExit(@This cell: Cell): Unit = {
     cell.asInstanceOf[RouterInstrumentationAware].setRouterInstrumentation(RouterMonitor.createRouterInstrumentation(cell))
   }
 }
@@ -150,13 +133,13 @@ object SendMessageMethodAdvisorForRouter {
   def routerInstrumentation(cell: Cell): RouterMonitor = cell.asInstanceOf[RouterInstrumentationAware].routerInstrumentation
 
   @OnMethodEnter
-  def onEnter(@This cell: RoutedActorCell): RelativeNanoTimestamp = {
+  def onEnter(@This cell: Cell): RelativeNanoTimestamp = {
     routerInstrumentation(cell).processMessageStart()
   }
 
   @OnMethodExit
-  def onExit(@This cell: RoutedActorCell,
-    @Enter timestampBeforeProcessing: RelativeNanoTimestamp): Unit = {
+  def onExit(@This cell: Cell,
+             @Enter timestampBeforeProcessing: RelativeNanoTimestamp): Unit = {
 
     routerInstrumentation(cell).processMessageEnd(timestampBeforeProcessing)
   }

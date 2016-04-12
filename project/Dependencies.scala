@@ -38,6 +38,7 @@ object Dependencies {
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.0"
+  val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.0"
   val akkaSlf4j         = "com.typesafe.akka"        %% "akka-slf4j"              % akkaVersion
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % akkaVersion
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
@@ -47,7 +48,6 @@ object Dependencies {
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
   val scalazConcurrent  = "org.scalaz"               %% "scalaz-concurrent"       % "7.1.0"
-
 
 
   val kamonAgent      = "io.kamon"          % "agent_2.11"        % "0.1-SNAPSHOT" classifier "assembly"

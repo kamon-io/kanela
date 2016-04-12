@@ -27,17 +27,17 @@ import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
 class FutureInstrumentation extends KamonInstrumentation {
 
   /**
-    * Instrument:
-    *
-    * scala.concurrent.impl.CallbackRunnable::run
-    * scala.concurrent.impl.Future$PromiseCompletingRunnable::run
-    *
-    * Mix:
-    *
-    * scala.concurrent.impl.CallbackRunnable with kamon.trace.TraceContextAware
-    * scala.concurrent.impl.Future$PromiseCompletingRunnable with kamon.trace.TraceContextAware
-    *
-    */
+   * Instrument:
+   *
+   * scala.concurrent.impl.CallbackRunnable::run
+   * scala.concurrent.impl.Future$PromiseCompletingRunnable::run
+   *
+   * Mix:
+   *
+   * scala.concurrent.impl.CallbackRunnable with kamon.trace.TraceContextAware
+   * scala.concurrent.impl.Future$PromiseCompletingRunnable with kamon.trace.TraceContextAware
+   *
+   */
 
   val RunMethod: Junction[MethodDescription] = named("run")
 
@@ -56,7 +56,6 @@ class FutureInstrumentation extends KamonInstrumentation {
   }
 }
 
-
 class TraceContextMixin extends TraceContextAware {
   var traceContext: TraceContext = _
 
@@ -64,11 +63,10 @@ class TraceContextMixin extends TraceContextAware {
   def init(): Unit = this.traceContext = Tracer.currentContext
 }
 
-
 /**
-  * Advisor for scala.concurrent.impl.CallbackRunnable::run
-  * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
-  */
+ * Advisor for scala.concurrent.impl.CallbackRunnable::run
+ * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
+ */
 class RunMethodAdvisor
 object RunMethodAdvisor {
   @OnMethodEnter

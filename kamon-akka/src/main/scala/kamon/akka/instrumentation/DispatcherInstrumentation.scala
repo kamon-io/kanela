@@ -79,9 +79,9 @@ class DispatcherInstrumentation extends KamonInstrumentation {
   /**
    * Instrument:
    *
-   * akka.dispatch.Dispatcher.LazyExecutorServiceDelegate::constructor
-   * akka.dispatch.Dispatcher.LazyExecutorServiceDelegate::copy
-   * akka.dispatch.Dispatcher.LazyExecutorServiceDelegate::shutdown
+   * akka.dispatch.ExecutorServiceDelegate::constructor
+   * akka.dispatch.ExecutorServiceDelegate::copy
+   * akka.dispatch.ExecutorServiceDelegate::shutdown
    *
    * Mix:
    *
@@ -91,7 +91,7 @@ class DispatcherInstrumentation extends KamonInstrumentation {
   val CopyMethod: Junction[MethodDescription] = named("copy")
   val ShutdownMethod: Junction[MethodDescription] = named("shutdown")
 
-  forTargetType("akka.dispatch.Dispatcher.LazyExecutorServiceDelegate") { builder ⇒
+  forSubtypeOf("akka.dispatch.ExecutorServiceDelegate") { builder ⇒
     builder
       .withMixin(classOf[LookupDataAwareMixin])
       .withAdvisorFor(Constructor, classOf[LazyExecutorServiceDelegateConstructorAdvisor])

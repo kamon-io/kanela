@@ -17,18 +17,18 @@
 package akka.kamon.instrumentation.advisor
 
 import java.lang.reflect.Method
-import java.util.concurrent.{ExecutorService, ThreadPoolExecutor}
+import java.util.concurrent.{ ExecutorService, ThreadPoolExecutor }
 
-import akka.actor.{ActorContext, ActorSystem, Props}
-import akka.dispatch.{Dispatcher, _}
+import akka.actor.{ ActorContext, ActorSystem, Props }
+import akka.dispatch.{ Dispatcher, _ }
 import akka.kamon.instrumentation.advisor.DispatcherInstrumentationAdvisors._
 import akka.kamon.instrumentation.advisor.LookupDataAware.LookupData
 import kamon.Kamon
 import kamon.agent.libs.net.bytebuddy.asm.Advice
 import kamon.agent.libs.net.bytebuddy.asm.Advice._
-import kamon.akka.instrumentation.mixin.{ActorSystemAware, LookupDataAware}
-import kamon.metric.{Entity, MetricsModule}
-import kamon.util.executors.{ForkJoinPoolMetrics, ThreadPoolExecutorMetrics}
+import kamon.akka.instrumentation.mixin.{ ActorSystemAware, LookupDataAware }
+import kamon.metric.{ Entity, MetricsModule }
+import kamon.util.executors.{ ForkJoinPoolMetrics, ThreadPoolExecutorMetrics }
 
 import scala.concurrent.forkjoin.ForkJoinPool
 

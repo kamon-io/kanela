@@ -22,9 +22,9 @@ import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.akka.instrumentation.mixin.{ ActorInstrumentationMixin, EnvelopeInstrumentationMixin, RoutedActorCellInstrumentationMixin }
+import kamon.akka.instrumentation.mixin.{ActorInstrumentationMixin, RoutedActorCellInstrumentationMixin}
 
-class   ActorInstrumentation extends KamonInstrumentation {
+class ActorInstrumentation extends KamonInstrumentation {
 
   val Constructor: Junction[MethodDescription] = isConstructor()
   val InvokeMethod: Junction[MethodDescription] = named("invoke").and(takesArguments(classOf[Envelope]))
@@ -34,25 +34,12 @@ class   ActorInstrumentation extends KamonInstrumentation {
   val ReplaceWitMethod: Junction[MethodDescription] = named("replaceWith")
 
   /**
-   * Mix:
-   *
-   * akka.dispatch.Envelope with InstrumentedEnvelope
-   *
-   */
-  forTargetType("akka.dispatch.Envelope") { builder ⇒
-    builder
-      .withMixin(classOf[EnvelopeInstrumentationMixin])
-      .build()
-  }
-
-  /**
    * Instrument:
    *
    * akka.actor.ActorCell::constructor
    * akka.actor.ActorCell::invoke
    * akka.actor.ActorCell::sendMessage
    * akka.actor.ActorCell::stop
-   * akka.actor.ActorCell::handleInvokeFailure
    *
    * Mix:
    *
@@ -66,7 +53,6 @@ class   ActorInstrumentation extends KamonInstrumentation {
       .withAdvisorFor(InvokeMethod, classOf[InvokeMethodAdvisor])
       .withAdvisorFor(SendMessageMethod, classOf[SendMessageMethodAdvisor])
       .withAdvisorFor(StopMethod, classOf[StopMethodAdvisor])
-      .withAdvisorFor(HandleInvokeFailureMethod, classOf[HandleInvokeFailureMethodAdvisor])
       .build()
   }
 

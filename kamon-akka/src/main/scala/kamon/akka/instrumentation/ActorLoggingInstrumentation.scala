@@ -17,7 +17,7 @@
 package akka.kamon.instrumentation
 
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, Super}
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{ RuntimeType, Super }
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
@@ -31,20 +31,19 @@ class ActorLoggingInstrumentation extends KamonInstrumentation {
    *  akka.dispatch.Dispatchers::lookup
    *
    */
-
   forSubtypeOf("akka.event.Logging.LogEvent") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
       .build()
   }
 
-  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
-
-  forSubtypeOf("akka.event.slf4j.Slf4jLogger") { builder ⇒
-    builder
-      .withTransformationFor(WithMdcMethod, classOf[WithMdcMethodTransformer])
-      .build()
-  }
+//  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
+//
+//  forSubtypeOf("akka.event.slf4j.Slf4jLogger") { builder ⇒
+//    builder
+//      .withTransformationFor(WithMdcMethod, classOf[WithMdcMethodTransformer])
+//      .build()
+//  }
 }
 
 class WithMdcMethodTransformer

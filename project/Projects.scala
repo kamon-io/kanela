@@ -85,15 +85,14 @@ object Projects extends Build {
     .settings(notAggregateInAssembly: _*)
 
   lazy val kamonAkka = Project("kamon-akka",file("kamon-akka"))
-    .dependsOn(agentScala)
-    .dependsOn(kamonScala)
+    .dependsOn(agentScala, kamonScala  % "test->test")
     .settings(basicSettings: _*)
     .settings(formatSettings: _*)
     .settings(agentSettings: _*)
     .settings(libraryDependencies ++=
       compile(kamonCore) ++
         provided(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
-        test(scalatest, akkaTestKit, akkaSlf4j))
+        test(scalatest, akkaTestKit, kamonTestkit, akkaSlf4j))
     .settings(excludeScalaLib: _*)
     .settings(noPublishing: _*)
     .settings(notAggregateInAssembly: _*)
