@@ -20,6 +20,7 @@ import akka.actor.Cell;
 import akka.kamon.instrumentation.ActorInstrumentation;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
+import kamon.trace.logging.MdcKeysSupport$;
 
 /**
  * Advisor for akka.actor.UnstartedCell::replaceWith

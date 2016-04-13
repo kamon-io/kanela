@@ -48,11 +48,11 @@ object Wrappers {
     def sendSystemMessage(msg: SystemMessage): Unit = underlying.sendSystemMessage(msg)
 
     def sendMessage(msg: Envelope): Unit = {
-//      val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
+      //      val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
 
-//      Tracer.withContext(envelopeContext.context) {
-        underlying.sendMessage(msg)
-      }
-//    }
+      //      Tracer.withContext(envelopeContext.context) {
+      underlying.sendMessage(msg)
+    }
+    //    }
   }
 }

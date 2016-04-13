@@ -16,12 +16,12 @@
 
 package akka.kamon.instrumentation.advisor
 
-import akka.actor.{ActorRef, ActorSystem, Cell, InternalActorRef}
+import akka.actor.{ ActorRef, ActorSystem, Cell, InternalActorRef }
 import akka.dispatch.Envelope
-import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
+import akka.kamon.instrumentation.{ ActorMonitor, RouterMonitor }
 import akka.routing.RoutedActorCell
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodExit, _}
-import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodExit, _ }
+import kamon.akka.instrumentation.mixin.{ ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware }
 import kamon.util.RelativeNanoTimestamp
 
 trait ActorInstrumentationSupport {
@@ -64,7 +64,7 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
 
     actorInstrumentation(cell).processMessageEnd(timestampBeforeProcessing, envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
 
-    if(failure != null)
+    if (failure != null)
       actorInstrumentation(cell).processFailure(failure)
   }
 }
@@ -139,7 +139,7 @@ object SendMessageMethodAdvisorForRouter {
 
   @OnMethodExit
   def onExit(@This cell: Cell,
-             @Enter timestampBeforeProcessing: RelativeNanoTimestamp): Unit = {
+    @Enter timestampBeforeProcessing: RelativeNanoTimestamp): Unit = {
 
     routerInstrumentation(cell).processMessageEnd(timestampBeforeProcessing)
   }

@@ -48,6 +48,8 @@ object InvokeAllMethodAdvisor {
   }
 
   @OnMethodExit
-  def onExit(): Unit = Tracer.currentContext.finish()
+  def onExit(): Unit = {
+    Tracer.currentContext.finish()
+  }
 }
 

@@ -26,7 +26,6 @@ import kamon.akka.instrumentation.mixin.TraceContextMixin
 class ActorSystemMessageInstrumentation extends KamonInstrumentation {
 
   val PointMethod: Junction[MethodDescription] = named("point")
-  val InvokeAllMethod: Junction[MethodDescription] = named("invokeAll$1")
 
   /**
    * Instrument:
@@ -60,9 +59,12 @@ class ActorSystemMessageInstrumentation extends KamonInstrumentation {
   /**
    * Instrument:
    *
-   * akka.actor.ActorCell::invokeAll$1
+   * akka.actor.ActorCell::invokeAll
    *
    */
+
+  val InvokeAllMethod: Junction[MethodDescription] = named("invokeAll$1")
+
   forTargetType("akka.actor.ActorCell") { builder ⇒
     builder
       .withAdvisorFor(InvokeAllMethod, classOf[InvokeAllMethodAdvisor])

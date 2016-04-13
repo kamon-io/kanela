@@ -16,42 +16,64 @@
 
 package akka.kamon.instrumentation
 
+import akka.event.Logging.LogEvent
+import kamon.agent.libs.net.bytebuddy.asm.Advice
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ Argument, Enter, OnMethodEnter, OnMethodExit }
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{ RuntimeType, Super }
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.instrumentation.mixin.TraceContextMixin
+import kamon.trace.logging.MdcKeysSupport
+import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import org.slf4j.MDC
 
 class ActorLoggingInstrumentation extends KamonInstrumentation {
 
   /**
-   * Instrument:
+   * Mix:
    *
-   *  akka.dispatch.Dispatchers::lookup
+   *  akka.event.Logging$LogEvent with kamon.trace.TraceContextAware
    *
    */
-  forSubtypeOf("akka.event.Logging.LogEvent") { builder ⇒
+  forSubtypeOf("akka.event.Logging$LogEvent") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
       .build()
   }
 
-//  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
-//
-//  forSubtypeOf("akka.event.slf4j.Slf4jLogger") { builder ⇒
-//    builder
-//      .withTransformationFor(WithMdcMethod, classOf[WithMdcMethodTransformer])
-//      .build()
-//  }
+  /**
+   * Instrument:
+   *
+   *  akka.event.slf4j.Slf4jLogger::withMdc
+   *
+   */
+  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
+
+  forTargetType("akka.event.slf4j.Slf4jLogger") { builder ⇒
+    builder
+      .withAdvisorFor(WithMdcMethod, classOf[WithMdcMethodAdvisor])
+      .build()
+  }
 }
 
-class WithMdcMethodTransformer
-object WithMdcMethodTransformer {
-  @RuntimeType
-  def withMdcInvocation(@Super runnable: Runnable): Unit = {
-    //    Tracer.withContext(logEvent.asInstanceOf[TraceContextAware].traceContext) {
-    //      MdcKeysSupport.withMdc(runnable.run())
-    //}
+/**
+ * Advisor for akka.event.slf4j.Slf4jLogger::withMdc
+ */
+class WithMdcMethodAdvisor
+object WithMdcMethodAdvisor {
+  @OnMethodEnter
+  def onEnter(@Argument(1) logEvent: LogEvent): Iterable[String] = {
+    val ctx: TraceContext = logEvent.asInstanceOf[TraceContextAware].traceContext
+    Tracer.setCurrentContext(ctx)
+    copyToMdc(ctx)
   }
+
+  @OnMethodExit
+  def onExit(@Enter keys: Iterable[String]): Unit = {
+    keys.foreach(key ⇒ MDC.remove(key))
+    Tracer.currentContext.finish()
+  }
+  //TODO:kamon.trace.logging.MdcKeysSupport#copyToMdc should be public :(
+  private def copyToMdc(traceContext: TraceContext): Iterable[String] = Iterable.empty
 }

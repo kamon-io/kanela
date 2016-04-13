@@ -22,11 +22,11 @@ import kamon.akka.instrumentation.mixin.EnvelopeInstrumentationMixin
 class EnvelopeInstrumentation extends KamonInstrumentation {
 
   /**
-    * Mix:
-    *
-    * akka.dispatch.Envelope with InstrumentedEnvelope
-    *
-    */
+   * Mix:
+   *
+   * akka.dispatch.Envelope with InstrumentedEnvelope
+   *
+   */
   forTargetType("akka.dispatch.Envelope") { builder ⇒
     builder
       .withMixin(classOf[EnvelopeInstrumentationMixin])

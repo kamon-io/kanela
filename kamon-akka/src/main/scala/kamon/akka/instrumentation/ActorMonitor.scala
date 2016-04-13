@@ -98,13 +98,15 @@ object ActorMonitors {
     }
 
     def processMessageEnd(timestampBeforeProcessing: RelativeNanoTimestamp, envelopeContext: EnvelopeContext): Unit = {
-      val timestampAfterProcessing = RelativeNanoTimestamp.now
-      val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
-      val processingTime = timestampAfterProcessing - timestampBeforeProcessing
+      try envelopeContext.context.finish() finally {
+        val timestampAfterProcessing = RelativeNanoTimestamp.now
+        val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
+        val processingTime = timestampAfterProcessing - timestampBeforeProcessing
 
-      actorMetrics.processingTime.record(processingTime.nanos)
-      actorMetrics.timeInMailbox.record(timeInMailbox.nanos)
-      actorMetrics.mailboxSize.decrement()
+        actorMetrics.processingTime.record(processingTime.nanos)
+        actorMetrics.timeInMailbox.record(timeInMailbox.nanos)
+        actorMetrics.mailboxSize.decrement()
+      }
     }
     def processFailure(failure: Throwable): Unit = actorMetrics.errors.increment()
     def cleanup(): Unit = Kamon.metrics.removeEntity(entity)
@@ -120,12 +122,14 @@ object ActorMonitors {
     }
 
     override def processMessageEnd(timestampBeforeProcessing: RelativeNanoTimestamp, envelopeContext: EnvelopeContext): Unit = {
-      val timestampAfterProcessing = RelativeNanoTimestamp.now
-      val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
-      val processingTime = timestampAfterProcessing - timestampBeforeProcessing
+      try envelopeContext.context.finish() finally {
+        val timestampAfterProcessing = RelativeNanoTimestamp.now
+        val timeInMailbox = timestampBeforeProcessing - envelopeContext.nanoTime
+        val processingTime = timestampAfterProcessing - timestampBeforeProcessing
 
-      routerMetrics.processingTime.record(processingTime.nanos)
-      routerMetrics.timeInMailbox.record(timeInMailbox.nanos)
+        routerMetrics.processingTime.record(processingTime.nanos)
+        routerMetrics.timeInMailbox.record(timeInMailbox.nanos)
+      }
     }
 
     def processFailure(failure: Throwable): Unit = routerMetrics.errors.increment()
