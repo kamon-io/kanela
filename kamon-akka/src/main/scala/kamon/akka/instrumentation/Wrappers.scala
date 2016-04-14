@@ -17,7 +17,7 @@
 package akka.kamon.instrumentation
 
 import akka.actor.dungeon.ChildrenContainer
-import akka.actor.{ ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props }
+import akka.actor.{ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props}
 import akka.dispatch.Envelope
 import akka.dispatch.sysmsg.SystemMessage
 import kamon.akka.instrumentation.mixin.InstrumentedEnvelope
@@ -48,11 +48,15 @@ object Wrappers {
     def sendSystemMessage(msg: SystemMessage): Unit = underlying.sendSystemMessage(msg)
 
     def sendMessage(msg: Envelope): Unit = {
-      //      val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
-
-      //      Tracer.withContext(envelopeContext.context) {
-      underlying.sendMessage(msg)
+      val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
+      if (envelopeContext != null) {
+        Tracer.withContext(envelopeContext.context) {
+          underlying.sendMessage(msg)
+        }
+      } else {
+        underlying.sendMessage(msg)
+      }
     }
-    //    }
+
   }
 }
