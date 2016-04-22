@@ -8,8 +8,6 @@ import static java.text.MessageFormat.format;
 
 public class AgentUtil {
 
-    private static final LazyLogger log = LazyLogger.create(AgentUtil.class);
-
     public static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
         long startMillis = System.currentTimeMillis();
         thunk.run();
@@ -17,23 +15,6 @@ public class AgentUtil {
     }
 
     public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk::run, (timeSpent) -> log.info(() -> format("{0} {1} ms",message, timeSpent)));
+        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> format("{0} {1} ms",message, timeSpent)));
     }
-
-//    private void printTransformedClass(byte[] b) {
-//        ClassReader cr = new ClassReader(b);
-//        cr.accept(new TraceClassVisitor(new PrintWriter(System.out)),
-//                TraceClassVisitor.getDefaultAttributes(),
-//                0);
-//    }
-
-//    public void printTransformedClassToFile(byte[] b, File f) {
-//        try {
-//            OutputStream out = new FileOutputStream(f);
-//            out.write(b);
-//            out.close();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

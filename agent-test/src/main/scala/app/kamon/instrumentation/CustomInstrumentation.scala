@@ -63,7 +63,7 @@ class CustomInstrumentation extends scala.KamonInstrumentation {
     }
 }
 
-class Pepe() {
+final case class Pepe() {
   def hello() = println("Hi, all")
   def bye() = {println("good bye");Thread.sleep(100)}
 }

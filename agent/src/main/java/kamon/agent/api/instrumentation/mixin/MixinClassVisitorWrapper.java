@@ -20,7 +20,7 @@ public class MixinClassVisitorWrapper implements AsmVisitorWrapper {
     public int mergeReader(int flags) { return flags | ClassReader.EXPAND_FRAMES; }
 
     @Override
-    public ClassVisitor wrap(TypeDescription typeDescription, ClassVisitor classVisitor) {
-        return new MixinClassVisitor(mixin, typeDescription.getInternalName(), classVisitor);
+    public ClassVisitor wrap(TypeDescription instrumentedType, ClassVisitor classVisitor, int writerFlags, int readerFlags) {
+        return new MixinClassVisitor(mixin, instrumentedType.getInternalName(), classVisitor);
     }
 }

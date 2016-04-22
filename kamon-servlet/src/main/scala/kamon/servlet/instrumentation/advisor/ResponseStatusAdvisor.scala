@@ -28,7 +28,7 @@ import kamon.trace.TraceContextAware
 class ResponseStatusAdvisor
 object ResponseStatusAdvisor {
   @OnMethodEnter
-  def onEnter(@Argument(0) status: Int, @This response: TraceContextAwareExtension): Unit = {
+  def onEnter(@This response: TraceContextAwareExtension, @Argument(0) status: Int): Unit = {
     response.traceContext().collect { ctx ⇒
       ServletExtension.httpServerMetrics.recordResponse(ctx.name, status.toString)
     }

@@ -24,23 +24,30 @@ object Dependencies {
     "Kamon Snapshots" at "http://snapshots.kamon.io"
   )
 
-  val slf4jApi          = "org.slf4j"                 % "slf4j-api"         % "1.7.19"
-  val logbackCore       = "ch.qos.logback"            % "logback-core"      % "1.1.6"
-  val logbackClassic    = "ch.qos.logback"            % "logback-classic"   % "1.1.6"
-  val typesafeConfig    = "com.typesafe"              % "config"            % "1.3.0"
-  val javaslang         = "com.javaslang"             % "javaslang"         % "2.0.0-RC4"
-  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"        % "1.3.3"
-  val scalatest         = "org.scalatest"            %% "scalatest"         % "2.2.6"
-  val mockito           = "org.mockito"               % "mockito-core"      % "2.0.42-beta"
-  val lombok            = "org.projectlombok"         % "lombok"            % "1.16.8"
+  val akkaVersion       = "2.3.14"
 
-  val servletApi        = "javax.servlet"             % "javax.servlet-api" % "3.1.0"
-  val kamonCore         = "io.kamon"                 %% "kamon-core"        % "0.6.0-affe465fdcc002fb12c54b3bb139ba3ef4fb1d85"
-  val springTest        = "org.springframework"       % "spring-test"       % "4.2.5.RELEASE"
-  val springWeb         = "org.springframework"       % "spring-web"        % "4.2.5.RELEASE"
-  val jetty             = "org.eclipse.jetty"         % "jetty-server"      % "9.3.8.v20160314"
-  val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"     % "9.3.8.v20160314"
-  val httpClient        = "org.apache.httpcomponents" % "httpclient"        % "4.5.2"
+  val slf4jApi          = "org.slf4j"                 % "slf4j-api"               % "1.7.19"
+  val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.1.6"
+  val logbackClassic    = "ch.qos.logback"            % "logback-classic"         % "1.1.6"
+  val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
+  val javaslang         = "io.javaslang"              % "javaslang"               % "2.0.2"
+  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.3.13"
+  val scalatest         = "org.scalatest"            %% "scalatest"               % "2.2.6"
+  val mockito           = "org.mockito"               % "mockito-core"            % "2.0.42-beta"
+  val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.8"
+
+  val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
+  val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.0"
+  val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.0"
+  val akkaSlf4j         = "com.typesafe.akka"        %% "akka-slf4j"              % akkaVersion
+  val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % akkaVersion
+  val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
+  val springWeb         = "org.springframework"       % "spring-web"              % "4.2.5.RELEASE"
+  val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
+  val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
+  val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
+  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
+  val scalazConcurrent  = "org.scalaz"               %% "scalaz-concurrent"       % "7.1.0"
 
 
   val kamonAgent      = "io.kamon"          % "agent_2.11"        % "0.1-SNAPSHOT" classifier "assembly"

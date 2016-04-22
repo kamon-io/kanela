@@ -10,25 +10,23 @@ import static java.text.MessageFormat.format;
 
 public class InstrumentationListener implements AgentBuilder.Listener {
 
-    private static final LazyLogger log = LazyLogger.create(InstrumentationListener.class);
-
     @Override
-    public void onTransformation(TypeDescription typeDescription, DynamicType dynamicType) {
-        log.info(() -> AnsiColor.ParseColors(format(":yellow,n: Transformed => {0}", typeDescription)));
+    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, DynamicType dynamicType) {
+        LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n:Transformed => {0} and loaded from {1}", typeDescription, classLoader)));
     }
 
     @Override
-    public void onIgnored(TypeDescription typeDescription) {
+    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader) {
 //        log.info(() -> typeDescription.toString());
     }
 
     @Override
-    public void onError(String error, Throwable cause) {
-        log.info(() -> AnsiColor.ParseColors(format(":red,n: Error => {0} with message {1}", error, cause.getMessage())));
+    public void onError(String error, ClassLoader classLoader, Throwable cause) {
+        LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}", error, cause.getMessage())));
     }
 
     @Override
-    public void onComplete(String s) {
+    public void onComplete(String s, ClassLoader classLoader) {
 //        log.info(() -> s);
     }
 }

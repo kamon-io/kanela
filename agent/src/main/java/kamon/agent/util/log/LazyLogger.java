@@ -1,10 +1,14 @@
 package kamon.agent.util.log;
 
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.labelers.TimestampLabeler;
+import org.pmw.tinylog.policies.SizePolicy;
+import org.pmw.tinylog.policies.StartupPolicy;
+import org.pmw.tinylog.writers.ConsoleWriter;
+import org.pmw.tinylog.writers.RollingFileWriter;
 
-import javaslang.control.Match;
-import kamon.agent.AgentLogger;
-import org.slf4j.Logger;
-
+import java.util.Locale;
 import java.util.function.Supplier;
 
 /**
@@ -13,95 +17,55 @@ import java.util.function.Supplier;
  */
 public class LazyLogger {
 
-    private final Logger underlying;
-
-    private LazyLogger(Logger underlying) {
-        this.underlying = underlying;
+    static {
+        Configurator.currentConfig()
+                .locale(Locale.US)
+                .writingThread("main", 1)
+                .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")
+                .writer(new ConsoleWriter())
+                .addWriter(new RollingFileWriter("log.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
+                .activate();
     }
 
-    private Boolean isTraceEnabled() {
-        return underlying.isTraceEnabled();
+    private LazyLogger(){}
+
+    public static void trace(final Supplier<String> msg) {
+        org.pmw.tinylog.Logger.trace(msg.get());
     }
 
-    public void trace(Supplier<String> msg) {
-        if (isTraceEnabled()) {
-            underlying.trace(msg.get());
-        }
+    public static void trace(final Supplier<String> msg, Throwable t) {
+        org.pmw.tinylog.Logger.trace(msg.get(), t);
     }
 
-    public void trace(Supplier<String> msg, Throwable t) {
-        if (isTraceEnabled()) {
-            underlying.trace(msg.get(), t);
-        }
+    public static void debug(final Supplier<String> msg) {
+        org.pmw.tinylog.Logger.debug(msg.get());
     }
 
-    private Boolean isDebugEnabled() {
-        return underlying.isDebugEnabled();
+    public static void debug(final Object source, final Supplier<String> msg, final Throwable t) {
+        org.pmw.tinylog.Logger.debug(msg.get(),t);
     }
 
-    public void debug(Supplier<String> msg) {
-        if (isDebugEnabled()) {
-            underlying.debug(msg.get());
-        }
+    public static void info(final Supplier<String> msg) {
+        org.pmw.tinylog.Logger.info(msg.get());
     }
 
-    public void debug(Supplier<String> msg, Throwable t) {
-        if (isDebugEnabled()) {
-            underlying.debug(msg.get(), t);
-        }
+    public static void info(final Supplier<String> msg, final Throwable t) {
+        org.pmw.tinylog.Logger.info(msg.get(),t);
     }
 
-    private Boolean isInfoEnabled() {
-        return underlying.isInfoEnabled();
+    public static void warn(final Supplier<String> msg) {
+        org.pmw.tinylog.Logger.warn(msg.get());
     }
 
-    public void info(Supplier<String> msg) {
-        if (isInfoEnabled()) {
-            underlying.info(msg.get());
-        }
+    public static void warn(final Supplier<String> msg, final Throwable t) {
+        org.pmw.tinylog.Logger.warn(msg.get(), t);
     }
 
-    public void info(Supplier<String> msg, Throwable t) {
-        if (isInfoEnabled()) {
-            underlying.info(msg.get(), t);
-        }
+    public static void error(final Supplier<String> msg) {
+        org.pmw.tinylog.Logger.error(msg.get());
     }
 
-    private Boolean isWarnEnabled() {
-        return underlying.isWarnEnabled();
-    }
-
-    public void warn(Supplier<String> msg) {
-        if (isWarnEnabled()) {
-            underlying.warn(msg.get());
-        }
-    }
-
-    public void warn(Supplier<String> msg, Throwable t) {
-        if (isWarnEnabled()) {
-            underlying.warn(msg.get(), t);
-        }
-    }
-
-    private Boolean isErrorEnabled() {
-        return underlying.isErrorEnabled();
-    }
-
-    public void error(Supplier<String> msg) {
-        if (isErrorEnabled()) {
-            underlying.error(msg.get());
-        }
-    }
-
-    public void error(Supplier<String> msg, Throwable t) {
-        if (isErrorEnabled()) {
-            underlying.error(msg.get(), t);
-        }
-    }
-
-    public  static LazyLogger create(final Object source) {
-        return Match.of(source).whenType(Class.class).then((logger) -> new LazyLogger(AgentLogger.create(logger)))
-                               .whenType(String.class).then((logger) -> new LazyLogger(AgentLogger.create(logger)))
-                               .getOrElse(new LazyLogger(AgentLogger.create(source.getClass())));
+    public static void error(final Supplier<String> msg, final Throwable t) {
+        org.pmw.tinylog.Logger.warn(msg.get(),t);
     }
 }

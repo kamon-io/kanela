@@ -28,6 +28,7 @@ class AsyncServletInstrumentation extends KamonInstrumentation {
 
   /**
    * javax.servlet.AsyncContext::start
+   * javax.servlet.AsyncContext::complete
    */
   val StartMethod: Junction[MethodDescription] = named("start")
   val CompleteMethod: Junction[MethodDescription] = named("complete")

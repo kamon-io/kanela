@@ -26,7 +26,6 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
     override def apply(a: A): B = f(a)
   }
 
-
   implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] = new JBifunction[A, B, C] {
     override def apply(a: A, b: B): C = f(a, b)
   }
@@ -42,12 +41,11 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
 
   class ConnectionInstrumentationPrototype extends KamonInstrumentation {
 
-    forSubtypeOf("java.sql.Connection", (builder:InstrumentationDescription.Builder) =>{
+    forSubtypeOf("java.sql.Connection", (builder: InstrumentationDescription.Builder) ⇒ {
       builder.build()
-    }
-    )
+    })
 
-//    addMixin(classOf[MixinTest])
+    //    addMixin(classOf[MixinTest])
 
     //    addTransformation { (builder: DynamicType.Builder[_], _: TypeDescription) ⇒
     //      builder

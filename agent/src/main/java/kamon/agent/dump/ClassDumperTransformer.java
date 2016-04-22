@@ -8,8 +8,6 @@ import java.security.ProtectionDomain;
 
 public class ClassDumperTransformer implements ClassFileTransformer {
 
-    private static final LazyLogger log = LazyLogger.create(ClassDumperTransformer.class);
-
     private ClassDumper classDumper;
 
     public ClassDumperTransformer(ClassDumper classDumper) {
@@ -32,7 +30,7 @@ public class ClassDumperTransformer implements ClassFileTransformer {
 
         } catch (Exception exc) {
             //exc.printStackTrace();
-            log.error(() -> "Failed on ClassDumperTransformer", exc);
+            LazyLogger.error(() -> "Failed on ClassDumperTransformer", exc);
         }
 
         // we don't mess with .class file, just return null
