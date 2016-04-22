@@ -45,10 +45,13 @@ object Wrappers {
     def childrenRefs: ChildrenContainer = underlying.childrenRefs
     def parent: InternalActorRef = underlying.parent
     def system: ActorSystem = underlying.system
-    def sendSystemMessage(msg: SystemMessage): Unit = underlying.sendSystemMessage(msg)
+    def sendSystemMessage(msg: SystemMessage): Unit = {
+      underlying.sendSystemMessage(msg)
+    }
 
     def sendMessage(msg: Envelope): Unit = {
       val envelopeContext = msg.asInstanceOf[InstrumentedEnvelope].envelopeContext()
+
       if (envelopeContext != null) {
         Tracer.withContext(envelopeContext.context) {
           underlying.sendMessage(msg)
@@ -57,6 +60,5 @@ object Wrappers {
         underlying.sendMessage(msg)
       }
     }
-
   }
 }

@@ -16,16 +16,18 @@
 
 package kamon.akka.instrumentation.mixin
 
-import kamon.trace.{ EmptyTraceContext, TraceContext }
+import kamon.trace.{EmptyTraceContext, TraceContext}
 import kamon.util.RelativeNanoTimestamp
 
 /**
  * Mixin for akka.dispatch.Envelope
  */
-class EnvelopeInstrumentationMixin() extends InstrumentedEnvelope {
+class EnvelopeInstrumentationMixin extends InstrumentedEnvelope {
   @volatile var envelopeContext: EnvelopeContext = _
 
-  def setEnvelopeContext(envelopeContext: EnvelopeContext): Unit = this.envelopeContext = envelopeContext
+  def setEnvelopeContext(envelopeContext: EnvelopeContext): Unit = {
+    this.envelopeContext = envelopeContext
+  }
 }
 
 case class EnvelopeContext(nanoTime: RelativeNanoTimestamp, context: TraceContext)

@@ -46,18 +46,8 @@ object Assembly {
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
-//        ShadeRule.rename("ch.qos.logback.core.**" -> "kamon.agent.libs.@0").inAll,
-//        ShadeRule.rename("ch.qos.logback.classic.**" -> "kamon.agent.libs.@0").inAll,
-//        ShadeRule.rename("org.slf4j.**" -> "kamon.agent.libs.@0").inAll
         ShadeRule.rename("org.pmw.tinylog.**" -> "kamon.agent.libs.@0").inAll
     )
-//    assemblyMergeStrategy in assembly := {
-//      case "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat" => MergeStrategy.discard
-//      case "META-INF/log4j-provider.properties" => MergeStrategy.first
-//      case x =>
-//        val oldStrategy = (assemblyMergeStrategy in assembly).value
-//        oldStrategy(x)
-//    }
   ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {}) ++ assemblyArtifact
 
   lazy val assemblyArtifact = artifact in (Compile, assembly) := {

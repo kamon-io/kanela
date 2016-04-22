@@ -17,12 +17,12 @@
 package kamon.scala.instrumentation
 
 import kamon.agent.api.instrumentation.Initializer
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodEnter, OnMethodExit, This}
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
 class FutureInstrumentation extends KamonInstrumentation {
 

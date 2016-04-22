@@ -16,11 +16,11 @@
 
 package akka.kamon.instrumentation
 
-import akka.actor.{ ActorRef, ActorSystem, Cell }
-import akka.kamon.instrumentation.ActorMonitors.{ TrackedActor, TrackedRoutee }
+import akka.actor.{ActorRef, ActorSystem, Cell}
+import akka.kamon.instrumentation.ActorMonitors.{TrackedActor, TrackedRoutee}
 import kamon.Kamon
 import kamon.akka.instrumentation.mixin.EnvelopeContext
-import kamon.akka.{ ActorMetrics, RouterMetrics }
+import kamon.akka.{ActorMetrics, RouterMetrics}
 import kamon.metric.Entity
 import kamon.trace.Tracer
 import kamon.util.RelativeNanoTimestamp

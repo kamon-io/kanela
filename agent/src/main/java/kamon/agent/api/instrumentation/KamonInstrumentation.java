@@ -34,16 +34,24 @@ public abstract class KamonInstrumentation {
     public void register(Instrumentation instrumentation) {
         final AgentBuilder agentBuilder = new AgentBuilder.Default()
                 .disableClassFormatChanges()
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+//                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .with(new InstrumentationListener());
         instrumentationDescriptions.forEach((instrumentationDescription) -> installInstrumentations(agentBuilder, instrumentationDescription, instrumentation));
     }
 
     private void installInstrumentations(AgentBuilder agentBuilder, InstrumentationDescription instrumentationDescription, Instrumentation instrumentation) {
         final Identified identified = agentBuilder
+                .ignore(nameMatches("sun..*"))
+                .ignore(nameMatches("java..*"))
+                .ignore(nameMatches("javax..*"))
                 .ignore(nameMatches("kamon.agent..*"))
+                .ignore(nameMatches("kamon.testkit..*"))
+                .ignore(nameMatches("kamon.instrumentation..*"))
+                .ignore(nameMatches("akka.testkit..*"))
+                .ignore(nameMatches("org.scalatest..*"))
+                .ignore(nameMatches("scala.collection..*"))
+                .ignore(is(isSystemClassLoader()))
                 .type(instrumentationDescription.elementMatcher().getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher")));
-//                .and(nameMatches("akka..*"));
 
         instrumentationDescription.mixins().forEach(mixin ->
                 identified.transform((builder, typeDescription, classLoader) -> builder.visit(new MixinClassVisitorWrapper(mixin))).installOn(instrumentation));

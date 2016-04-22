@@ -16,12 +16,11 @@
 
 package akka.kamon.instrumentation.advisor
 
-import akka.actor.{ ActorRef, ActorSystem, Cell, InternalActorRef }
-import akka.dispatch.Envelope
-import akka.kamon.instrumentation.{ ActorMonitor, RouterMonitor }
+import akka.actor.{ActorRef, ActorSystem, Cell}
+import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
 import akka.routing.RoutedActorCell
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodExit, _ }
-import kamon.akka.instrumentation.mixin.{ ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware }
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodExit, _}
+import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
 import kamon.util.RelativeNanoTimestamp
 
 trait ActorInstrumentationSupport {
@@ -37,7 +36,7 @@ object ActorCellConstructorAdvisor {
   def onExit(@This cell: Cell,
     @Argument(0) system: ActorSystem,
     @Argument(1) ref: ActorRef,
-    @Argument(4) parent: InternalActorRef): Unit = {
+    @Argument(4) parent: ActorRef): Unit = {
 
     cell.asInstanceOf[ActorInstrumentationAware].setActorInstrumentation(ActorMonitor.createActorMonitor(cell, system, ref, parent))
   }
@@ -51,7 +50,7 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
 
   @OnMethodEnter
   def onEnter(@This cell: Cell,
-    @Argument(0) envelope: Envelope): RelativeNanoTimestamp = {
+    @Argument(0) envelope: Object): RelativeNanoTimestamp = {
 
     actorInstrumentation(cell).processMessageStart(envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
   }
@@ -59,7 +58,7 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodExit
   def onExit(@This cell: Cell,
     @Enter timestampBeforeProcessing: RelativeNanoTimestamp,
-    @Argument(0) envelope: Envelope,
+    @Argument(0) envelope: Object,
     @Thrown failure: Throwable): Unit = {
 
     actorInstrumentation(cell).processMessageEnd(timestampBeforeProcessing, envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
@@ -77,7 +76,7 @@ class SendMessageMethodAdvisor
 object SendMessageMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodEnter
   def onEnter(@This cell: Cell,
-    @Argument(0) envelope: Envelope): Unit = {
+    @Argument(0) envelope: Object): Unit = {
     envelope.asInstanceOf[InstrumentedEnvelope].setEnvelopeContext(actorInstrumentation(cell).captureEnvelopeContext())
   }
 }
@@ -107,7 +106,7 @@ object RepointableActorCellConstructorAdvisor {
   def onExit(@This cell: Cell,
     @Argument(0) system: ActorSystem,
     @Argument(1) ref: ActorRef,
-    @Argument(3) parent: InternalActorRef): Unit = {
+    @Argument(3) parent: ActorRef): Unit = {
 
     cell.asInstanceOf[ActorInstrumentationAware].setActorInstrumentation(ActorMonitor.createActorMonitor(cell, system, ref, parent))
   }

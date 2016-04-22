@@ -16,7 +16,7 @@
 
 package akka.kamon.instrumentation
 
-import akka.kamon.instrumentation.advisor.{ InvokeAllMethodAdvisor, PointMethodAdvisor }
+import akka.kamon.instrumentation.advisor.{InvokeAllMethodAdvisor, PointMethodAdvisor}
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
@@ -25,7 +25,18 @@ import kamon.akka.instrumentation.mixin.TraceContextMixin
 
 class ActorSystemMessageInstrumentation extends KamonInstrumentation {
 
-  val PointMethod: Junction[MethodDescription] = named("point")
+  /**
+    * Mix:
+    *
+    * akka.dispatch.sysmsg.SystemMessage with kamon.trace.TraceContextAware
+    *
+    */
+  forSubtypeOf("akka.dispatch.sysmsg.SystemMessage") { builder ⇒
+    builder
+      .withMixin(classOf[TraceContextMixin])
+      .build()
+  }
+
 
   /**
    * Instrument:
@@ -37,22 +48,13 @@ class ActorSystemMessageInstrumentation extends KamonInstrumentation {
    * akka.actor.RepointableActorRef with kamon.trace.TraceContextAware
    *
    */
+
+  val PointMethod: Junction[MethodDescription] = named("point")
+
   forTargetType("akka.actor.RepointableActorRef") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
       .withAdvisorFor(PointMethod, classOf[PointMethodAdvisor])
-      .build()
-  }
-
-  /**
-   * Mix:
-   *
-   * akka.dispatch.sysmsg.SystemMessage with kamon.trace.TraceContextAware
-   *
-   */
-  forSubtypeOf("akka.dispatch.sysmsg.SystemMessage") { builder ⇒
-    builder
-      .withMixin(classOf[TraceContextMixin])
       .build()
   }
 

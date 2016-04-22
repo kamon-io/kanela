@@ -21,7 +21,7 @@ import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.akka.instrumentation.mixin.{ ActorSystemAwareMixin, LookupDataAwareMixin, TraceContextMixin }
+import kamon.akka.instrumentation.mixin.{ ActorSystemAwareMixin, LookupDataAwareMixin }
 
 class DispatcherInstrumentation extends KamonInstrumentation {
 
