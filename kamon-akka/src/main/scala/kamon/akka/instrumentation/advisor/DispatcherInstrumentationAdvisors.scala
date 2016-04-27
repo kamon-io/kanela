@@ -72,7 +72,7 @@ object LookupMethodAdvisor {
  */
 class ExecutorServiceFactoryConstructorAdvisor
 object ExecutorServiceFactoryConstructorAdvisor {
-  @OnMethodExit(onThrowable = false)
+  @OnMethodExit
   def onExit(@This factory: ExecutorServiceFactory): Unit = {
     factory.asInstanceOf[LookupDataAware].lookupData = LookupDataAware.currentLookupData
   }
@@ -99,7 +99,7 @@ object CreateExecutorServiceAdvisor {
  */
 class LazyExecutorServiceDelegateConstructorAdvisor
 object LazyExecutorServiceDelegateConstructorAdvisor {
-  @OnMethodExit(onThrowable = false)
+  @OnMethodExit
   def onExit(@This lazyExecutor: ExecutorServiceDelegate): Unit = {
     lazyExecutor.asInstanceOf[LookupDataAware].lookupData = LookupDataAware.currentLookupData
   }

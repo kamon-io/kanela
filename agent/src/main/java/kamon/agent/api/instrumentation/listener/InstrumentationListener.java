@@ -17,16 +17,16 @@ public class InstrumentationListener implements AgentBuilder.Listener {
 
     @Override
     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader) {
-//        log.info(() -> typeDescription.toString());
+//        LazyLogger.debug(() -> AnsiColor.ParseColors(format(":red,n:Ignored => {0} and loaded from {1}", typeDescription, classLoader)));
     }
 
     @Override
     public void onError(String error, ClassLoader classLoader, Throwable cause) {
-        LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}", error, cause.getMessage())));
+        LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}. Class loader: {2}", error, cause.getMessage(), classLoader)));
     }
 
     @Override
     public void onComplete(String s, ClassLoader classLoader) {
-//        log.info(() -> s);
+//        LazyLogger.debug(() -> AnsiColor.ParseColors(format(":green,n: onComplete: {0}", s)));
     }
 }

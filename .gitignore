@@ -33,3 +33,4 @@ bin/
 # Default sigar library provision location.
 native/
 
+/agent/src/main/scala/*.sc

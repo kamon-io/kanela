@@ -3,6 +3,7 @@ package kamon.agent.api.instrumentation.mixin;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import kamon.agent.api.instrumentation.Initializer;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
 import utils.AgentApiUtils;
@@ -58,5 +59,9 @@ public class MixinDescription {
 
     public Option<String> getMixinInit() {
         return mixinInit;
+    }
+
+    public AgentBuilder.Transformer makeTransformer() {
+        return (builder, typeDescription, classLoader) -> builder.visit(new MixinClassVisitorWrapper(this));
     }
 }

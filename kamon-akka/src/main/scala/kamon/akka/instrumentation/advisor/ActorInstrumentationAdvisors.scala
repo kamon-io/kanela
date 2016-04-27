@@ -32,7 +32,7 @@ trait ActorInstrumentationSupport {
  */
 class ActorCellConstructorAdvisor
 object ActorCellConstructorAdvisor {
-  @OnMethodExit(onThrowable = false)
+  @OnMethodExit
   def onExit(@This cell: Cell,
     @Argument(0) system: ActorSystem,
     @Argument(1) ref: ActorRef,
@@ -55,7 +55,7 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
     actorInstrumentation(cell).processMessageStart(envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
   }
 
-  @OnMethodExit
+  @OnMethodExit(onThrowable = classOf[Throwable])
   def onExit(@This cell: Cell,
     @Enter timestampBeforeProcessing: RelativeNanoTimestamp,
     @Argument(0) envelope: Object,
@@ -102,7 +102,7 @@ object StopMethodAdvisor extends ActorInstrumentationSupport {
  */
 class RepointableActorCellConstructorAdvisor
 object RepointableActorCellConstructorAdvisor {
-  @OnMethodExit(onThrowable = false)
+  @OnMethodExit
   def onExit(@This cell: Cell,
     @Argument(0) system: ActorSystem,
     @Argument(1) ref: ActorRef,
@@ -117,7 +117,7 @@ object RepointableActorCellConstructorAdvisor {
  */
 class RoutedActorCellConstructorAdvisor
 object RoutedActorCellConstructorAdvisor {
-  @OnMethodExit(onThrowable = false)
+  @OnMethodExit
   def onExit(@This cell: Cell): Unit = {
     cell.asInstanceOf[RouterInstrumentationAware].setRouterInstrumentation(RouterMonitor.createRouterInstrumentation(cell))
   }

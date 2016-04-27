@@ -29,7 +29,14 @@ public class KamonAgentConfig {
                     .onFailure(exc -> LazyLogger.warn(
                             () -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc));
 
-            withinPackage = Option.of(config.getString("within"));
+            Try.run(() -> {
+                javaslang.collection.List<String> whitinList = javaslang.collection.List
+                        .ofAll(config.getStringList("within"));
+
+                if (whitinList.nonEmpty()) {
+                    withinPackage = Option.of(whitinList.mkString("|"));
+                }
+            });
 
             Option<Boolean> dumpEnabled = Try.of(() -> Option.some(config.getBoolean("dump.enabled")) ).getOrElse(Option.none());
             Option<String> dumpDir = Try.of(() -> Option.some(config.getString("dump.dir")) ).getOrElse(Option.none());
