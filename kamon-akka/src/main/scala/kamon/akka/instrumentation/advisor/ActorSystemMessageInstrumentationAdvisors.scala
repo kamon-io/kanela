@@ -17,8 +17,8 @@
 package akka.kamon.instrumentation.advisor
 
 import akka.dispatch.sysmsg.EarliestFirstSystemMessageList
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit, This}
-import kamon.trace.{EmptyTraceContext, TraceContext, TraceContextAware, Tracer}
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ Enter, OnMethodEnter, OnMethodExit, This }
+import kamon.trace.{ EmptyTraceContext, TraceContext, TraceContextAware, Tracer }
 
 /**
  * Advisor for akka.actor.RepointableActorRef::point

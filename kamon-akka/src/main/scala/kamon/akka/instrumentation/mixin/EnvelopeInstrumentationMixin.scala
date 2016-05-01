@@ -16,7 +16,7 @@
 
 package kamon.akka.instrumentation.mixin
 
-import kamon.trace.{EmptyTraceContext, TraceContext}
+import kamon.trace.{ EmptyTraceContext, TraceContext }
 import kamon.util.RelativeNanoTimestamp
 
 /**

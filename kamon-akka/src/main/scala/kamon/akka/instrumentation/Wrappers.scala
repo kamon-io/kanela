@@ -17,7 +17,7 @@
 package akka.kamon.instrumentation
 
 import akka.actor.dungeon.ChildrenContainer
-import akka.actor.{ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props}
+import akka.actor.{ ActorRef, ActorSystem, ActorSystemImpl, Cell, ChildStats, InternalActorRef, Props }
 import akka.dispatch.Envelope
 import akka.dispatch.sysmsg.SystemMessage
 import kamon.akka.instrumentation.mixin.InstrumentedEnvelope
