@@ -26,7 +26,7 @@ import sbt.Tests.{SubProcess, Group}
 object Settings {
 
   val JavaVersion = "1.8"
-  val ScalaVersion = "2.11.7"
+  val ScalaVersion = "2.12.1"
 
   lazy val basicSettings = Seq(
     scalaVersion := ScalaVersion,
@@ -34,10 +34,11 @@ object Settings {
     version <<= version in ThisBuild,
     fork in run := true,
     parallelExecution in Global := false,
-    testGrouping in Test  := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value),
+//    testGrouping in Test  := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value),
     javacOptions   := Seq(
       "-Xlint:-options",
       "-source", JavaVersion, "-target", JavaVersion),
+    javaOptions := Seq("-javaagent:/home/diego/.ivy2/local/io.kamon/agent_2.12/0.1-SNAPSHOT/jars/agent_2.12.jar", "-Dnet.bytebuddy.dump=/home/diego/puto3"),
     scalacOptions  := Seq(
       "-encoding",
       "utf8",
@@ -48,7 +49,6 @@ object Settings {
       "-deprecation",
       "-language:postfixOps",
       "-language:implicitConversions",
-      "-Yinline-warnings",
       "-Xlog-reflective-calls"
     )
   ) ++ publishSettings ++ releaseSettings

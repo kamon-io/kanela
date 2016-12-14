@@ -1,4 +1,4 @@
-package kamon.agent.dump;
+package kamon.agent.api.instrumentation.listener.dumper;
 
 import kamon.agent.api.banner.AnsiColor;
 import kamon.agent.util.log.LazyLogger;

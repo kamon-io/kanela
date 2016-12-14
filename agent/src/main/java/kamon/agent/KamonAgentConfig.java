@@ -1,83 +1,82 @@
 package kamon.agent;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigParseOptions;
+import com.typesafe.config.ConfigResolveOptions;
+import javaslang.collection.List;
+import javaslang.collection.List.Nil;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import kamon.agent.util.log.LazyLogger;
-import lombok.Getter;
+import lombok.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@Value
 public class KamonAgentConfig {
+    List<String> instrumentations;
+    Option<String> withinPackage;
+    Boolean isDebugMode;
+    DumpConfig dump;
 
-    @Getter
-    private List<String> instrumentations = new ArrayList<>();
+    private static class Holder {
+        private static final KamonAgentConfig Instance = new KamonAgentConfig();
+    }
 
-    @Getter
-    private Option<String> withinPackage = Option.none();
+    public static KamonAgentConfig instance() {
+        return Holder.Instance;
+    }
 
-    @Getter
-    private DumpConfig dump;
+    private KamonAgentConfig() {
+        Config config = getConfig();
+        this.instrumentations = getInstrumentations(config);
+        this.withinPackage = getWithinConfiguration(config);
+        this.isDebugMode = getDebugMode(config);
+        this.dump = new DumpConfig(config);
+    }
 
-    public KamonAgentConfig() {
-        try {
-            Config config = loadDefaultConfig().getConfig("kamon.agent");
-            Try.run(() -> instrumentations = config.getStringList("instrumentations"))
-                    .onFailure(exc -> LazyLogger.warn(
-                            () -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc));
+    @Value
+    public class DumpConfig {
+        Boolean dumpEnabled;
+        String dumpDir;
+        Boolean onTheFly;
+        Boolean createJar;
+        String jarName;
 
-            Try.run(() -> {
-                javaslang.collection.List<String> whitinList = javaslang.collection.List
-                        .ofAll(config.getStringList("within"));
-
-                if (whitinList.nonEmpty()) {
-                    withinPackage = Option.of(whitinList.mkString("|"));
-                }
-            });
-
-            Option<Boolean> dumpEnabled = Try.of(() -> Option.some(config.getBoolean("dump.enabled")) ).getOrElse(Option.none());
-            Option<String> dumpDir = Try.of(() -> Option.some(config.getString("dump.dir")) ).getOrElse(Option.none());
-            Option<String> classesPattern = Try.of(() -> Option.some(config.getString("dump.classes")) ).getOrElse(Option.none());
-            Option<Boolean> onTheFly = Try.of(() -> Option.some(config.getBoolean("dump.on-the-fly")) ).getOrElse(Option.none());
-            Option<Boolean> createJar = Try.of(() -> Option.some(config.getBoolean("dump.create-jar")) ).getOrElse(Option.none());
-            Option<String> jarName = Try.of(() -> Option.some(config.getString("dump.jar-name")) ).getOrElse(Option.none());
-            this.dump = new DumpConfig(dumpEnabled, dumpDir, classesPattern, onTheFly, createJar, jarName);
-        } catch(ConfigException.Missing missing) {
-            LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing);
+        DumpConfig(Config config) {
+            this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
+            this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kamon-agent/dump");
+            this.onTheFly = Try.of(() -> config.getBoolean("class-dumper.on-the-fly")).getOrElse(false);
+            this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
+            this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
         }
     }
 
-    private Config loadDefaultConfig() { return ConfigFactory.load("META-INF/reference");}
+    private Config getConfig() {
+        return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
+                .onFailure(missing -> LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
+                .get();
+    }
 
-    public class DumpConfig {
-        @Getter
-        private Boolean dumpEnabled = false;
-        @Getter
-        private String dumpDir = "./target/classes-dump";
-        @Getter
-        private String classesPattern = ".*";
-        @Getter
-        private Boolean onTheFly = false;
-        @Getter
-        private Boolean createJar = true;
-        @Getter
-        private String jarName = "instrumentedClasses";
+    private List<String> getInstrumentations(Config config) {
+        return Try.of(() -> List.ofAll(config.getStringList("instrumentations")))
+                .onFailure(exc -> LazyLogger.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc))
+                .getOrElse(Nil.instance());
+    }
 
-        public DumpConfig(Option<Boolean> dumpEnabled,
-                          Option<String> dumpDir,
-                          Option<String> classesPattern,
-                          Option<Boolean> onTheFly,
-                          Option<Boolean> createJar,
-                          Option<String> jarName) {
-            dumpEnabled.forEach((enabled) -> this.dumpEnabled = enabled);
-            dumpDir.forEach((dir) -> this.dumpDir = dir);
-            classesPattern.forEach((regex) -> this.classesPattern = regex);
-            onTheFly.forEach((fly) -> this.onTheFly = fly);
-            createJar.forEach((jar) -> this.createJar = jar);
-            jarName.forEach((name) -> this.jarName = name);
-        }
+    private Option<String> getWithinConfiguration(Config config) {
+        return Try.of(() -> List.ofAll(config.getStringList("within"))).map(within -> within.mkString("|")).toOption();
+    }
+
+
+    private Boolean getDebugMode(Config config) {
+        return Try.of(() -> config.getBoolean("debug-mode")).getOrElse(false);
+    }
+
+
+
+    private Config loadDefaultConfig() {
+        return ConfigFactory
+                .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
+                .setAllowUnresolved(true));
     }
 }

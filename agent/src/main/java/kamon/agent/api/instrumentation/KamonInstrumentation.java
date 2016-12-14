@@ -4,6 +4,7 @@ import javaslang.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
+
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+
 public abstract class KamonInstrumentation {
     private final List<InstrumentationDescription> instrumentationDescriptions = new ArrayList<>();
 
@@ -31,6 +35,7 @@ public abstract class KamonInstrumentation {
                 .map(this::makeTransformations)
                 .collect(Collectors.toList());
     }
+
     private TypeTransformation makeTransformations(InstrumentationDescription instrumentationDescription) {
         final Set<AgentBuilder.Transformer> mixins = toTransformers(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
         final Set<AgentBuilder.Transformer> advisors = toTransformers(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
@@ -59,5 +64,24 @@ public abstract class KamonInstrumentation {
 
     private ElementMatcher.Junction<TypeDescription> defaultTypeMatcher() {
         return  failSafe(not(isInterface()).and(not(isSynthetic())));
+    }
+
+    public boolean isActive() {
+        return true;
+    }
+
+    public int order() {
+        return 1;
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper=false)
+    public static class NoOp extends KamonInstrumentation {
+        Throwable cause;
+
+        @Override
+        public boolean isActive() {
+            return false;
+        }
     }
 }

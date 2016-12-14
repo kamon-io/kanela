@@ -1,6 +1,5 @@
 package kamon.agent.api.instrumentation;
 
-import javaslang.collection.HashMap;
 import javaslang.collection.HashSet;
 import javaslang.control.Option;
 import lombok.Value;

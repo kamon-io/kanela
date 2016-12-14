@@ -1,7 +1,6 @@
 package kamon.agent;
 
 import kamon.agent.api.banner.KamonAgentBanner;
-import kamon.agent.dump.ClassDumperLoader;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -25,10 +24,7 @@ public class KamonAgent {
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         withTimeLogging(() -> {
             KamonAgentBanner.printBanner(System.out);
-            final KamonAgentConfig kamonAgentConfig = new KamonAgentConfig();
-//            instrumentation.addTransformer(new DebugClassloaderTransformer());
-            InstrumentationLoader.load(instrumentation, kamonAgentConfig);
-            ClassDumperLoader.load(instrumentation, kamonAgentConfig.getDump());
+            InstrumentationLoader.load(instrumentation);
         }, "Premain startup complete in");
     }
 

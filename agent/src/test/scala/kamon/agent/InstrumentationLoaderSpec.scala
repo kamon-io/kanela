@@ -16,7 +16,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
   "with the config empty < kamon.agent.instrumentations >" should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
     val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
-    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List.empty[String])
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(javaslang.collection.List.empty[String])
 
     InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
 
@@ -27,7 +27,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     val instrumentationMock = mock(classOf[Instrumentation])
     val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
 
-    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List("UnknownInstrumentation"))
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(javaslang.collection.List.of("UnknownInstrumentation"))
 
     InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
 
@@ -38,7 +38,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     val instrumentationMock = mock(classOf[Instrumentation])
     val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
 
-    when(kamonAgentConfigMock.getInstrumentations) thenReturn List("kamon.agent.api.instrumentation.KamonInstrumentationFake")
+    when(kamonAgentConfigMock.getInstrumentations) thenReturn javaslang.collection.List.of("kamon.agent.api.instrumentation.KamonInstrumentationFake")
 
     val registeringCounter = KamonInstrumentationFake.registeringCounter
 
