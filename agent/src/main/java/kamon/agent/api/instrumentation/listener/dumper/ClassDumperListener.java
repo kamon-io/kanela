@@ -16,9 +16,9 @@ import java.io.File;
 @EqualsAndHashCode(callSuper = false)
 public class ClassDumperListener extends Listener.Adapter {
 
-    final KamonAgentConfig.DumpConfig config;
     final File dumpDir;
     final File jarFile;
+    final KamonAgentConfig.DumpConfig config;
 
     private ClassDumperListener(KamonAgentConfig.DumpConfig config){
         this.config = config;
@@ -37,17 +37,22 @@ public class ClassDumperListener extends Listener.Adapter {
 
     private void addClassToDump(DynamicType dynamicType) {
         if(!dumpDir.exists()){
-            Try.of(dumpDir::mkdirs).onFailure((cause) -> LazyLogger.error(() -> "Error creating directory...", cause));
+            runSafe(dumpDir::mkdirs, "Error creating directory...");
         }
 
         if(config.getCreateJar()) {
             if(!jarFile.exists()) {
-                Try.of(jarFile::createNewFile).onFailure((cause) -> LazyLogger.error(() -> "Error creating a new file...", cause));
-                Try.of(() -> dynamicType.toJar(jarFile)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to add transformed class to jar...", cause));
+                runSafe(jarFile::createNewFile, "Error creating a new file...");
+                runSafe(() -> dynamicType.toJar(jarFile), "Error trying to add transformed class to a new jar...");
+            } else {
+                runSafe( () -> dynamicType.inject(jarFile), "Error trying to add transformed class to existing jar...");
             }
-            Try.of(() -> dynamicType.inject(jarFile)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to add transformed class to jar...", cause));
         } else {
-            Try.of(() -> dynamicType.saveIn(dumpDir)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to save transformed class into directory...", cause));
+            runSafe(() -> dynamicType.saveIn(dumpDir), "Error trying to save transformed class into directory...");
         }
+    }
+
+    private <R> void runSafe(Try.CheckedSupplier<R> thunk, String msg) {
+        Try.of(thunk).onFailure((cause) -> LazyLogger.error(() -> msg, cause));
     }
 }

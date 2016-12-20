@@ -38,14 +38,12 @@ public class KamonAgentConfig {
     public class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
-        Boolean onTheFly;
         Boolean createJar;
         String jarName;
 
         DumpConfig(Config config) {
             this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
             this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kamon-agent/dump");
-            this.onTheFly = Try.of(() -> config.getBoolean("class-dumper.on-the-fly")).getOrElse(false);
             this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
         }
