@@ -1,7 +1,7 @@
 package kamon.agent.api.instrumentation.listener.dumper;
 
+import javaslang.control.Try;
 import kamon.agent.KamonAgentConfig;
-import kamon.agent.api.banner.AnsiColor;
 import kamon.agent.util.log.LazyLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -11,22 +11,19 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-
-import static java.text.MessageFormat.format;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class ClassDumperListener extends Listener.Adapter {
 
-    static final LinkedHashMap<String,byte[]> classNameToBytes = new LinkedHashMap<>();
     final KamonAgentConfig.DumpConfig config;
+    final File dumpDir;
+    final File jarFile;
 
-    ClassDumperListener(KamonAgentConfig.DumpConfig config) {
+    private ClassDumperListener(KamonAgentConfig.DumpConfig config){
         this.config = config;
-        onShutdown(this.config);
+        this.dumpDir = new File(config.getDumpDir());
+        this.jarFile = new File(config.getDumpDir() + File.separator + config.getJarName() + ".jar");
     }
 
     public static ClassDumperListener instance(KamonAgentConfig.DumpConfig config) {
@@ -35,60 +32,22 @@ public class ClassDumperListener extends Listener.Adapter {
 
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
-        addClassToDump(typeDescription.getSimpleName(), dynamicType.getBytes());
+        addClassToDump(dynamicType);
     }
 
-    private void onShutdown(KamonAgentConfig.DumpConfig config) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                dumpClassesToDisk(classNameToBytes);
-                if (config.getCreateJar()) {
-                    JarCreator.createJar(config.getJarName(), ClassDumperListener.this.config.getDumpDir());
-                }
-            } catch (Exception exc) {
-                LazyLogger.error(() -> "The class dumping on shutdown failed", exc);
-            }
-        }));
-    }
-
-
-    private void addClassToDump(String className, byte[] classBytes) {
-        byte[] oldBytes = classNameToBytes.put(className, classBytes);
-        if(oldBytes != null && !Arrays.equals(classBytes, oldBytes)) {
-            LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n:There exist two different classes with name {0}", className)));
+    private void addClassToDump(DynamicType dynamicType) {
+        if(!dumpDir.exists()){
+            Try.of(dumpDir::mkdirs).onFailure((cause) -> LazyLogger.error(() -> "Error creating directory...", cause));
         }
-    }
 
-    private synchronized void dumpClassesToDisk(LinkedHashMap<String, byte[]> classNameToBytes) {
-        classNameToBytes.forEach(this::dumpClass);
-    }
-
-    synchronized private void dumpClass(String className, byte[] classBuf) {
-        try {
-            // create package directories if needed
-            className = className.replace("/", File.separator);
-            StringBuilder buf = new StringBuilder();
-            String dumpDir = this.config.getDumpDir();
-            buf.append(dumpDir);
-            buf.append(File.separatorChar);
-            int index = className.lastIndexOf(File.separatorChar);
-            if (index != -1) {
-                buf.append(className.substring(0, index));
+        if(config.getCreateJar()) {
+            if(!jarFile.exists()) {
+                Try.of(jarFile::createNewFile).onFailure((cause) -> LazyLogger.error(() -> "Error creating a new file...", cause));
+                Try.of(() -> dynamicType.toJar(jarFile)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to add transformed class to jar...", cause));
             }
-            String dir = buf.toString();
-            new File(dir).mkdirs();
-
-            // write .class file
-            String fileName = dumpDir + File.separator + className + ".class";
-            FileOutputStream fos = new FileOutputStream(fileName);
-            fos.write(classBuf);
-            fos.close();
-
-            final String message = String.format("Dump %s", fileName);
-            LazyLogger.debug(() -> message);
-        } catch (Exception exc) {
-            String message = "Error creating dump file for " + className;
-            LazyLogger.error(() -> message, exc);
+            Try.of(() -> dynamicType.inject(jarFile)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to add transformed class to jar...", cause));
+        } else {
+            Try.of(() -> dynamicType.saveIn(dumpDir)).onFailure((cause) -> LazyLogger.error(() -> "Error trying to save transformed class into directory...", cause));
         }
     }
 }

@@ -17,7 +17,7 @@ public class MixinClassVisitor extends ClassVisitor {
     private final MixinDescription mixin;
     private final Type type;
 
-    public MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
+    MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);

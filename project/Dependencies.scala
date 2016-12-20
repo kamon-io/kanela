@@ -34,7 +34,7 @@ object Dependencies {
   val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.5.7"
   val scalatest         = "org.scalatest"            %% "scalatest"               % "3.0.1"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.0.42-beta"
-  val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.8"
+  val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "core"                    % "0.7.0-SNAPSHOT"

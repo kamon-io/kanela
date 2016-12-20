@@ -15,7 +15,7 @@ import lombok.Value;
 public class KamonAgentConfig {
     List<String> instrumentations;
     Option<String> withinPackage;
-    Boolean isDebugMode;
+    Boolean debugMode;
     DumpConfig dump;
 
     private static class Holder {
@@ -30,7 +30,7 @@ public class KamonAgentConfig {
         Config config = getConfig();
         this.instrumentations = getInstrumentations(config);
         this.withinPackage = getWithinConfiguration(config);
-        this.isDebugMode = getDebugMode(config);
+        this.debugMode = getDebugMode(config);
         this.dump = new DumpConfig(config);
     }
 
@@ -49,6 +49,14 @@ public class KamonAgentConfig {
             this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
         }
+
+        public boolean isDumpEnabled() {
+            return this.dumpEnabled;
+        }
+    }
+
+    public boolean isDebugMode() {
+        return this.debugMode;
     }
 
     private Config getConfig() {

@@ -1,18 +1,16 @@
 package kamon.agent.api.instrumentation.mixin;
 
+import lombok.Value;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.pool.TypePool;
 
+@Value(staticConstructor = "of")
 public class MixinClassVisitorWrapper implements AsmVisitorWrapper {
 
-    private final MixinDescription mixin;
-
-    public MixinClassVisitorWrapper(MixinDescription mixin) {
-        this.mixin = mixin;
-    }
+    MixinDescription mixin;
 
     @Override
     public int mergeWriter(int flags) {  return flags; }
