@@ -38,7 +38,6 @@ object Settings {
     javacOptions   := Seq(
       "-Xlint:-options",
       "-source", JavaVersion, "-target", JavaVersion),
-    javaOptions := Seq("-javaagent:/home/diego/.ivy2/local/io.kamon/agent_2.12/0.1-SNAPSHOT/jars/agent_2.12.jar", "-Dnet.bytebuddy.dump=/home/diego/puto3"),
     scalacOptions  := Seq(
       "-encoding",
       "utf8",
