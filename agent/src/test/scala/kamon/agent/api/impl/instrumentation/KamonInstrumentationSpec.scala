@@ -34,9 +34,9 @@ class KamonInstrumentationSpec extends WordSpecLike with Matchers {
     val kamonInstrumentation = new KamonInstrumentation() {}
     val fakeInstrumentation = mock(classOf[Instrumentation])
 
-//    intercept[RuntimeException] {
-//      kamonInstrumentation.register()
-//    }
+    //    intercept[RuntimeException] {
+    //      kamonInstrumentation.register()
+    //    }
   }
 
   class ConnectionInstrumentationPrototype extends KamonInstrumentation {
