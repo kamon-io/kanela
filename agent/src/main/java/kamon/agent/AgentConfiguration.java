@@ -1,3 +1,19 @@
+/*
+ * =========================================================================================
+ * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ * =========================================================================================
+ */
+
 package kamon.agent;
 
 import com.typesafe.config.Config;
@@ -12,21 +28,21 @@ import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 
 @Value
-public class KamonAgentConfig {
+public class AgentConfiguration {
     List<String> instrumentations;
     Option<String> withinPackage;
     Boolean debugMode;
     DumpConfig dump;
 
     private static class Holder {
-        private static final KamonAgentConfig Instance = new KamonAgentConfig();
+        private static final AgentConfiguration Instance = new AgentConfiguration();
     }
 
-    public static KamonAgentConfig instance() {
+    public static AgentConfiguration instance() {
         return Holder.Instance;
     }
 
-    private KamonAgentConfig() {
+    private AgentConfiguration() {
         Config config = getConfig();
         this.instrumentations = getInstrumentations(config);
         this.withinPackage = getWithinConfiguration(config);

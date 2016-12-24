@@ -1,7 +1,23 @@
+/*
+ * =========================================================================================
+ * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ * =========================================================================================
+ */
+
 package kamon.agent.builder;
 
 import javaslang.collection.List;
-import kamon.agent.KamonAgentConfig;
+import kamon.agent.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
@@ -19,7 +35,7 @@ abstract class KamonAgentBuilder {
 
     List<TransformerDescription> transformersByTypes = List.empty();
 
-    AgentBuilder build(KamonAgentConfig config) {
+    AgentBuilder build(AgentConfiguration config) {
         return transformersByTypes
                 .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
                         agent.type(transformerByType.getElementMatcher())
@@ -27,11 +43,11 @@ abstract class KamonAgentBuilder {
                                 .asDecorator());
     }
 
-    protected abstract AgentBuilder newAgentBuilder(KamonAgentConfig config);
+    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
 
     public abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
-    AgentBuilder from(KamonAgentConfig config) {
+    AgentBuilder from(AgentConfiguration config) {
         val ignoreList = ignoredMatcherList(config);
         val byteBuddy = new ByteBuddy()
                 .with(TypeValidation.of(config.isDebugMode()))
@@ -46,7 +62,7 @@ abstract class KamonAgentBuilder {
 //                .ignore(any(), isExtensionClassLoader());
     }
 
-    List<ElementMatcher.Junction<NamedElement>> ignoredMatcherList(KamonAgentConfig config) {
+    List<ElementMatcher.Junction<NamedElement>> ignoredMatcherList(AgentConfiguration config) {
         return config.getWithinPackage()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
