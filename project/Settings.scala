@@ -31,10 +31,8 @@ object Settings {
   lazy val basicSettings = Seq(
     scalaVersion := ScalaVersion,
     resolvers ++= Dependencies.resolutionRepos,
-    version <<= version in ThisBuild,
     fork in run := true,
     parallelExecution in Global := false,
-//    testGrouping in Test  := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value),
     javacOptions   := Seq(
       "-Xlint:-options",
       "-source", JavaVersion, "-target", JavaVersion),
@@ -54,7 +52,7 @@ object Settings {
 
   def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
     tests map { test =>
-      new Group(
+      Group(
         name = test.name,
         tests = Seq(test),
         runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))

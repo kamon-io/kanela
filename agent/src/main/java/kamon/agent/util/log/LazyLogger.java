@@ -16,7 +16,6 @@
 
 package kamon.agent.util.log;
 
-import utils.AnsiColor;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.labelers.TimestampLabeler;

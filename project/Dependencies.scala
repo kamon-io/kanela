@@ -52,10 +52,8 @@ object Dependencies {
 
   val kamonAgent      = "io.kamon"          % "agent_2.12"        % "0.1-SNAPSHOT" classifier "assembly"
 
-  def compile   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")
-  def provided  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")
-  def test      (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "test")
-  def runtime   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "runtime")
-  def container (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "container")
-  def optional  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile,optional")
+  def compileScope   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")
+  def providedScope  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")
+  def testScope      (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "test")
+  def optionalScope  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile,optional")
 }
