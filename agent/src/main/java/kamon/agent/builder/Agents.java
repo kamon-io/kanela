@@ -14,23 +14,26 @@
  * =========================================================================================
  */
 
-package kamon.agent.util;
+package kamon.agent.builder;
 
-import kamon.agent.util.log.LazyLogger;
+import javaslang.collection.List;
+import kamon.agent.AgentConfiguration;
+import kamon.agent.api.instrumentation.TypeTransformation;
+import lombok.Value;
 
-import java.util.function.Consumer;
+import java.lang.instrument.Instrumentation;
 
-import static java.text.MessageFormat.format;
+@Value(staticConstructor = "from")
+public class Agents {
+    AgentConfiguration config;
+    List<KamonAgentBuilder> agentBuilders = List.of(MixinAgentBuilder.instance(), DefaultAgentBuilder.instance());
 
-public class AgentUtil {
-
-    public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> format("{0} {1} ms", message, timeSpent)));
+    public void install(Instrumentation instrumentation) {
+        agentBuilders.forEach(builder -> builder.build(config).installOn(instrumentation));
     }
 
-    private static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
-        long startMillis = System.currentTimeMillis();
-        thunk.run();
-        timeSpent.accept(System.currentTimeMillis() - startMillis);
+    public Agents addTypeTransformation(TypeTransformation typeTransformation) {
+        agentBuilders.forEach(builder -> builder.addTypeTransformation(typeTransformation));
+        return this;
     }
 }

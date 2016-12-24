@@ -4,7 +4,7 @@ import java.lang.instrument.Instrumentation
 
 class KamonInstrumentationFake extends KamonInstrumentation {
   import KamonInstrumentationFake._
-  override def register(instrumentation: Instrumentation) = registeringCounter = registeringCounter + 1
+  //  override def register(instrumentation: Instrumentation) = registeringCounter = registeringCounter + 1
 }
 
 object KamonInstrumentationFake {

@@ -7,42 +7,40 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{ mock, when }
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
-import scala.collection.JavaConversions._
-
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   //  "should redefine API KamonInstrumentation by the agent" in {
 
   "with the config empty < kamon.agent.instrumentations >" should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
-    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List.empty[String])
+    val kamonAgentConfigMock = mock(classOf[AgentConfiguration])
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(javaslang.collection.List.empty[String])
 
-    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+    InstrumentationLoader.load(instrumentationMock)
 
     Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
   }
 
   "with an unknown instrumentation" should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
+    val kamonAgentConfigMock = mock(classOf[AgentConfiguration])
 
-    when(kamonAgentConfigMock.getInstrumentations).thenReturn(List("UnknownInstrumentation"))
+    when(kamonAgentConfigMock.getInstrumentations).thenReturn(javaslang.collection.List.of[String]("UnknownInstrumentation"))
 
-    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+    InstrumentationLoader.load(instrumentationMock)
 
     Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
   }
 
   "with an existing instrumentation" should "register it correctly" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val kamonAgentConfigMock = mock(classOf[KamonAgentConfig])
+    val kamonAgentConfigMock = mock(classOf[AgentConfiguration])
 
-    when(kamonAgentConfigMock.getInstrumentations) thenReturn List("kamon.agent.api.instrumentation.KamonInstrumentationFake")
+    when(kamonAgentConfigMock.getInstrumentations) thenReturn javaslang.collection.List.of[String]("kamon.agent.api.instrumentation.KamonInstrumentationFake")
 
     val registeringCounter = KamonInstrumentationFake.registeringCounter
 
-    InstrumentationLoader.load(instrumentationMock, kamonAgentConfigMock)
+    InstrumentationLoader.load(instrumentationMock)
 
     Mockito.verify(kamonAgentConfigMock, Mockito.times(1)).getInstrumentations
     KamonInstrumentationFake.registeringCounter should be(registeringCounter + 1)

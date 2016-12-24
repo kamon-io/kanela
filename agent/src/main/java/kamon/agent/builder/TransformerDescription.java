@@ -14,23 +14,15 @@
  * =========================================================================================
  */
 
-package kamon.agent.util;
+package kamon.agent.builder;
 
-import kamon.agent.util.log.LazyLogger;
+import lombok.Value;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 
-import java.util.function.Consumer;
-
-import static java.text.MessageFormat.format;
-
-public class AgentUtil {
-
-    public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> format("{0} {1} ms", message, timeSpent)));
-    }
-
-    private static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
-        long startMillis = System.currentTimeMillis();
-        thunk.run();
-        timeSpent.accept(System.currentTimeMillis() - startMillis);
-    }
+@Value(staticConstructor = "of")
+class TransformerDescription {
+    ElementMatcher<? super TypeDescription> elementMatcher;
+    AgentBuilder.Transformer transformer;
 }

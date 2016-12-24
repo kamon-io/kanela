@@ -1,18 +1,23 @@
-package kamon.agent.api.banner;
+/*
+ * =========================================================================================
+ * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ * =========================================================================================
+ */
+
+package utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-/*
- * Color code format WITH background color ->  :foreground,background:
- * Color code format WITHOUT background color -> :foreground,N:
- * Reset Color format -> [RC]
- *
- *   Example Use:
- *              String ansiColoredString = ColorCodes.ParseColors("Hello, This :blue,n:is[RC] a :red,white:response[RC].");
- *              - or -
- *              String ansiColoredString = ColorCodes.RED + "Hello" + ColorCodes.WHITE + ". This is a " + ColorColorCodes.BLUE + "test";
- */
 
 /** Class used for ANSI Color manipulation in a console supporting ANSI color codes */
 public class AnsiColor {
@@ -23,8 +28,6 @@ public class AnsiColor {
     public static final String GREEN = "\u001B[32;40;1m";
     public static final String YELLOW = "\u001B[33;40;1m";
     public static final String BLUE = "\u001B[34;40;1m";
-    public static final String PURPLE = "\u001B[35;40;1m";
-    public static final String CYAN = "\u001B[36;40;1m";
     public static final String WHITE = "\u001B[37;40;1m";
     public static final String DEFAULT = "\u001B[39;1m";
 
@@ -79,5 +82,4 @@ public class AnsiColor {
         }
         return 7;
     }
-
 }

@@ -14,23 +14,23 @@
  * =========================================================================================
  */
 
-package kamon.agent.util;
+package kamon.agent.api.instrumentation.listener;
 
 import kamon.agent.util.log.LazyLogger;
-
-import java.util.function.Consumer;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import net.bytebuddy.agent.builder.AgentBuilder.Listener;
+import net.bytebuddy.utility.JavaModule;
+import utils.AnsiColor;
 
 import static java.text.MessageFormat.format;
 
-public class AgentUtil {
+@Value(staticConstructor = "instance")
+@EqualsAndHashCode(callSuper = false)
+public class DefaultInstrumentationListener extends Listener.Adapter {
 
-    public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> format("{0} {1} ms", message, timeSpent)));
-    }
-
-    private static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
-        long startMillis = System.currentTimeMillis();
-        thunk.run();
-        timeSpent.accept(System.currentTimeMillis() - startMillis);
+    @Override
+    public void onError(String error, ClassLoader classLoader, JavaModule module, Throwable throwable) {
+        LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), classLoader)));
     }
 }

@@ -21,7 +21,7 @@ import sbtassembly._
 
 object Assembly {
 
-  lazy val settings = Seq(
+  lazy val settings: Seq[Setting[_]] = Seq(
     assemblyJarName in assembly := s"kamon-agent.jar",
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(cacheUnzip = false),
     packageOptions <+= (name, version, organization) map { (title, version, vendor) =>
