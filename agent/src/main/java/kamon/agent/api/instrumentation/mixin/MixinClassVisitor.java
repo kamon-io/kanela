@@ -37,7 +37,6 @@ public class MixinClassVisitor extends ClassVisitor {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);
-
     }
 
     @Override

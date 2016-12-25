@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+
 public class InstrumentationDescription {
     private final Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     private final List<MixinDescription> mixins;
@@ -79,7 +80,7 @@ public class InstrumentationDescription {
         }
 
         public Builder withAdvisorFor(ElementMatcher.Junction<MethodDescription> methodDescription , Supplier<Class<?>> classSupplier) {
-            interceptors.add(new AdvisorDescription(methodDescription.and(defaultMethodElementMatcher()), classSupplier.get()));
+            interceptors.add(AdvisorDescription.of(methodDescription.and(defaultMethodElementMatcher()), classSupplier.get()));
             return this;
         }
 

@@ -49,7 +49,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
   "with an existing instrumentation" should "register it correctly" in {
     val instrumentationMock = mock(classOf[Instrumentation])
     val agentConfiguration = spy(AgentConfiguration.instance())
-    when(agentConfiguration.getInstrumentations) thenReturn javaslang.collection.List.of[String]("kamon.agent.instrumentation.KamonInstrumentationFake")
+    when(agentConfiguration.getInstrumentations) thenReturn javaslang.collection.List.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation")
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 

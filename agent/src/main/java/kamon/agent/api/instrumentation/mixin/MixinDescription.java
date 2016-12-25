@@ -41,11 +41,7 @@ public class MixinDescription {
     Option<String> mixinInit;
     ElementMatcher targetTypes;
 
-    private MixinDescription(Type implementation,
-                             Set<String> interfaces,
-                             byte[] bytes,
-                             Option<String> mixinInit,
-                             ElementMatcher targetTypes) {
+    private MixinDescription(Type implementation, Set<String> interfaces, byte[] bytes, Option<String> mixinInit, ElementMatcher targetTypes) {
         this.implementation = implementation;
         this.interfaces = interfaces;
         this.bytes = bytes;
@@ -64,7 +60,7 @@ public class MixinDescription {
         final ClassLoader loader = implementation.getClassLoader();
         final String resourceName = implementation.getName().replace('.','/') + ".class";
         final InputStream stream = loader.getResourceAsStream(resourceName);
-        return Try.of(() -> AgentApiUtils.streamToByteArray(stream)).getOrElseThrow(() -> new RuntimeException(""));
+        return Try.of(() -> AgentApiUtils.streamToByteArray(stream)).getOrElseThrow((cause) -> new RuntimeException("Error trying to convert a class to byte array", cause));
     }
 
     public AgentBuilder.Transformer makeTransformer() {

@@ -29,7 +29,6 @@ import static java.text.MessageFormat.format;
 public class InstrumentationLoader {
 
     /**
-     *
      * @param instrumentation: provided by JVM
      */
     public static void load(Instrumentation instrumentation, AgentConfiguration config) {

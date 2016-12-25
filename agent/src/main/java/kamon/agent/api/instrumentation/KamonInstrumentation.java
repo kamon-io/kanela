@@ -45,18 +45,18 @@ public abstract class KamonInstrumentation {
 
     public List<TypeTransformation> collectTransformations() {
         return instrumentationDescriptions.stream()
-                .map(this::makeTransformations)
+                .map(this::buildTransformations)
                 .collect(Collectors.toList());
     }
 
-    private TypeTransformation makeTransformations(InstrumentationDescription instrumentationDescription) {
-        val mixins = collectTransformers(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
-        val advisors = collectTransformers(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
-        val transformers = collectTransformers(instrumentationDescription.transformers(), Function.identity());
+    private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription) {
+        val mixins = collect(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
+        val advisors = collect(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
+        val transformers = collect(instrumentationDescription.transformers(), Function.identity());
         return TypeTransformation.of(instrumentationDescription.elementMatcher(), mixins, advisors, transformers);
     }
 
-    private <T> Set<AgentBuilder.Transformer> collectTransformers(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
+    private <T> Set<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
         return transformerList.stream()
                 .map(f)
                 .collect(Collectors.toSet());

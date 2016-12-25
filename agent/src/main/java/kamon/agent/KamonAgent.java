@@ -35,7 +35,7 @@ public class KamonAgent {
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         withTimeLogging(() -> {
-            KamonAgentBanner.printBanner(System.out);
+            KamonAgentBanner.print(System.out);
             InstrumentationLoader.load(instrumentation, AgentConfiguration.instance());
         }, "Premain startup complete in");
     }

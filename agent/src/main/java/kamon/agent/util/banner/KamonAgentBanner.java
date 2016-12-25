@@ -36,15 +36,15 @@ public class KamonAgentBanner {
 
     private static final int STRAP_LINE_SIZE = 42;
 
-    public static void printBanner(PrintStream printStream) {
+    public static void print(PrintStream printStream) {
         for (String line : BANNER) {
             printStream.println(line);
         }
-        String version = "1.0";
+        String version = "0.1.0";
         version = (version == null ? "" : " (v" + version + ")");
         String padding = "";
-        while (padding.length() < STRAP_LINE_SIZE
-                - (version.length() + KAMON_AGENT.length())) {
+
+        while (padding.length() < STRAP_LINE_SIZE - (version.length() + KAMON_AGENT.length())) {
             padding += " ";
         }
 

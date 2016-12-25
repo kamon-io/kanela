@@ -96,8 +96,6 @@ public class AgentConfiguration {
         return Try.of(() -> config.getBoolean("debug-mode")).getOrElse(false);
     }
 
-
-
     private Config loadDefaultConfig() {
         return ConfigFactory
                 .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
