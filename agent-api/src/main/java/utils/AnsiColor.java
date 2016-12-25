@@ -73,10 +73,6 @@ public class AnsiColor {
             return 3;
         }else if(color.equalsIgnoreCase("BLUE")){
             return 4;
-        }else if(color.equalsIgnoreCase("MAGENTA")){
-            return 5;
-        }else if(color.equalsIgnoreCase("CYAN")){
-            return 6;
         }else if(color.equalsIgnoreCase("WHITE")){
             return 7;
         }

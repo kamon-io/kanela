@@ -26,8 +26,10 @@ import javaslang.control.Option;
 import javaslang.control.Try;
 import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 
 @Value
+@NonFinal
 public class AgentConfiguration {
     List<String> instrumentations;
     Option<String> withinPackage;

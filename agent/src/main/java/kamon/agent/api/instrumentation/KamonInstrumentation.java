@@ -19,6 +19,7 @@ package kamon.agent.api.instrumentation;
 import javaslang.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
@@ -49,27 +50,26 @@ public abstract class KamonInstrumentation {
     }
 
     private TypeTransformation makeTransformations(InstrumentationDescription instrumentationDescription) {
-        final Set<AgentBuilder.Transformer> mixins = toTransformers(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
-        final Set<AgentBuilder.Transformer> advisors = toTransformers(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
-        final Set<AgentBuilder.Transformer> transformers = toTransformers(instrumentationDescription.transformers(), Function.identity());
-
+        val mixins = collectTransformers(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
+        val advisors = collectTransformers(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
+        val transformers = collectTransformers(instrumentationDescription.transformers(), Function.identity());
         return TypeTransformation.of(instrumentationDescription.elementMatcher(), mixins, advisors, transformers);
     }
 
-    private <T> Set<AgentBuilder.Transformer> toTransformers(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
+    private <T> Set<AgentBuilder.Transformer> collectTransformers(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
         return transformerList.stream()
                 .map(f)
                 .collect(Collectors.toSet());
     }
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
-        InstrumentationDescription.Builder builder = new InstrumentationDescription.Builder();
+        val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher().and(named(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
-        InstrumentationDescription.Builder builder = new InstrumentationDescription.Builder();
+        val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher().and(isSubTypeOf(typePool.describe(f.get()).resolve())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }

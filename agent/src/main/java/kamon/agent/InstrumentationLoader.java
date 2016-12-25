@@ -32,9 +32,7 @@ public class InstrumentationLoader {
      *
      * @param instrumentation: provided by JVM
      */
-    public static void load(Instrumentation instrumentation) {
-        val config = AgentConfiguration.instance();
-
+    public static void load(Instrumentation instrumentation, AgentConfiguration config) {
         config.getInstrumentations()
                 .map(InstrumentationLoader::loadInstrumentation)
                 .sortBy(KamonInstrumentation::order)
@@ -46,6 +44,6 @@ public class InstrumentationLoader {
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {
         LazyLogger.info(() -> format("Loading {0}...", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, InstrumentationLoader.class.getClassLoader()).newInstance())
-                .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
+                  .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
     }
 }

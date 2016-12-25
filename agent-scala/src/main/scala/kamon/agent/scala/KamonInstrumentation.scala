@@ -12,31 +12,18 @@ import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 
 trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrumentation {
 
-  implicit def toJavaSupplier[A](f: ⇒ A): JSupplier[A] = new JSupplier[A] {
-    override def get(): A = f
-  }
+  implicit def toJavaSupplier[A](f: ⇒ A): JSupplier[A] = () ⇒ f
+  implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] = (a: A) ⇒ f(a)
 
-  implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] = new JFunction1[A, B] {
-    override def apply(a: A): B = f(a)
-  }
+  private implicit def toJavaFunction2[A, B, C](f: (A, B) ⇒ C): JFunction2[A, B, C] = (a: A, b: B) ⇒ f(a, b)
+  private implicit def toJavaFunction3[A, B, C, D](f: (A, B, C) ⇒ D): JFunction3[A, B, C, D] = (a: A, b: B, c: C) ⇒ f(a, b, c)
+  private implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] = (a: A, b: B) ⇒ f(a, b)
 
-  private implicit def toJavaFunction2[A, B, C](f: (A, B) ⇒ C): JFunction2[A, B, C] = new JFunction2[A, B, C] {
-    override def apply(a: A, b: B): C = f(a, b)
-  }
-
-  private implicit def toJavaFunction3[A, B, C, D](f: (A, B, C) ⇒ D): JFunction3[A, B, C, D] = new JFunction3[A, B, C, D] {
-    override def apply(a: A, b: B, c: C): D = f(a, b, c)
-  }
-
-  private implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] = new JBifunction[A, B, C] {
-    override def apply(a: A, b: B): C = f(a, b)
-  }
-
-  def forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription) = {
+  def forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
     super.forSubtypeOf(name, builder)
   }
 
-  def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription) = {
+  def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
     super.forTargetType(name, builder)
   }
 
