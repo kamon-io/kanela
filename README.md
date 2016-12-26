@@ -10,18 +10,19 @@ Scala-Friendly API to define the custom instrumentation in a declarative manner.
 The agent is able to modify the code during the runtime of a Java application. It uses [ByteBuddy] as a facility
 library to manipulate the desirable classes and exposes an API to define the transformation to be made.
 
-The agent supplies 2 kinds of transformation:
+The agent provides 2 kinds of transformation:
 
-* Advisor: introduce changes on methods and constructors for a given type matcher.
-* Mixin: compose existing types with new types in order to enrich them with new capabilities.
+* **Advisor:** introduce changes on methods and constructors for a given type matcher.
+* **Mixin:** compose existing types with new types in order to enrich them with new capabilities.
 
-The API has a version for Java and other one for Scala. To define the transformations you have to extends the
+The API has a version for *Java* and other one for *Scala*. To define the transformations you have to extends the
 `KamonInstrumentation` type (picking the Java or the Scala version) and call the available methods to introduce transformations:
 
 * `forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription)`
 * `forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription)`
 
-In the builder introduced in the function argument that receive the methods, you must define the transformations for a particular type matcher.
+In the builder introduced in the function argument, you must define the transformations for a particular type matcher,
+as shown in the following example.
 
 A simple use case using the Scala version:
 
@@ -29,7 +30,12 @@ A simple use case using the Scala version:
 
 import kamon.agent.scala.KamonInstrumentation
 
+// And other imports !
+
 class ServletInstrumentation extends KamonInstrumentation {
+
+    val SetStatusMethod: Junction[MethodDescription] = named("setStatus")
+    val SendErrorMethod: Junction[MethodDescription] = named("sendError").and(takesArguments(classOf[Int]))
 
     forSubtypeOf("javax.servlet.http.HttpServletResponse") { builder ⇒
         builder
@@ -37,9 +43,19 @@ class ServletInstrumentation extends KamonInstrumentation {
           .withAdvisorFor(SetStatusMethod, classOf[ResponseStatusAdvisor])
           .withAdvisorFor(SendErrorMethod, classOf[ResponseStatusAdvisor])
           .build()
-      }
     }
-    
+}
+
+class ResponseStatusAdvisor
+object ResponseStatusAdvisor {
+  @OnMethodEnter
+  def onEnter(@This response: TraceContextAwareExtension, @Argument(0) status: Int): Unit = {
+    response.traceContext().collect { ctx ⇒
+      ServletExtension.httpServerMetrics.recordResponse(ctx.name, status.toString)
+    }
+  }
+}
+
 ```
 
 [ByteBuddy]:(http://bytebuddy.net/#/)
