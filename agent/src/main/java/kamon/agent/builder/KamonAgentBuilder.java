@@ -38,8 +38,8 @@ abstract class KamonAgentBuilder {
         return transformersByTypes
                 .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
                         agent.type(transformerByType.getElementMatcher())
-                                .transform(transformerByType.getTransformer())
-                                .asDecorator());
+                             .transform(transformerByType.getTransformer())
+                             .asDecorator());
     }
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
