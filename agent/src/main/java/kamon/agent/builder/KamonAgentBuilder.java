@@ -17,8 +17,8 @@
 package kamon.agent.builder;
 
 import javaslang.collection.List;
-import kamon.agent.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -29,7 +29,6 @@ import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static net.bytebuddy.matcher.ElementMatchers.nameMatches;
 
 abstract class KamonAgentBuilder {
 
@@ -48,27 +47,34 @@ abstract class KamonAgentBuilder {
     public abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
     AgentBuilder from(AgentConfiguration config) {
-        val ignoreList = ignoredMatcherList(config);
         val byteBuddy = new ByteBuddy()
                 .with(TypeValidation.of(config.isDebugMode()))
                 .with(MethodGraph.Empty.INSTANCE);
-        val agentBuilder = new AgentBuilder
-                .Default(byteBuddy)
-                .disableClassFormatChanges();
-//                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
 
-        return ignoreList.foldLeft(agentBuilder, AgentBuilder::ignore)
-                .ignore(any(), isBootstrapClassLoader());
-//                .ignore(any(), isExtensionClassLoader());
+        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy);
+
+        if(config.isAttachedInRuntime()) {
+            agentBuilder.disableClassFormatChanges()
+                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+        }
+
+        return ignoredMatcherList(config).foldLeft(agentBuilder, AgentBuilder::ignore)
+                .ignore(any(), isBootstrapClassLoader())
+                .or(any(), isExtensionClassLoader());
     }
 
-    List<ElementMatcher.Junction<NamedElement>> ignoredMatcherList(AgentConfiguration config) {
+    private List<ElementMatcher.Junction<NamedElement>> ignoredMatcherList(AgentConfiguration config) {
         return config.getWithinPackage()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
                         nameMatches("sun\\..*"),
+                        nameMatches("com\\.sun\\..*"),
                         nameMatches("java\\..*"),
                         nameMatches("javax\\..*"),
+                        nameMatches("org\\.aspectj.\\..*"),
+                        nameMatches("org\\.groovy.\\..*"),
+                        nameMatches("net\\.bytebuddy.\\..*"),
+                        nameMatches("\\.asm.\\..*"),
                         nameMatches("kamon\\.agent\\..*"),
                         nameMatches("kamon\\.testkit\\..*"),
                         nameMatches("kamon\\.instrumentation\\..*"),

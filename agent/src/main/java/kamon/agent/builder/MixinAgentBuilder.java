@@ -16,7 +16,7 @@
 
 package kamon.agent.builder;
 
-import kamon.agent.AgentConfiguration;
+import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
 import lombok.EqualsAndHashCode;

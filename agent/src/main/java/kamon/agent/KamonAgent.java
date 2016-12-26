@@ -16,10 +16,7 @@
 
 package kamon.agent;
 
-import kamon.agent.util.banner.KamonAgentBanner;
 import java.lang.instrument.Instrumentation;
-
-import static kamon.agent.util.AgentUtil.withTimeLogging;
 
 public class KamonAgent {
 
@@ -34,10 +31,7 @@ public class KamonAgent {
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        withTimeLogging(() -> {
-            KamonAgentBanner.print(System.out);
-            InstrumentationLoader.load(instrumentation, AgentConfiguration.instance());
-        }, "Premain startup complete in");
+        AgentEntryPoint.premain(args, instrumentation);
     }
 
     /**
@@ -51,6 +45,6 @@ public class KamonAgent {
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        premain(args, instrumentation);
+        AgentEntryPoint.agentmain(args, instrumentation);
     }
 }

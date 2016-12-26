@@ -19,15 +19,14 @@ package kamon.agent;
 import javaslang.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
 import kamon.agent.builder.Agents;
+import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 
-import lombok.val;
 import java.lang.instrument.Instrumentation;
 
 import static java.text.MessageFormat.format;
 
 public class InstrumentationLoader {
-
     /**
      * @param instrumentation: provided by JVM
      */

@@ -17,7 +17,7 @@
 package kamon.agent.api.instrumentation.listener.dumper;
 
 import javaslang.control.Try;
-import kamon.agent.AgentConfiguration;
+import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
