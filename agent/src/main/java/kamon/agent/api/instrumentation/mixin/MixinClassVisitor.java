@@ -62,6 +62,7 @@ public class MixinClassVisitor extends ClassVisitor {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public void visitEnd() {
         ClassReader cr = new ClassReader(mixin.getBytes());
         ClassNode cn = new ClassNode();
