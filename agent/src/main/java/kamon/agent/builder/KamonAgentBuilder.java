@@ -18,11 +18,10 @@ package kamon.agent.builder;
 
 import javaslang.Function1;
 import javaslang.collection.List;
-
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
-
+import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
@@ -30,8 +29,6 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
-
-import lombok.val;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -56,9 +53,9 @@ abstract class KamonAgentBuilder {
         }
 
         return configuredMatcherList.apply(config)
-                                         .foldLeft(agentBuilder, AgentBuilder::ignore)
-                                         .ignore(any(), isBootstrapClassLoader())
-                                         .or(any(), isExtensionClassLoader());
+                                    .foldLeft(agentBuilder, AgentBuilder::ignore)
+                                    .ignore(any(), isBootstrapClassLoader())
+                                    .or(any(), isExtensionClassLoader());
     }
 
     AgentBuilder build(AgentConfiguration config) {
@@ -78,6 +75,7 @@ abstract class KamonAgentBuilder {
                         nameMatches("java\\..*"),
                         nameMatches("javax\\..*"),
                         nameMatches("org\\.aspectj.\\..*"),
+                        nameMatches("com\\.newrelic.\\..*"),
                         nameMatches("org\\.groovy.\\..*"),
                         nameMatches("net\\.bytebuddy.\\..*"),
                         nameMatches("\\.asm.\\..*"),
