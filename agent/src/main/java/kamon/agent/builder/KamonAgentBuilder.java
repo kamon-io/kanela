@@ -18,6 +18,7 @@ package kamon.agent.builder;
 
 import javaslang.collection.List;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
@@ -32,14 +33,14 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    List<TransformerDescription> transformersByTypes = List.empty();
+    final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
 
     AgentBuilder build(AgentConfiguration config) {
-        return transformersByTypes
+        return transformersByTypes.build()
                 .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
                         agent.type(transformerByType.getElementMatcher())
-                             .transform(transformerByType.getTransformer())
-                             .asDecorator());
+                                .transform(transformerByType.getTransformer())
+                                .asDecorator());
     }
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
@@ -53,9 +54,9 @@ abstract class KamonAgentBuilder {
 
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy);
 
-        if(config.isAttachedInRuntime()) {
+        if (config.isAttachedInRuntime()) {
             agentBuilder.disableClassFormatChanges()
-                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+                    .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
 
         return ignoredMatcherList(config).foldLeft(agentBuilder, AgentBuilder::ignore)

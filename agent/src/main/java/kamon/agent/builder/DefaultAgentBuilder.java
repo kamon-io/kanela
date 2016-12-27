@@ -40,7 +40,7 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
-            transformersByTypes = transformersByTypes.appendAll(typeTransformation
+            transformersByTypes.addAll(typeTransformation
                     .getTransformations()
                     .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
         }

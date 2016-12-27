@@ -34,7 +34,7 @@ class MixinAgentBuilder extends KamonAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
-            transformersByTypes = transformersByTypes.appendAll(typeTransformation
+            transformersByTypes.addAll(typeTransformation
                     .getMixins()
                     .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
         }

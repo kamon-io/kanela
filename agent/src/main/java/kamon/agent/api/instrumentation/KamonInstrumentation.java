@@ -16,6 +16,7 @@
 
 package kamon.agent.api.instrumentation;
 
+import javaslang.Function0;
 import javaslang.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
@@ -62,20 +63,24 @@ public abstract class KamonInstrumentation {
                 .collect(Collectors.toSet());
     }
 
+    private Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> failSafe(not(isInterface()).and(not(isSynthetic())))).memoized();
+
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher().and(named(f.get())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(named(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher().and(isSubTypeOf(typePool.describe(f.get()).resolve())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isSubTypeOf(typePool.describe(f.get()).resolve())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    private ElementMatcher.Junction<TypeDescription> defaultTypeMatcher() {
-        return  failSafe(not(isInterface()).and(not(isSynthetic())));
+    public void annotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+        val builder = new InstrumentationDescription.Builder();
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(typePool.describe(f.get()).resolve())));
+        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public boolean isActive() {
