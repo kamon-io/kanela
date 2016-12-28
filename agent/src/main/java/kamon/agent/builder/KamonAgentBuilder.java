@@ -19,6 +19,7 @@ package kamon.agent.builder;
 import javaslang.Function1;
 import javaslang.collection.List;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
@@ -35,6 +36,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 abstract class KamonAgentBuilder {
 
     private final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
+
     final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
@@ -45,7 +48,9 @@ abstract class KamonAgentBuilder {
                 .with(TypeValidation.of(config.isDebugMode()))
                 .with(MethodGraph.Empty.INSTANCE);
 
+
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy);
+//                .with(poolStrategyCache);
 
         if (config.isAttachedInRuntime()) {
             agentBuilder.disableClassFormatChanges()
