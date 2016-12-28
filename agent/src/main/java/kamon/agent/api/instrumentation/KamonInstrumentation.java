@@ -26,7 +26,6 @@ import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.pool.TypePool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,6 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class KamonInstrumentation {
     private final List<InstrumentationDescription> instrumentationDescriptions = new ArrayList<>();
 
-    private final TypePool typePool = TypePool.Default.ofClassPath();
     protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
     protected final ElementMatcher.Junction<MethodDescription> TakesArguments = not(takesArguments(0));
 
@@ -73,13 +71,13 @@ public abstract class KamonInstrumentation {
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isSubTypeOf(typePool.describe(f.get()).resolve())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(hasSuperType(named(f.get()))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void annotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(typePool.describe(f.get()).resolve())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(named(f.get()))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
