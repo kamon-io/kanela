@@ -18,37 +18,51 @@ package kamon.agent.cache;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.pool.TypePool;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCache {
 
-    WeakConcurrentMap<ClassLoader, TypePool.CacheProvider> cache =  WeakConcurrentMap.instance();
+    ConcurrentHashMap<ClassLoader, TypePool.CacheProvider> cache =  new ConcurrentHashMap<>();
 
     private PoolStrategyCache() { super(TypePool.Default.ReaderMode.EXTENDED);}
 
     public static PoolStrategyCache instance() {
+//        return new PoolStrategyCache();
         return PoolStrategyCache.Holder.Instance;
     }
 
+//    @Override
+//    public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
+//        return new TypePool.Default.WithLazyResolution(locate(classLoader), classFileLocator, readerMode);
+//    }
+
     @Override
-    protected TypePool.CacheProvider locate(ClassLoader classLoader) {
+    public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
+//        System.out.println("Using ClassLoader ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + classLoader.getClass().getName());
+        return new TypePool.Default.WithLazyResolution(TypePool.CacheProvider.Simple.withObjectType(), classFileLocator, readerMode);
+    }
+
+    @Override
+    protected synchronized TypePool.CacheProvider locate(ClassLoader classLoader) {
         classLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
-        TypePool.CacheProvider cacheProvider = cache.get(classLoader);
-        while (cacheProvider == null) {
-            cacheProvider = TypePool.CacheProvider.Simple.withObjectType();
-            TypePool.CacheProvider previous = cache.putIfAbsent(classLoader, cacheProvider);
-            if (previous != null) {
-                cacheProvider = previous;
-            }
-        }
-        return cacheProvider;
+//        val result = cache.get(classLoader);
+
+//        if(result != null && result.find("kamon.servlet.instrumentation.mixin.SegmentAwareExtension") != null) {
+//            System.out.println("========================>>>>>>>>>>>>>>>>>>" + result.find("kamon.servlet.instrumentation.mixin.SegmentAwareExtension"));
+//        }
+
+        return cache.computeIfAbsent(classLoader, (key) -> TypePool.CacheProvider.Simple.withObjectType());
     }
 
     public void triggerClean() {
-       this.cache.expungeStaleEntries();
+//       this.cache.expungeStaleEntries();
     }
 
     private static class Holder {

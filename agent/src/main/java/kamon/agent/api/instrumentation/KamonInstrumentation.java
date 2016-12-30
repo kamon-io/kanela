@@ -61,7 +61,7 @@ public abstract class KamonInstrumentation {
                 .collect(Collectors.toSet());
     }
 
-    private Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> failSafe(not(isInterface()).and(not(isSynthetic())))).memoized();
+    private Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
