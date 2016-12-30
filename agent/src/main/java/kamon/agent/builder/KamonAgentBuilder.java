@@ -37,7 +37,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    private final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
     private final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
 
     final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
@@ -74,7 +74,7 @@ abstract class KamonAgentBuilder {
                              .asDecorator());
     }
 
-    private Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+    private static Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
         return (configuration) -> configuration.getWithinPackage()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
