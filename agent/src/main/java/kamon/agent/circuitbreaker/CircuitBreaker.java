@@ -17,7 +17,6 @@
 package kamon.agent.circuitbreaker;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
-import com.sun.management.GcInfo;
 import javaslang.collection.List;
 import javaslang.control.Option;
 import lombok.Value;
@@ -36,7 +35,6 @@ import java.lang.management.MemoryPoolMXBean;
 public class CircuitBreaker {
 
     long jvmStartTime;
-    Option<MemoryPoolMXBean> youngGenPool;
     Option<MemoryPoolMXBean> oldGenPool;
 
     @NonFinal long youngGenSizeAfter = 0;
@@ -44,7 +42,6 @@ public class CircuitBreaker {
     public CircuitBreaker() {
         val memoryBeans = List.ofAll(ManagementFactory.getMemoryPoolMXBeans());
         this.jvmStartTime = ManagementFactory.getRuntimeMXBean().getStartTime();
-        this.youngGenPool = memoryBeans.find(CircuitBreakerTools::isYoungGenPool);
         this.oldGenPool = memoryBeans.find(CircuitBreakerTools::isOldGenPool);
     }
 
@@ -60,12 +57,9 @@ public class CircuitBreaker {
 
     private void processGCEvent(GarbageCollectionNotificationInfo info) {
         val event = new GcEvent(info, jvmStartTime + info.getGcInfo().getStartTime());
-        updateMetrics(info.getGcName(), info.getGcInfo());
-    }
 
-    private void updateMetrics(String name, GcInfo info) {
-        val before = info.getMemoryUsageBeforeGc();
-        val after = info.getMemoryUsageAfterGc();
+        val before = info.getGcInfo().getMemoryUsageBeforeGc();
+        val after = info.getGcInfo().getMemoryUsageAfterGc();
 
         val oldDelta = oldGenPool.map((oldGenPoolName) -> {
             val oldBefore = before.get(oldGenPoolName).getUsed();
@@ -73,13 +67,7 @@ public class CircuitBreaker {
             return oldAfter - oldBefore;
         });
 
-        val youngDelta = youngGenPool.map((youngGenPoolName) -> {
-            val youngBefore = before.get(youngGenPoolName).getUsed();
-            val youngAfter = after.get(youngGenPoolName).getUsed();
-            val delta = youngBefore - youngGenSizeAfter;
-            youngGenSizeAfter = youngAfter;
-            return delta;
-        });
+        
     }
 
 
