@@ -30,11 +30,14 @@ import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import static kamon.agent.util.matcher.ClassLoaderMatcher.isReflectionClassLoader;
+import static kamon.agent.util.matcher.TimedMatcher.withTimeSpent;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    private final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+
     final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
@@ -45,6 +48,7 @@ abstract class KamonAgentBuilder {
                 .with(TypeValidation.of(config.isDebugMode()))
                 .with(MethodGraph.Empty.INSTANCE);
 
+
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy);
 
         if (config.isAttachedInRuntime()) {
@@ -54,8 +58,9 @@ abstract class KamonAgentBuilder {
 
         return configuredMatcherList.apply(config)
                                     .foldLeft(agentBuilder, AgentBuilder::ignore)
-                                    .ignore(any(), isBootstrapClassLoader())
-                                    .or(any(), isExtensionClassLoader());
+                                    .ignore(any(), withTimeSpent(getAgentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
+                                    .or(any(), withTimeSpent(getAgentName(),"classloader", "extension", isExtensionClassLoader()))
+                                    .or(any(), withTimeSpent(getAgentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
     AgentBuilder build(AgentConfiguration config) {
@@ -66,7 +71,7 @@ abstract class KamonAgentBuilder {
                              .asDecorator());
     }
 
-    private Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+    private static Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
         return (configuration) -> configuration.getWithinPackage()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
@@ -90,5 +95,9 @@ abstract class KamonAgentBuilder {
 
     ElementMatcher<? super TypeDescription> extractElementMatcher(TypeTransformation typeTransformation) {
         return typeTransformation.getElementMatcher().getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher"));
+    }
+
+    protected String getAgentName() {
+        return getClass().getSimpleName();
     }
 }

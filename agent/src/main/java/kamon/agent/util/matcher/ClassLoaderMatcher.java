@@ -14,23 +14,28 @@
  * =========================================================================================
  */
 
-package kamon.agent.api.instrumentation.listener;
+package kamon.agent.util.matcher;
 
-import kamon.agent.util.log.LazyLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder.Listener;
-import net.bytebuddy.utility.JavaModule;
-import utils.AnsiColor;
+import net.bytebuddy.matcher.ElementMatcher;
 
-import static java.text.MessageFormat.format;
-
-@Value(staticConstructor = "instance")
+@Value
 @EqualsAndHashCode(callSuper = false)
-public class DefaultInstrumentationListener extends Listener.Adapter {
+public class ClassLoaderMatcher extends ElementMatcher.Junction.AbstractBase<ClassLoader>{
+
+    String classLoaderName;
+
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> withName(String name) {
+        return new ClassLoaderMatcher(name);
+    }
+
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isReflectionClassLoader() {
+        return new ClassLoaderMatcher("sun.reflect.DelegatingClassLoader");
+    }
 
     @Override
-    public void onError(String error, ClassLoader classLoader, JavaModule module, Throwable throwable) {
-        LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName())));
+    public boolean matches(ClassLoader target) {
+        return (target != null) && classLoaderName.equals(target.getClass().getName());
     }
 }
