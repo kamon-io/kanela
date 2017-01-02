@@ -45,14 +45,14 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
         this.cache = ExpiringMap
                 .builder()
                 .entryLoader((key) -> TypePool.CacheProvider.Simple.withObjectType())
-                .expiration(3, TimeUnit.MINUTES)
+                .expiration(5, TimeUnit.SECONDS) //TODO: configuration
                 .expirationPolicy(ExpirationPolicy.ACCESSED)
-                .asyncExpirationListener(LogExpirationListener())
+                .expirationListener(LogExpirationListener())
                 .build();
     }
 
     @Override
-    protected synchronized TypePool.CacheProvider locate(ClassLoader classLoader) {
+    protected TypePool.CacheProvider locate(ClassLoader classLoader) {
         val mapKey = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
         return cache.get(mapKey);
     }

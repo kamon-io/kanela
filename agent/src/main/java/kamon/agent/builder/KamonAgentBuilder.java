@@ -41,12 +41,10 @@ abstract class KamonAgentBuilder {
 
     private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
 
-    private final PoolStrategyCache cache = PoolStrategyCache.instance();
+    private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
 
     final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
     final ListBuilder<TypeTransformation> typeTrasformations = ListBuilder.builder();
-
-
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
@@ -58,7 +56,8 @@ abstract class KamonAgentBuilder {
                 .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
 
-        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy).with(cache);
+        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
+                                                    .with(poolStrategyCache);
 
         if (config.isAttachedInRuntime()) {
             agentBuilder.disableClassFormatChanges()
@@ -77,7 +76,6 @@ abstract class KamonAgentBuilder {
             java.util.List<AgentBuilder.Transformer> listaPuta = new ArrayList<>();
             listaPuta.addAll(typeTransformation.getMixins().toJavaList());
             listaPuta.addAll(typeTransformation.getTransformations().toJavaList());
-                System.out.println("a" + listaPuta);
             return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(listaPuta));
 
         });
