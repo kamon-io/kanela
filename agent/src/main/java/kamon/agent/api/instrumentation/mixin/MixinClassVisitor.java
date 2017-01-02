@@ -16,9 +16,7 @@
 
 package kamon.agent.api.instrumentation.mixin;
 
-import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
-import lombok.Value;
 import net.bytebuddy.jar.asm.*;
 import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
@@ -31,20 +29,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-@Value
-@EqualsAndHashCode(callSuper = false)
 public class MixinClassVisitor extends ClassVisitor {
 
-    static final String ConstructorDescriptor = "<init>";
+    private static final String ConstructorDescriptor = "<init>";
 
-    MixinDescription mixin;
-    Type type;
+    private final MixinDescription mixin;
+    private final Type type;
 
-    public static MixinClassVisitor from(MixinDescription mixin, String className, ClassVisitor classVisitor) {
-        return new MixinClassVisitor(mixin, className, classVisitor);
-    }
-
-    private MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
+    MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);
@@ -71,9 +63,8 @@ public class MixinClassVisitor extends ClassVisitor {
         return newInterfaces.toArray(new String[newInterfaces.size()]);
     }
 
-    @Override
-    @SneakyThrows
     @SuppressWarnings("unchecked")
+    @SneakyThrows
     public void visitEnd() {
         ClassReader cr = new ClassReader(mixin.getMixinClass());
         ClassNode cn = new ClassNode();

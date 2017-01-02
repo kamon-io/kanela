@@ -46,7 +46,7 @@ public class CircuitBreaker {
     }
 
     public void install() {
-        val notificationListener = GcNotificationListener.instance();
+        val notificationListener = new GcNotificationListener();
         for (GarbageCollectorMXBean mbean : ManagementFactory.getGarbageCollectorMXBeans()) {
             if (mbean instanceof NotificationEmitter) {
                 val emitter = (NotificationEmitter) mbean;
@@ -71,7 +71,7 @@ public class CircuitBreaker {
     }
 
 
-    @Value(staticConstructor = "instance")
+//    @Value(staticConstructor = "instance")
     private class GcNotificationListener implements NotificationListener {
         @Override
         public void handleNotification(Notification notification, Object handback) {
