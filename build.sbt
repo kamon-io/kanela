@@ -31,7 +31,7 @@ lazy val agent = (project in file("agent"))
   .settings(formatSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy) ++
+    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy, expirinMap) ++
     testScope(scalatest, mockito) ++
     providedScope(lombok))
   .settings(excludeScalaLib: _*)

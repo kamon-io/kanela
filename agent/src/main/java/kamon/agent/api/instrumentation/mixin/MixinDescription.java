@@ -19,17 +19,23 @@ package kamon.agent.api.instrumentation.mixin;
 
 import javaslang.collection.List;
 import javaslang.control.Option;
+import javaslang.control.Try;
 import kamon.agent.api.instrumentation.Initializer;
+import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.pool.TypePool;
 
+import javax.sound.midi.Soundbank;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Value
 public class MixinDescription {
@@ -57,11 +63,9 @@ public class MixinDescription {
 
     public AgentBuilder.Transformer makeTransformer() {
         val interfaces = List.ofAll(this.interfaces)
-                .map(i -> TypePool.Default.ofClassPath().describe(i).resolve())
-                .toJavaList();
-        System.out.println("la concha de tu madre:=========================" + interfaces);
+                .map(i -> new TypeDescription.ForLoadedType(Try.of(() -> Class.forName(i)).get())).toJavaList();
         return (builder, typeDescription, classLoader) ->
-//                builder.implement(interfaces)
-                        builder.visit(MixinClassVisitorWrapper.of(this));
+                builder.implement(interfaces)
+                       .visit(MixinClassVisitorWrapper.of(this));
     }
 }

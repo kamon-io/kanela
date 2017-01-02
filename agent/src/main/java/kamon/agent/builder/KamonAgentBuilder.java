@@ -19,6 +19,7 @@ package kamon.agent.builder;
 import javaslang.Function1;
 import javaslang.collection.List;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
@@ -30,6 +31,8 @@ import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import java.util.ArrayList;
+
 import static kamon.agent.util.matcher.ClassLoaderMatcher.isReflectionClassLoader;
 import static kamon.agent.util.matcher.TimedMatcher.withTimeSpent;
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -38,18 +41,24 @@ abstract class KamonAgentBuilder {
 
     private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
 
+    private final PoolStrategyCache cache = PoolStrategyCache.instance();
+
     final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
+    final ListBuilder<TypeTransformation> typeTrasformations = ListBuilder.builder();
+
+
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
+
     AgentBuilder from(AgentConfiguration config) {
         val byteBuddy = new ByteBuddy()
                 .with(TypeValidation.of(config.isDebugMode()))
-                .with(MethodGraph.Empty.INSTANCE);
+                .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
 
-        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy);
+        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy).with(cache);
 
         if (config.isAttachedInRuntime()) {
             agentBuilder.disableClassFormatChanges()
@@ -64,12 +73,21 @@ abstract class KamonAgentBuilder {
     }
 
     AgentBuilder build(AgentConfiguration config) {
-        return transformersByTypes.build()
-                .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
-                        agent.type(transformerByType.getElementMatcher())
-                             .transform(transformerByType.getTransformer())
-                             .asDecorator());
+            return typeTrasformations.build().foldLeft(newAgentBuilder(config), (agent, typeTransformation) -> {
+            java.util.List<AgentBuilder.Transformer> listaPuta = new ArrayList<>();
+            listaPuta.addAll(typeTransformation.getMixins().toJavaList());
+            listaPuta.addAll(typeTransformation.getTransformations().toJavaList());
+                System.out.println("a" + listaPuta);
+            return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(listaPuta));
+
+        });
     }
+//        return transformersByTypes.build()
+//                .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
+//                        agent.type(transformerByType.getElementMatcher())
+//                             .transform(transformerByType.getTransformer())
+//                             .asDecorator());
+//    }
 
     private static Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
         return (configuration) -> configuration.getWithinPackage()

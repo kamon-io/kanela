@@ -35,6 +35,6 @@ public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
     @Override
     public ClassVisitor wrap(TypeDescription instrumentedType, ClassVisitor classVisitor, Implementation.Context implementationContext, TypePool typePool, FieldList<FieldDescription.InDefinedShape> fields, MethodList<?> methods, int writerFlags, int readerFlags) {
-        return new MixinClassVisitor(mixin, instrumentedType.getInternalName(), classVisitor);
+        return  MixinClassVisitor.from(mixin, instrumentedType.getInternalName(), classVisitor);
     }
 }

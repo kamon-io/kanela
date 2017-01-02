@@ -26,7 +26,7 @@ import java.lang.instrument.Instrumentation;
 @Value(staticConstructor = "from")
 public class Agents {
     AgentConfiguration config;
-    List<KamonAgentBuilder> agentBuilders = List.of(MixinAgentBuilder.instance(), DefaultAgentBuilder.instance());
+    List<KamonAgentBuilder> agentBuilders = List.of(DefaultAgentBuilder.instance());
 
     public void install(Instrumentation instrumentation) {
         agentBuilders.forEach(builder -> builder.build(config).installOn(instrumentation));

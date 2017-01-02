@@ -35,6 +35,8 @@ object Dependencies {
   val scalatest         = "org.scalatest"            %% "scalatest"               % "3.0.1"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
+  val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
+
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"

@@ -39,12 +39,14 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
     }
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
-        if (typeTransformation.isActive()) {
-            transformersByTypes.addAll(typeTransformation
-                    .getTransformations()
-                    .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
-        }
+        typeTrasformations.add(typeTransformation);
     }
+//        if (typeTransformation.isActive()) {
+//            transformersByTypes.addAll(typeTransformation
+//                    .getTransformations()
+//                    .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
+//        }
+//    }
 
     private AgentBuilder.Listener additionalListeners(AgentConfiguration config) {
         val listeners = new ArrayList<AgentBuilder.Listener>();
