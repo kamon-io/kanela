@@ -60,7 +60,7 @@ abstract class KamonAgentBuilder {
                                                     .with(poolStrategyCache);
 
         if (config.isAttachedInRuntime()) {
-            agentBuilder.disableClassFormatChanges()
+            agentBuilder = agentBuilder.disableClassFormatChanges()
                         .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
 
