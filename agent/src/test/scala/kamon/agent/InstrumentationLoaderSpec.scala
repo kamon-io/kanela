@@ -14,14 +14,13 @@
  * =========================================================================================
  */
 
-package kamon.agent.instrumentation
+package kamon.agent
 
 import java.lang.instrument.Instrumentation
 
-import kamon.agent.InstrumentationLoader
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 

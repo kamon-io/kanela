@@ -14,8 +14,22 @@
  * =========================================================================================
  */
 
-package kamon.agent.instrumentation
+package app.kamon.instrumentation
 
-import kamon.agent.api.instrumentation.KamonInstrumentation
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
-class KamonFakeInstrumentation extends KamonInstrumentation
+import scala.collection.mutable.ListBuffer
+
+class KamonInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+
+  "Advisor with OnMethodEnter and OnMethodExit" should "instrument the method correctly" in {
+    val testClass = new TestClass()
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
+  }
+
+}
+
+class TestClass {
+  var stringValue: String = "value"
+  def addValue(values: ListBuffer[String]): ListBuffer[String] = values += "body"
+}
