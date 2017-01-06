@@ -38,6 +38,7 @@ public class AgentConfiguration {
     Option<String> withinPackage;
     Boolean debugMode;
     DumpConfig dump;
+    CircuitBreakerConfig circuitBreakerConfig;
     Boolean showBanner;
     Map<String, Object> extraParams;
 
@@ -57,6 +58,7 @@ public class AgentConfiguration {
         this.showBanner = getShowBanner(config);
         this.extraParams = HashMap.empty();
         this.dump = new DumpConfig(config);
+        this.circuitBreakerConfig = new CircuitBreakerConfig(config);
     }
 
     @Value
@@ -75,6 +77,25 @@ public class AgentConfiguration {
 
         public boolean isDumpEnabled() {
             return this.dumpEnabled;
+        }
+    }
+
+    @Value
+    public class CircuitBreakerConfig {
+        boolean enabled;
+        boolean shouldLogAfterGc;
+        double freeMemoryThreshold;
+        double gcProcessCPUThreshold;
+
+        CircuitBreakerConfig(Config config) {
+            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.enabled")).getOrElse(false);
+            this.shouldLogAfterGc = Try.of(() -> config.getBoolean("circuit-breaker.log-after-gc-run")).getOrElse(false);
+            this.freeMemoryThreshold = Try.of(() -> config.getDouble("circuit-breaker.free-memory-threshold")).getOrElse(50.0);
+            this.gcProcessCPUThreshold = Try.of(() -> config.getDouble("circuit-breaker.gc-process-cpu-threshold")).getOrElse(10.0);
+        }
+
+        public boolean isCircuitBreakerEnabled() {
+            return this.enabled;
         }
     }
 
