@@ -33,13 +33,12 @@ public class AgentEntryPoint {
         withTimeLogging(() -> {
             val configuration = AgentConfiguration.instance();
 
-            if(configuration.getShowBanner())  {
-                KamonAgentBanner.print(System.out);
-            }
-
+            KamonAgentBanner.run(configuration);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+
             InstrumentationLoader.load(instrumentation, configuration);
+
         }, "Startup complete in");
     }
 

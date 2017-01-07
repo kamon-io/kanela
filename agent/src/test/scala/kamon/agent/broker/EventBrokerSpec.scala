@@ -1,36 +1,29 @@
 package kamon.agent.broker
 
-import java.util.Date
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+class EventBrokerSpec extends  Matchers with WordSpecLike with BeforeAndAfterAll {
+  "The EventBroker" should  {
+    "publish a message and all interested observers should be notified" in {
+        val StringMessage = "message"
 
-class EventBrokerSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+        val broker = spy(classOf[EventBroker])
+        val observer = spy(classOf[EventObserver])
 
-  val broker = EventBroker.instance()
+        broker.add(observer)
+        broker.publish(StringMessage)
 
-  "with the agent EventBroker" should "send messages and" in {
-    broker.add(new EventObserver)
-    broker.publish("Hello")
-    broker.publish(new Date())
-    broker.publish(3.1415)
+        verify(broker, times(1)).add(observer)
+        verify(broker, times(1)).publish(any())
 
-//    verify(agentConfiguration, times(1)).getInstrumentations
+        verify(observer, times(1)).onString(StringMessage)
+      }
   }
 }
 
 class EventObserver {
   @Subscribe
-  def onString(s:String):Unit = {
-    println("String - " + s)
-  }
-
-  @Subscribe
-  def onDate(d:Date):Unit = {
-    println("Date - " + d)
-  }
-
-  @Subscribe
-  def onDouble(d: Double):Unit = {
-    println("Double - " + d)
-  }
+  def onString(s:String):Unit = {}
 }
