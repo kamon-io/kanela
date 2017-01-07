@@ -14,24 +14,22 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon.instrumentation.advisor
 
-import app.kamon.instrumentation.advisor.{ SpyAdvisor, TestMethodAdvisor }
-import app.kamon.instrumentation.mixin.SpyMixin
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import kamon.agent.libs.net.bytebuddy.asm.Advice._
+import collection.mutable.ListBuffer
 
-class CustomInstrumentation extends scala.KamonInstrumentation {
-  val methodName: Junction[MethodDescription] = named("addValue")
+class TestMethodAdvisor
+object TestMethodAdvisor {
 
-  forTargetType("app.kamon.instrumentation.TestClass") { builder ⇒
-    builder
-      .withMixin(classOf[SpyMixin])
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .withAdvisorFor(methodName, classOf[SpyAdvisor])
-      .build()
+  @OnMethodEnter
+  def onMethodEnter(@Argument(value = 0, readOnly = false) values: ListBuffer[String]): Unit = {
+    values += "enter"
   }
-}
 
+  @OnMethodExit
+  def onMethodExit(@Return(readOnly = false) values: ListBuffer[String]): Unit = {
+    values += "exit"
+  }
+
+}

@@ -14,24 +14,22 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon.instrumentation.advisor
 
-import app.kamon.instrumentation.advisor.{ SpyAdvisor, TestMethodAdvisor }
-import app.kamon.instrumentation.mixin.SpyMixin
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import app.kamon.instrumentation.SpyAware
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
 
-class CustomInstrumentation extends scala.KamonInstrumentation {
-  val methodName: Junction[MethodDescription] = named("addValue")
+object SpyAdvisor {
 
-  forTargetType("app.kamon.instrumentation.TestClass") { builder ⇒
-    builder
-      .withMixin(classOf[SpyMixin])
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .withAdvisorFor(methodName, classOf[SpyAdvisor])
-      .build()
+  @OnMethodEnter
+  def onMethodEnter(@This instance: Object): Unit = {
+    instance.asInstanceOf[SpyAware].addTracks("enter")
+  }
+
+  @OnMethodExit
+  def onMethodExit(@This instance: Object): Unit = {
+    instance.asInstanceOf[SpyAware].addTracks("exit")
   }
 }
 
+class SpyAdvisor

@@ -14,24 +14,21 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon.instrumentation.mixin
 
-import app.kamon.instrumentation.advisor.{ SpyAdvisor, TestMethodAdvisor }
-import app.kamon.instrumentation.mixin.SpyMixin
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import app.kamon.instrumentation.SpyAware
+import kamon.agent.api.instrumentation.Initializer
 
-class CustomInstrumentation extends scala.KamonInstrumentation {
-  val methodName: Junction[MethodDescription] = named("addValue")
+import scala.collection.mutable.ListBuffer
 
-  forTargetType("app.kamon.instrumentation.TestClass") { builder ⇒
-    builder
-      .withMixin(classOf[SpyMixin])
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .withAdvisorFor(methodName, classOf[SpyAdvisor])
-      .build()
+class SpyMixin extends SpyAware {
+  private var _tracks: ListBuffer[String] = _
+  def tracks: ListBuffer[String] = _tracks
+  def addTracks(v: String): Unit = { this._tracks += v }
+
+  @Initializer
+  def _initializer(): Unit = {
+    this._tracks = ListBuffer.empty
+    this.addTracks("init")
   }
 }
-

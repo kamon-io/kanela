@@ -22,14 +22,28 @@ import scala.collection.mutable.ListBuffer
 
 class KamonInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "Advisor with OnMethodEnter and OnMethodExit" should "instrument the method correctly" in {
+  "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
+  }
+
+  "A Mixin" should "introduce a Type to a simple class" in {
+    new TestClass().asInstanceOf[SpyAware]
+  }
+
+  it should "be able to initialize any value from a @Initializer method" in {
+    val testClass = new TestClass()
+    testClass.addValue(ListBuffer())
+    testClass.asInstanceOf[SpyAware].tracks shouldBe ListBuffer("init", "enter", "exit")
   }
 
 }
 
 class TestClass {
-  var stringValue: String = "value"
   def addValue(values: ListBuffer[String]): ListBuffer[String] = values += "body"
+}
+
+trait SpyAware {
+  def tracks: ListBuffer[String]
+  def addTracks(v: String): Unit
 }
