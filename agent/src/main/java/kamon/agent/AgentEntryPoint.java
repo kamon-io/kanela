@@ -16,8 +16,10 @@
 
 package kamon.agent;
 
+import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.util.banner.KamonAgentBanner;
 import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.jvm.OldGarbageCollectorListener;
 import lombok.Value;
 import lombok.val;
 
@@ -30,9 +32,13 @@ public class AgentEntryPoint {
     private static void start(String args, Instrumentation instrumentation) {
         withTimeLogging(() -> {
             val configuration = AgentConfiguration.instance();
+
             if(configuration.getShowBanner())  {
                 KamonAgentBanner.print(System.out);
             }
+
+            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
             InstrumentationLoader.load(instrumentation, configuration);
         }, "Startup complete in");
     }

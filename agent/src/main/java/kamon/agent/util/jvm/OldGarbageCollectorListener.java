@@ -19,11 +19,14 @@ package kamon.agent.util.jvm;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import javaslang.collection.List;
 import javaslang.control.Option;
+import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.log.LazyLogger;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
+import utils.AnsiColor;
 
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
@@ -33,31 +36,44 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 
+import static java.text.MessageFormat.format;
+
 
 @Value
-public class OldGCCollectionListener {
+public class OldGarbageCollectorListener {
 
-    long jvmStartTime;
-    Option<MemoryPoolMXBean> oldGenPool;
     JvmTools tools;
-    AgentConfiguration.CircuitBreakerConfig config;
+    long jvmStartTime;
     EventBroker broker;
+    Option<MemoryPoolMXBean> oldGenPool;
+    AgentConfiguration.OldGarbageCollectorConfig config;
 
     @SneakyThrows
-    public OldGCCollectionListener() {
+    private OldGarbageCollectorListener(AgentConfiguration.OldGarbageCollectorConfig configuration) {
         val memoryBeans = List.ofAll(ManagementFactory.getMemoryPoolMXBeans());
 
         this.jvmStartTime = ManagementFactory.getRuntimeMXBean().getStartTime();
         this.oldGenPool = memoryBeans.find(JvmTools::isOldGenPool);
         this.tools = JvmTools.instance();
-        this.config = AgentConfiguration.instance().getCircuitBreakerConfig();
+        this.config = configuration;
         this.broker = EventBroker.instance();
+
+        startListening();
+    }
+
+    public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration) {
+        if(configuration.isCircuitBreakerRunning()) {
+            Try.of(() -> new OldGarbageCollectorListener(configuration))
+               .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: Old Garbage Collector Listener was activated."))))
+               .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate Old Garbage Collector Listener.")), cause));
+        }
     }
 
     /**
      * register the listener
      */
-    public void install() {
+
+    private void startListening() {
         val notificationListener = new GcNotificationListener();
         for (GarbageCollectorMXBean mbean : ManagementFactory.getGarbageCollectorMXBeans()) {
             if (mbean instanceof NotificationEmitter) {
@@ -67,10 +83,7 @@ public class OldGCCollectionListener {
         }
     }
 
-    @SneakyThrows
     private void processGCEvent(GarbageCollectionNotificationInfo info) {
-//        val event = new GcEvent(info, jvmStartTime + info.getGcInfo().getStartTime());
-
         if(tools.isEndOfMayorGC(info.getGcAction())) {
             val after = info.getGcInfo().getMemoryUsageAfterGc();
 
@@ -82,12 +95,13 @@ public class OldGCCollectionListener {
             });
 
             percentageFreeMemory.forEach((freeMemory) -> {
-                broker.publish(new GcEvent(info, (double) freeMemory));
+                val event = new GcEvent(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
 
                 if(config.isShouldLogAfterGc()) {
-//                    System.out.println("accuracyGCMayorPercentCPUTime " + gcProcessCpuTimePercentage);
-//                    System.out.println(freeMemory);
+                    LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n: {0}", event)));
                 }
+
+                broker.publish(event);
             });
         }
     }

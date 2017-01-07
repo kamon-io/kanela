@@ -17,24 +17,38 @@
 package kamon.agent.circuitbreaker;
 
 
+import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.GcEvent;
 import kamon.agent.util.jvm.JvmTools;
+import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.val;
+import utils.AnsiColor;
+
+import static java.text.MessageFormat.format;
 
 
 @Value
-public class CircuitBreaker {
+public class SystemThroughputCircuitBreaker {
     JvmTools jvmTools;
     AgentConfiguration.CircuitBreakerConfig config;
 
-    public CircuitBreaker() {
+    private SystemThroughputCircuitBreaker(AgentConfiguration.CircuitBreakerConfig config) {
         EventBroker.instance().add(this);
         this.jvmTools = JvmTools.instance();
-        this.config = AgentConfiguration.instance().getCircuitBreakerConfig();
+        this.config = config;
+    }
+
+    public static void attach(AgentConfiguration.CircuitBreakerConfig config) {
+        if(config.isEnabled()){
+            Try.of(() -> new SystemThroughputCircuitBreaker(config))
+               .andThen(config::circuitBreakerRunning)
+               .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: System Throughput CircuitBreaker was activated."))))
+               .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate System Throughput CircuitBreaker.")), cause));
+        }
     }
 
     @Subscribe
@@ -45,7 +59,7 @@ public class CircuitBreaker {
          System.out.println("FreeMemoryAfterGC " + event.getPercentageFreeMemoryAfterGc());
 
         if((gcProcessCpuTimePercentage >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-             System.out.println("piuttttttttooooo");
+             System.out.println("lo que sea");
          }
     }
 }

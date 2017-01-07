@@ -1,11 +1,12 @@
 package kamon.agent.circuitbraker
 
-import kamon.agent.circuitbreaker.CircuitBreaker
-import kamon.agent.util.jvm.OldGCCollectionListener
+import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker
+import kamon.agent.util.conf.AgentConfiguration
+import kamon.agent.util.jvm.OldGarbageCollectorListener
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class CircuitBreakerSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
-//  "The OldGCCollectionListener" should {
+//  "The OldGarbageCollectorListener" should {
     "when the GC is triggered" should "manage a GC event" in {
 //      System.gc()
 //      System.gc()
@@ -13,8 +14,8 @@ class CircuitBreakerSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
       val  data = new Array[Object](50);
 
-      new CircuitBreaker()
-      new OldGCCollectionListener().install()
+      SystemThroughputCircuitBreaker.attach(AgentConfiguration.instance().getCircuitBreakerConfig);
+      OldGarbageCollectorListener.attach(AgentConfiguration.instance().getOldGarbageCollectorConfig);
 
 //      System.gc()
       for (i <- 0 to 100000) {
