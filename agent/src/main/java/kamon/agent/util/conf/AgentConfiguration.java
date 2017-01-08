@@ -65,6 +65,7 @@ public class AgentConfiguration {
     }
 
     @Value
+    @NonFinal
     public class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
@@ -84,6 +85,7 @@ public class AgentConfiguration {
     }
 
     @Value
+    @NonFinal
     public class CircuitBreakerConfig {
         boolean enabled;
         double freeMemoryThreshold;
@@ -101,6 +103,7 @@ public class AgentConfiguration {
     }
 
     @Value
+    @NonFinal
     public class OldGarbageCollectorConfig {
         boolean shouldLogAfterGc;
 

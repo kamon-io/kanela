@@ -25,6 +25,7 @@ import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 import lombok.val;
 import utils.AnsiColor;
 
@@ -40,8 +41,8 @@ import static java.text.MessageFormat.format;
 
 
 @Value
+@NonFinal
 public class OldGarbageCollectorListener {
-
     JvmTools tools;
     long jvmStartTime;
     EventBroker broker;
@@ -61,6 +62,11 @@ public class OldGarbageCollectorListener {
         startListening();
     }
 
+    /**
+     * Attach and start the listener
+     *
+     * @param configuration @see {{@link AgentConfiguration.OldGarbageCollectorConfig}}
+     */
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration) {
         if(configuration.isCircuitBreakerRunning()) {
             Try.of(() -> new OldGarbageCollectorListener(configuration))
@@ -68,10 +74,6 @@ public class OldGarbageCollectorListener {
                .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate Old Garbage Collector Listener.")), cause));
         }
     }
-
-    /**
-     * register the listener
-     */
 
     private void startListening() {
         val notificationListener = new GcNotificationListener();
