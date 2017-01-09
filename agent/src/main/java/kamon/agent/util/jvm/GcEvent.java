@@ -26,7 +26,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-@Value
+@Value(staticConstructor = "from")
 public class GcEvent {
 
     static final long ONE_KIBIBYTE = 1 << 10;

@@ -16,11 +16,11 @@
 
 package kamon.agent.util.jvm
 
-import kamon.agent.broker.{EventBroker, Subscribe}
+import kamon.agent.broker.{ EventBroker, Subscribe }
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
 class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The OldGarbageCollectorListener" should {
@@ -41,8 +41,8 @@ class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with Be
       verify(gcListener, times(1)).onGCEvent(argumentCaptor.capture())
 
       argumentCaptor.getValue.asInstanceOf[GcEvent].getInfo should not be null
-      argumentCaptor.getValue.asInstanceOf[GcEvent].getPercentageFreeMemoryAfterGc shouldBe > (0.0)
-      argumentCaptor.getValue.asInstanceOf[GcEvent].getStartTime shouldBe > (0L)
+      argumentCaptor.getValue.asInstanceOf[GcEvent].getPercentageFreeMemoryAfterGc shouldBe >(0.0)
+      argumentCaptor.getValue.asInstanceOf[GcEvent].getStartTime shouldBe >(0L)
     }
   }
 }

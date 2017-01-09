@@ -19,6 +19,7 @@ package kamon.agent.util.jvm;
 
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 import lombok.val;
 import sun.management.counter.LongCounter;
 import sun.management.counter.perf.PerfInstrumentation;
@@ -29,9 +30,12 @@ import java.lang.management.MemoryPoolMXBean;
 import java.util.concurrent.TimeUnit;
 
 @Value
+@NonFinal
 public class JvmTools {
 
-    private PerfInstrumentation perfInstrumentation;
+    private static final JvmTools instance = new JvmTools();
+
+    PerfInstrumentation perfInstrumentation;
 
     @SneakyThrows
     private JvmTools() {
@@ -42,7 +46,7 @@ public class JvmTools {
     }
 
     public static JvmTools instance() {
-        return new JvmTools();
+        return instance;
     }
 
     /**
