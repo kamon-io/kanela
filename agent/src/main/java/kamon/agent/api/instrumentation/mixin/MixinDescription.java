@@ -17,17 +17,19 @@
 
 package kamon.agent.api.instrumentation.mixin;
 
+import javaslang.collection.List;
 import javaslang.control.Option;
 import kamon.agent.api.instrumentation.Initializer;
 import lombok.Value;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.pool.TypePool;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Value
 public class MixinDescription {
@@ -48,12 +50,18 @@ public class MixinDescription {
 
     public static MixinDescription of(ElementMatcher targetTypes, Class<?> clazz) {
         final Type implementation = Type.getType(clazz);
-        final Set<String> interfaces = Arrays.stream(clazz.getInterfaces()).map(name -> Type.getType(name).getInternalName()).collect(Collectors.toSet());
+        final Set<String> interfaces = List.ofAll(Arrays.asList(clazz.getInterfaces())).map(Class::getName).toJavaSet();
         final Option<String> mixinInit = Option.ofOptional(Arrays.stream(clazz.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(Initializer.class)).findFirst().map(Method::getName));
         return new MixinDescription(implementation, interfaces, clazz.getName(), mixinInit, targetTypes);
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader) -> builder.visit(MixinClassVisitorWrapper.of(this));
+        val interfaces = List.ofAll(this.interfaces)
+                .map(i -> TypePool.Default.ofClassPath().describe(i).resolve())
+                .toJavaList();
+        System.out.println("la concha de tu madre:=========================" + interfaces);
+        return (builder, typeDescription, classLoader) ->
+//                builder.implement(interfaces)
+                        builder.visit(MixinClassVisitorWrapper.of(this));
     }
 }

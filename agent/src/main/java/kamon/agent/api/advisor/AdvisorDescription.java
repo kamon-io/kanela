@@ -25,7 +25,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 @Value(staticConstructor = "of")
 public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription.InDefinedShape> methodMatcher;
+    ElementMatcher<? super MethodDescription> methodMatcher;
     Class<?> interceptorClass;
 
     public AgentBuilder.Transformer makeTransformer() {
