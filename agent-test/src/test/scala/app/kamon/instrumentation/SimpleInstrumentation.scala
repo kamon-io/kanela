@@ -23,10 +23,10 @@ import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
 import kamon.agent.scala
 
-class CustomInstrumentation extends scala.KamonInstrumentation {
+class SimpleInstrumentation extends scala.KamonInstrumentation {
   val methodName: Junction[MethodDescription] = named("addValue")
 
-  forTargetType("app.kamon.instrumentation.TestClass") { builder ⇒
+  forTargetType("app.kamon.specs.TestClass") { builder ⇒
     builder
       .withMixin(classOf[SpyMixin])
       .withAdvisorFor(methodName, classOf[TestMethodAdvisor])

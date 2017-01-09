@@ -14,15 +14,15 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon.specs
 
 import app.kamon.utils.AdditionalJVMParameters
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
 import scala.collection.mutable.ListBuffer
 
-@AdditionalJVMParameters(parameters = "-Dkamon.agent.instrumentations.0=app.kamon.instrumentation.CustomInstrumentation")
-class KamonInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+@AdditionalJVMParameters(parameters = "-Dkamon.agent.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation")
+class SimpleInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {
     val testClass = new TestClass()

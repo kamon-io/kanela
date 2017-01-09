@@ -14,22 +14,31 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.advisor
+package app.kamon.instrumentation.mixin
 
-import app.kamon.specs.SpyAware
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import app.kamon.specs.{ MixinAware1, MixinAware2, MixinAware3 }
+import kamon.agent.api.instrumentation.Initializer
 
-object SpyAdvisor {
+object MixinOverMixin {
 
-  @OnMethodEnter
-  def onMethodEnter(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("enter")
+  class MixinOverMixin1 extends MixinAware1 {
+    private var _value1: String = _
+    @Initializer
+    def initializer1: Unit = _value1 = "dummy 1"
+    override def dummyMethod1 = _value1
   }
 
-  @OnMethodExit
-  def onMethodExit(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("exit")
+  class MixinOverMixin2 extends MixinAware2 {
+    private var _value2: String = _
+    @Initializer
+    def initializer2: Unit = _value2 = "dummy 2"
+    override def dummyMethod2 = _value2
+  }
+
+  class MixinOverMixin3 extends MixinAware3 {
+    private var _value3: String = _
+    @Initializer
+    def initializer3: Unit = _value3 = "dummy 3"
+    override def dummyMethod3 = _value3
   }
 }
-
-class SpyAdvisor

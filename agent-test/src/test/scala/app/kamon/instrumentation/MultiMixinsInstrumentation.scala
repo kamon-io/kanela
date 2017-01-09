@@ -14,22 +14,18 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.advisor
+package app.kamon.instrumentation
 
-import app.kamon.specs.SpyAware
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import kamon.agent.scala
 
-object SpyAdvisor {
+class MultiMixinsInstrumentation extends scala.KamonInstrumentation {
+  import app.kamon.instrumentation.mixin.MixinOverMixin._
 
-  @OnMethodEnter
-  def onMethodEnter(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("enter")
-  }
-
-  @OnMethodExit
-  def onMethodExit(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("exit")
+  forTargetType("app.kamon.specs.WithMultiMixinsClass") { builder ⇒
+    builder
+      .withMixin(classOf[MixinOverMixin1])
+      .withMixin(classOf[MixinOverMixin2])
+      .withMixin(classOf[MixinOverMixin3])
+      .build()
   }
 }
-
-class SpyAdvisor
