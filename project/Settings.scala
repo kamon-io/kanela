@@ -14,6 +14,7 @@
  * =========================================================================================
  */
 
+import sbt.Def.Setting
 import sbt._
 import Keys._
 import com.typesafe.sbt.SbtScalariform
@@ -21,14 +22,13 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 import Publish.{settings => publishSettings}
 import Release.{settings => releaseSettings }
-import sbt.Tests.{SubProcess, Group}
 
 object Settings {
 
   val JavaVersion = "1.8"
   val ScalaVersion = "2.12.1"
 
-  lazy val basicSettings = Seq(
+  lazy val basicSettings: Seq[Setting[_]] = Seq(
     scalaVersion := ScalaVersion,
     resolvers ++= Dependencies.resolutionRepos,
     fork in run := true,
@@ -50,14 +50,6 @@ object Settings {
     )
   ) ++ publishSettings ++ releaseSettings
 
-  def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
-    tests map { test =>
-      Group(
-        name = test.name,
-        tests = Seq(test),
-        runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
-    }
-
   lazy val formatSettings = SbtScalariform.scalariformSettings ++ Seq(
     ScalariformKeys.preferences in Compile := formattingPreferences,
     ScalariformKeys.preferences in Test := formattingPreferences
@@ -67,6 +59,7 @@ object Settings {
   lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
   lazy val excludeScalaLib = Assembly.excludeScalaLib
   lazy val agentSettings = Agent.settings
+  lazy val agentTestSettings = AgentTest.settings
 
   def formattingPreferences =
     FormattingPreferences()

@@ -62,6 +62,7 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(basicSettings: _*)
   .settings(formatSettings: _*)
   .settings(agentSettings: _*)
+  .settings(agentTestSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(slf4jApi, logbackCore, logbackClassic) ++
       testScope(scalatest, mockito) ++
