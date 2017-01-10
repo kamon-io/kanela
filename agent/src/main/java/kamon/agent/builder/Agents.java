@@ -20,6 +20,7 @@ import javaslang.collection.List;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.Value;
+import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 
 import java.lang.instrument.Instrumentation;
 
@@ -28,8 +29,8 @@ public class Agents {
     AgentConfiguration config;
     List<KamonAgentBuilder> agentBuilders = List.of(DefaultAgentBuilder.instance());
 
-    public void install(Instrumentation instrumentation) {
-        agentBuilders.forEach(builder -> builder.build(config).installOn(instrumentation));
+    public List<ResettableClassFileTransformer> install(Instrumentation instrumentation) {
+        return agentBuilders.map(builder -> builder.build(config).installOn(instrumentation));
     }
 
     public Agents addTypeTransformation(TypeTransformation typeTransformation) {
