@@ -26,7 +26,6 @@ import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -40,15 +39,12 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 abstract class KamonAgentBuilder {
 
     private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
-
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
 
-    final ListBuilder<TransformerDescription> transformersByTypes = ListBuilder.builder();
-    final ListBuilder<TypeTransformation> typeTrasformations = ListBuilder.builder();
+    final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
     protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
-
 
     AgentBuilder from(AgentConfiguration config) {
         val byteBuddy = new ByteBuddy()
@@ -72,20 +68,13 @@ abstract class KamonAgentBuilder {
     }
 
     AgentBuilder build(AgentConfiguration config) {
-            return typeTrasformations.build().foldLeft(newAgentBuilder(config), (agent, typeTransformation) -> {
-            java.util.List<AgentBuilder.Transformer> listaPuta = new ArrayList<>();
-            listaPuta.addAll(typeTransformation.getMixins().toJavaList());
-            listaPuta.addAll(typeTransformation.getTransformations().toJavaList());
-            return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(listaPuta));
-
+            return typeTransformations.build().foldLeft(newAgentBuilder(config), (agent, typeTransformation) -> {
+            java.util.List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+            transformers.addAll(typeTransformation.getMixins().toJavaList());
+            transformers.addAll(typeTransformation.getTransformations().toJavaList());
+            return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(transformers));
         });
     }
-//        return transformersByTypes.build()
-//                .foldLeft(newAgentBuilder(config), (agent, transformerByType) ->
-//                        agent.type(transformerByType.getElementMatcher())
-//                             .transform(transformerByType.getTransformer())
-//                             .asDecorator());
-//    }
 
     private static Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
         return (configuration) -> configuration.getWithinPackage()
@@ -107,10 +96,6 @@ abstract class KamonAgentBuilder {
                         nameMatches("org\\.scalatest\\..*"),
                         nameMatches("scala\\.(?!concurrent).*")
                 ));
-    }
-
-    ElementMatcher<? super TypeDescription> extractElementMatcher(TypeTransformation typeTransformation) {
-        return typeTransformation.getElementMatcher().getOrElseThrow(() -> new RuntimeException("There must be an element selected by elementMatcher"));
     }
 
     protected String getAgentName() {

@@ -16,11 +16,11 @@
 
 package kamon.agent.builder;
 
-import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
@@ -40,15 +40,9 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
       if (typeTransformation.isActive()) {
-          typeTrasformations.add(typeTransformation);
+          typeTransformations.add(typeTransformation);
       }
     }
-//        if (typeTransformation.isActive()) {
-//            transformersByTypes.addAll(typeTransformation
-//                    .getTransformations()
-//                    .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
-//        }
-//    }
 
     private AgentBuilder.Listener additionalListeners(AgentConfiguration config) {
         val listeners = new ArrayList<AgentBuilder.Listener>();

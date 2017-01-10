@@ -17,8 +17,8 @@
 package kamon.agent.builder;
 
 import javaslang.collection.List;
-import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.Value;
 
 import java.lang.instrument.Instrumentation;
