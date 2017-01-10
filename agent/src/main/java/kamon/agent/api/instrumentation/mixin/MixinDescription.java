@@ -30,7 +30,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Value
 public class MixinDescription {
