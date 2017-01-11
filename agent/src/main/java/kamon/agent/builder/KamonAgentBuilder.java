@@ -38,15 +38,15 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    private static final Function1<AgentConfiguration, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private static final Function1<AgentConfiguration.AgentModuleDescription, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
 
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
-    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config);
+    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
-    AgentBuilder from(AgentConfiguration config) {
+    AgentBuilder from(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
         val byteBuddy = new ByteBuddy()
                 .with(TypeValidation.of(config.isDebugMode()))
                 .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
@@ -57,27 +57,27 @@ abstract class KamonAgentBuilder {
 
         if (config.isAttachedInRuntime()) {
             agentBuilder = agentBuilder.disableClassFormatChanges()
-                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+                                       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
 
-        return configuredMatcherList.apply(config)
+        return configuredMatcherList.apply(moduleDescription)
                                     .foldLeft(agentBuilder, AgentBuilder::ignore)
                                     .ignore(any(), withTimeSpent(getAgentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
                                     .or(any(), withTimeSpent(getAgentName(),"classloader", "extension", isExtensionClassLoader()))
                                     .or(any(), withTimeSpent(getAgentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
-    AgentBuilder build(AgentConfiguration config) {
-            return typeTransformations.build().foldLeft(newAgentBuilder(config), (agent, typeTransformation) -> {
-            java.util.List<AgentBuilder.Transformer> transformers = new ArrayList<>();
-            transformers.addAll(typeTransformation.getMixins().toJavaList());
-            transformers.addAll(typeTransformation.getTransformations().toJavaList());
-            return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(transformers));
-        });
+    AgentBuilder build(AgentConfiguration config, AgentConfiguration.AgentModuleDescription module) {
+            return typeTransformations.build().foldLeft(newAgentBuilder(config, module), (agent, typeTransformation) -> {
+                java.util.List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+                transformers.addAll(typeTransformation.getMixins().toJavaList());
+                transformers.addAll(typeTransformation.getTransformations().toJavaList());
+                return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(transformers));
+            });
     }
 
-    private static Function1<AgentConfiguration,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
-        return (configuration) -> configuration.getWithinPackage()
+    private static Function1<AgentConfiguration.AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+        return (configuration) -> configuration.getWithin()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
                         nameMatches("sun\\..*"),

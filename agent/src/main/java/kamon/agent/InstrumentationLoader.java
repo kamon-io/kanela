@@ -16,9 +16,11 @@
 
 package kamon.agent;
 
+import javaslang.collection.List;
 import javaslang.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
 import kamon.agent.builder.Agents;
+import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 
@@ -28,15 +30,18 @@ import static java.text.MessageFormat.format;
 
 public class InstrumentationLoader {
     /**
-     * @param instrumentation: provided by JVM
+     * @param instrumentation : provided by JVM
      */
-    public static void load(Instrumentation instrumentation, AgentConfiguration config) {
-        config.getInstrumentations()
-                .map(InstrumentationLoader::loadInstrumentation)
-                .sortBy(KamonInstrumentation::order)
-                .flatMap(KamonInstrumentation::collectTransformations)
-                .foldLeft(Agents.from(config), Agents::addTypeTransformation)
-                .install(instrumentation);
+    public static List<List<KamonAgentFileTransformer>> load(Instrumentation instrumentation, AgentConfiguration config) {
+        return config.getAgentModules().map( moduleDescription -> {
+            LazyLogger.info(() -> format("Loading Module {0}...",  moduleDescription.getName()));
+            return moduleDescription.getInstrumentations()
+                                    .map(InstrumentationLoader::loadInstrumentation)
+                                    .sortBy(KamonInstrumentation::order)
+                                    .flatMap(KamonInstrumentation::collectTransformations)
+                                    .foldLeft(Agents.from(config), Agents::addTypeTransformation)
+                                    .install(instrumentation, moduleDescription);
+        });
     }
 
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {

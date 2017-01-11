@@ -29,8 +29,8 @@ public class Agents {
     AgentConfiguration config;
     List<KamonAgentBuilder> agentBuilders = List.of(DefaultAgentBuilder.instance());
 
-    public List<ResettableClassFileTransformer> install(Instrumentation instrumentation) {
-        return agentBuilders.map(builder -> builder.build(config).installOn(instrumentation));
+    public List<KamonAgentFileTransformer> install(Instrumentation instrumentation, AgentConfiguration.AgentModuleDescription module) {
+        return agentBuilders.map(builder -> KamonAgentFileTransformer.from(builder.build(config, module).installOn(instrumentation), module.isStoppable()));
     }
 
     public Agents addTypeTransformation(TypeTransformation typeTransformation) {

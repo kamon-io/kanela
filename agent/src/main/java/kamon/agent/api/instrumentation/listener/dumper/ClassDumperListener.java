@@ -32,18 +32,20 @@ import java.io.File;
 @EqualsAndHashCode(callSuper = false)
 public class ClassDumperListener extends Listener.Adapter {
 
-    final File dumpDir;
-    final File jarFile;
-    final AgentConfiguration.DumpConfig config;
+    private static ClassDumperListener Instance = new ClassDumperListener();
 
-    private ClassDumperListener(AgentConfiguration.DumpConfig config){
-        this.config = config;
+    File dumpDir;
+    File jarFile;
+    AgentConfiguration.DumpConfig config;
+
+    private ClassDumperListener(){
+        this.config = AgentConfiguration.instance().getDump();
         this.dumpDir = new File(config.getDumpDir());
         this.jarFile = new File(config.getDumpDir() + File.separator + config.getJarName() + ".jar");
     }
 
-    public static ClassDumperListener instance(AgentConfiguration.DumpConfig config) {
-        return new ClassDumperListener(config);
+    public static ClassDumperListener instance() {
+        return Instance;
     }
 
     @Override

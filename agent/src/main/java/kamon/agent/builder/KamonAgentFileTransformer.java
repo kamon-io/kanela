@@ -16,21 +16,11 @@
 
 package kamon.agent.builder;
 
-import kamon.agent.api.instrumentation.TypeTransformation;
-import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
-import kamon.agent.util.conf.AgentConfiguration;
-import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 
-@Value(staticConstructor = "instance")
-@EqualsAndHashCode(callSuper = false)
-class NoOpAgentBuilder extends KamonAgentBuilder {
-
-    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
-        return from(config, moduleDescription)
-                .with(DefaultInstrumentationListener.instance());
-    }
-
-    public void addTypeTransformation(TypeTransformation typeTransformation) {}
+@Value(staticConstructor = "from")
+public class KamonAgentFileTransformer {
+    ResettableClassFileTransformer classFileTransformer;
+    boolean stoppable;
 }

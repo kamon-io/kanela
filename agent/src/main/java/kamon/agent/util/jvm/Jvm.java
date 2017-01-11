@@ -31,21 +31,21 @@ import java.util.concurrent.TimeUnit;
 
 @Value
 @NonFinal
-public class JvmTools {
+public class Jvm {
 
-    private static final JvmTools instance = new JvmTools();
+    private static final Jvm instance = new Jvm();
 
     PerfInstrumentation perfInstrumentation;
 
     @SneakyThrows
-    private JvmTools() {
+    private Jvm() {
         val jvm = ManagementFactory.getRuntimeMXBean().getName();
         val pid = Integer.parseInt(jvm.substring(0, jvm.indexOf('@')));
         val buffer = Perf.getPerf().attach(pid, "r");
         this.perfInstrumentation = new PerfInstrumentation(buffer);
     }
 
-    public static JvmTools instance() {
+    public static Jvm instance() {
         return instance;
     }
 
@@ -69,11 +69,14 @@ public class JvmTools {
         return ( (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean() ).getProcessCpuTime();
     }
 
+    public double getGcProcessCpuTimePercent() {
+        return 100.0 * ((double) getProcessCPUCollectionTime() / getProcessCPUTime());
+    }
+
 
     private long getPerformanceCounterValue(String name) {
         return ((LongCounter) perfInstrumentation.findByPattern(name).get(0)).longValue();
     }
-
 
     static boolean isOldGenPool(MemoryPoolMXBean bean) {
         return bean.getName().endsWith("Old Gen") || bean.getName().endsWith("Tenured Gen");
