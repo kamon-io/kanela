@@ -77,7 +77,7 @@ abstract class KamonAgentBuilder {
     }
 
     private static Function1<AgentConfiguration.AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
-        return (configuration) -> configuration.getWithin()
+        return (moduleDescription) -> moduleDescription.getWithinPackage()
                 .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
                         nameMatches("sun\\..*"),

@@ -80,7 +80,7 @@ public class AgentConfiguration {
         String name;
         boolean stoppable;
         List<String> instrumentations;
-        List<String> within;
+        List<String> withinPackage;
     }
 
     @Value
@@ -169,7 +169,7 @@ public class AgentConfiguration {
     }
 
     private List<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("within"))).getOrElse(List.empty());
+        return Try.of(() -> List.ofAll(config.getStringList("withinPackage"))).getOrElse(List.empty());
     }
 
 
