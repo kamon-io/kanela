@@ -29,9 +29,7 @@ import java.lang.instrument.Instrumentation;
 import static java.text.MessageFormat.format;
 
 public class InstrumentationLoader {
-    /**
-     * @param instrumentation : provided by JVM
-     */
+
     public static List<List<KamonAgentFileTransformer>> load(Instrumentation instrumentation, AgentConfiguration config) {
         return config.getAgentModules().map( moduleDescription -> {
             LazyLogger.info(() -> format("Loading Module {0}...",  moduleDescription.getName()));

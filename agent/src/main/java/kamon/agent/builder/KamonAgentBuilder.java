@@ -67,9 +67,9 @@ abstract class KamonAgentBuilder {
                                     .or(any(), withTimeSpent(getAgentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
-    AgentBuilder build(AgentConfiguration config, AgentConfiguration.AgentModuleDescription module) {
-            return typeTransformations.build().foldLeft(newAgentBuilder(config, module), (agent, typeTransformation) -> {
-                java.util.List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+    AgentBuilder build(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription), (agent, typeTransformation) -> {
+                val transformers = new ArrayList<AgentBuilder.Transformer>();
                 transformers.addAll(typeTransformation.getMixins().toJavaList());
                 transformers.addAll(typeTransformation.getTransformations().toJavaList());
                 return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(transformers));
