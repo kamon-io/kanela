@@ -18,7 +18,8 @@ package kamon.agent.instrumentation
 
 import java.lang.instrument.Instrumentation
 
-import kamon.agent.{ AgentConfiguration, InstrumentationLoader }
+import kamon.agent.InstrumentationLoader
+import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 

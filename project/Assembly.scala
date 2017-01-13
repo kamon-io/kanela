@@ -13,9 +13,8 @@
  * =========================================================================================
  */
 
-import sbt._
 import sbt.Keys._
-
+import sbt._
 import sbtassembly.AssemblyKeys._
 import sbtassembly._
 
@@ -46,7 +45,8 @@ object Assembly {
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("org.pmw.tinylog.**" -> "kamon.agent.libs.@0").inAll
+        ShadeRule.rename("org.pmw.tinylog.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("net.jodah.**" -> "kamon.agent.libs.@0").inAll
     )
   ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {}) ++ assemblyArtifact
 

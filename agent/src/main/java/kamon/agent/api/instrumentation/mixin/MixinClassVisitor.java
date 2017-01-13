@@ -16,6 +16,9 @@
 
 package kamon.agent.api.instrumentation.mixin;
 
+import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
+import lombok.Value;
 import net.bytebuddy.jar.asm.*;
 import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
@@ -23,17 +26,23 @@ import net.bytebuddy.jar.asm.tree.ClassNode;
 import net.bytebuddy.jar.asm.tree.FieldNode;
 import net.bytebuddy.jar.asm.tree.MethodNode;
 
-import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
+@Value
+@EqualsAndHashCode(callSuper = false)
 public class MixinClassVisitor extends ClassVisitor {
 
-    private static final String ConstructorDescriptor = "<init>";
+    static final String ConstructorDescriptor = "<init>";
 
-    private final MixinDescription mixin;
-    private final Type type;
+    MixinDescription mixin;
+    Type type;
 
-    MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
+    public static MixinClassVisitor from(MixinDescription mixin, String className, ClassVisitor classVisitor) {
+        return new MixinClassVisitor(mixin, className, classVisitor);
+    }
+
+    private MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
         super(Opcodes.ASM5, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);
@@ -49,21 +58,10 @@ public class MixinClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        cv.visit(version, access, name, signature, superName, addInterfaces(mixin, interfaces));
-    }
-
-    private String[] addInterfaces(MixinDescription mixin, String[] interfaces) {
-        if(mixin.getInterfaces().isEmpty()) return interfaces;
-        Set<String> newInterfaces = mixin.getInterfaces();
-        if (interfaces != null) newInterfaces.addAll(Arrays.asList(interfaces));
-        return newInterfaces.toArray(new String[newInterfaces.size()]);
-    }
-
-
-    @Override
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
     public void visitEnd() {
-        ClassReader cr = new ClassReader(mixin.getBytes());
+        ClassReader cr = new ClassReader(mixin.getMixinClass());
         ClassNode cn = new ClassNode();
         cr.accept(cn, ClassReader.EXPAND_FRAMES);
 

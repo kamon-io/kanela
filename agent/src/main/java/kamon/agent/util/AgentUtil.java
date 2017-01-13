@@ -17,20 +17,47 @@
 package kamon.agent.util;
 
 import kamon.agent.util.log.LazyLogger;
+import lombok.SneakyThrows;
+import lombok.val;
+import utils.AnsiColor;
 
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 import static java.text.MessageFormat.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 
 public class AgentUtil {
 
     public static void withTimeLogging(final Runnable thunk, String message) {
-        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> format("{0} {1} ms", message, timeSpent)));
+        withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":green,n: {0} {1} ms", message, MILLISECONDS.convert(timeSpent, NANOSECONDS)))));
     }
 
-    private static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
-        long startMillis = System.currentTimeMillis();
+    public static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) {
+        val startMillis = System.nanoTime();
         thunk.run();
-        timeSpent.accept(System.currentTimeMillis() - startMillis);
+        timeSpent.accept(System.nanoTime() - startMillis);
+    }
+
+    public static long timed(final Runnable thunk) {
+        val startMillis = System.nanoTime();
+        thunk.run();
+        return (System.nanoTime() - startMillis);
+    }
+
+    public static <T> T withTimeLogging(final Callable<T> thunk, String message) {
+        return withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":green,n: {0} {1} ms", message, MILLISECONDS.convert(timeSpent, NANOSECONDS)))));
+    }
+
+    @SneakyThrows
+    public static <T> T withTimeSpent(final Callable<T> thunk, Consumer<Long> timeSpent) {
+        val startMillis = System.nanoTime();
+        try {
+            return thunk.call();
+        } finally {
+            timeSpent.accept(System.nanoTime() - startMillis);
+        }
     }
 }

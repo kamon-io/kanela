@@ -31,10 +31,12 @@ object Dependencies {
   val logbackClassic    = "ch.qos.logback"            % "logback-classic"         % "1.1.6"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
   val javaslang         = "io.javaslang"              % "javaslang"               % "2.0.5"
-  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.5.7"
+  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.6.0"
   val scalatest         = "org.scalatest"            %% "scalatest"               % "3.0.1"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
+  val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
+
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"

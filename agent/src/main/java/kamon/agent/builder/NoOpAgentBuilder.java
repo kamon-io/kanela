@@ -16,27 +16,21 @@
 
 package kamon.agent.builder;
 
-import kamon.agent.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 @Value(staticConstructor = "instance")
 @EqualsAndHashCode(callSuper = false)
-class MixinAgentBuilder extends KamonAgentBuilder {
+class NoOpAgentBuilder extends KamonAgentBuilder {
 
     public AgentBuilder newAgentBuilder(AgentConfiguration config) {
         return from(config)
                 .with(DefaultInstrumentationListener.instance());
     }
 
-    public void addTypeTransformation(TypeTransformation typeTransformation) {
-        if (typeTransformation.isActive()) {
-            transformersByTypes = transformersByTypes.appendAll(typeTransformation
-                    .getMixins()
-                    .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
-        }
-    }
+    public void addTypeTransformation(TypeTransformation typeTransformation) {}
 }

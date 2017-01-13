@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.agent;
+package kamon.agent.util.conf;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -28,6 +28,10 @@ import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 @Value
 @NonFinal
 public class AgentConfiguration {
@@ -35,6 +39,10 @@ public class AgentConfiguration {
     Option<String> withinPackage;
     Boolean debugMode;
     DumpConfig dump;
+    CircuitBreakerConfig circuitBreakerConfig;
+    OldGarbageCollectorConfig oldGarbageCollectorConfig;
+    Boolean showBanner;
+    Map<String, Object> extraParams;
 
     private static class Holder {
         private static final AgentConfiguration Instance = new AgentConfiguration();
@@ -49,10 +57,15 @@ public class AgentConfiguration {
         this.instrumentations = getInstrumentations(config);
         this.withinPackage = getWithinConfiguration(config);
         this.debugMode = getDebugMode(config);
+        this.showBanner = getShowBanner(config);
+        this.extraParams = new HashMap();
         this.dump = new DumpConfig(config);
+        this.circuitBreakerConfig = new CircuitBreakerConfig(config);
+        this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
     }
 
     @Value
+    @NonFinal
     public class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
@@ -71,8 +84,57 @@ public class AgentConfiguration {
         }
     }
 
+    @Value
+    @NonFinal
+    public class CircuitBreakerConfig {
+        boolean enabled;
+        double freeMemoryThreshold;
+        double gcProcessCPUThreshold;
+
+        CircuitBreakerConfig(Config config) {
+            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.enabled")).getOrElse(false);
+            this.freeMemoryThreshold = Try.of(() -> config.getDouble("circuit-breaker.free-memory-threshold")).getOrElse(50.0);
+            this.gcProcessCPUThreshold = Try.of(() -> config.getDouble("circuit-breaker.gc-process-cpu-threshold")).getOrElse(10.0);
+        }
+
+        public void circuitBreakerRunning() {
+            AgentConfiguration.this.addExtraParameter("circuit-breaker-running", true);
+        }
+    }
+
+    @Value
+    @NonFinal
+    public class OldGarbageCollectorConfig {
+        boolean shouldLogAfterGc;
+
+        OldGarbageCollectorConfig(Config config) {
+            this.shouldLogAfterGc = Try.of(() -> config.getBoolean("gc-listener.log-after-gc-run")).getOrElse(false);
+        }
+
+        public boolean isCircuitBreakerRunning() {
+            return (boolean) AgentConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
+        }
+    }
+
     public boolean isDebugMode() {
         return this.debugMode;
+    }
+
+    private <T> void addExtraParameter(String key, T value) {
+        this.extraParams.put(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public  <T> Option<T> getExtraParameter(String key) {
+        return Option.of((T) this.extraParams.get(key));
+    }
+
+    public boolean isAttachedInRuntime() {
+        return (boolean) this.getExtraParameter("attached-in-runtime").getOrElse(false);
+    }
+
+    public void runtimeAttach() {
+        this.addExtraParameter("attached-in-runtime", true);
     }
 
     private Config getConfig() {
@@ -94,6 +156,10 @@ public class AgentConfiguration {
 
     private Boolean getDebugMode(Config config) {
         return Try.of(() -> config.getBoolean("debug-mode")).getOrElse(false);
+    }
+
+    private Boolean getShowBanner(Config config) {
+        return Try.of(() -> config.getBoolean("show-banner")).getOrElse(false);
     }
 
     private Config loadDefaultConfig() {

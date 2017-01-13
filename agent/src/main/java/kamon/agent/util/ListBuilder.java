@@ -14,21 +14,30 @@
  * =========================================================================================
  */
 
-package kamon.agent.api.advisor;
+package kamon.agent.util;
 
-import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import javaslang.collection.List;
 
-@Value(staticConstructor = "of")
-public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> interceptorClass;
+import java.util.ArrayList;
 
-    public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
+public class ListBuilder<T> {
+    private java.util.List<T> list = new ArrayList<>();
+
+    public ListBuilder add(T element) {
+        this.list.add(element);
+        return this;
+    }
+
+    public ListBuilder addAll(Iterable<T> elements) {
+        this.list.addAll(List.ofAll(elements).toJavaList());
+        return this;
+    }
+
+    public List<T> build() {
+        return List.ofAll(this.list);
+    }
+
+    public static <T> ListBuilder<T> builder() {
+        return new ListBuilder<>();
     }
 }

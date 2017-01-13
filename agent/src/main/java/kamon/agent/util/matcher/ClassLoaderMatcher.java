@@ -14,15 +14,28 @@
  * =========================================================================================
  */
 
-package kamon.agent.builder;
+package kamon.agent.util.matcher;
 
+import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-@Value(staticConstructor = "of")
-class TransformerDescription {
-    ElementMatcher<? super TypeDescription> elementMatcher;
-    AgentBuilder.Transformer transformer;
+@Value
+@EqualsAndHashCode(callSuper = false)
+public class ClassLoaderMatcher extends ElementMatcher.Junction.AbstractBase<ClassLoader>{
+
+    String classLoaderName;
+
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> withName(String name) {
+        return new ClassLoaderMatcher(name);
+    }
+
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isReflectionClassLoader() {
+        return new ClassLoaderMatcher("sun.reflect.DelegatingClassLoader");
+    }
+
+    @Override
+    public boolean matches(ClassLoader target) {
+        return (target != null) && classLoaderName.equals(target.getClass().getName());
+    }
 }

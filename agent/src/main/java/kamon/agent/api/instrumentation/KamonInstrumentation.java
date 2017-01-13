@@ -16,18 +16,18 @@
 
 package kamon.agent.api.instrumentation;
 
+import javaslang.Function0;
 import javaslang.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
+import kamon.agent.util.ListBuilder;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
-import net.bytebuddy.pool.TypePool;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -37,16 +37,15 @@ import java.util.stream.Collectors;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class KamonInstrumentation {
-    private final List<InstrumentationDescription> instrumentationDescriptions = new ArrayList<>();
+    private final ListBuilder<InstrumentationDescription> instrumentationDescriptions = ListBuilder.builder();
 
-    private final TypePool typePool = TypePool.Default.ofClassPath();
     protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
     protected final ElementMatcher.Junction<MethodDescription> TakesArguments = not(takesArguments(0));
 
+    private static Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
+
     public List<TypeTransformation> collectTransformations() {
-        return instrumentationDescriptions.stream()
-                .map(this::buildTransformations)
-                .collect(Collectors.toList());
+        return instrumentationDescriptions.build().map(this::buildTransformations).toJavaList();
     }
 
     private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription) {
@@ -64,18 +63,20 @@ public abstract class KamonInstrumentation {
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher().and(named(f.get())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(named(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher().and(isSubTypeOf(typePool.describe(f.get()).resolve())));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(hasSuperType(named(f.get()))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    private ElementMatcher.Junction<TypeDescription> defaultTypeMatcher() {
-        return  failSafe(not(isInterface()).and(not(isSynthetic())));
+    public void annotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+        val builder = new InstrumentationDescription.Builder();
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(named(f.get()))));
+        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public boolean isActive() {
