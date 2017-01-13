@@ -14,22 +14,10 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.advisor
+package app.kamon.cases.simple
 
-import app.kamon.cases.simple.SpyAware
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import scala.collection.mutable.ListBuffer
 
-object SpyAdvisor {
-
-  @OnMethodEnter
-  def onMethodEnter(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("enter")
-  }
-
-  @OnMethodExit
-  def onMethodExit(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("exit")
-  }
+class TestClass {
+  def addValue(values: ListBuffer[String]): ListBuffer[String] = values += "body"
 }
-
-class SpyAdvisor

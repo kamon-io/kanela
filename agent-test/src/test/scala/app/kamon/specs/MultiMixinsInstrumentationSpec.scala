@@ -16,6 +16,8 @@
 
 package app.kamon.specs
 
+import app.kamon.cases.multimixins.MixinAware.{ MixinAware1, MixinAware2, MixinAware3 }
+import app.kamon.cases.multimixins.WithMultiMixinsClass
 import app.kamon.utils.AdditionalJVMParameters
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
@@ -29,19 +31,4 @@ class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeA
     mixinsClass.isInstanceOf[MixinAware2] shouldBe true
     mixinsClass.isInstanceOf[MixinAware3] shouldBe true
   }
-}
-class WithMultiMixinsClass {
-  def process: String = "Hi"
-}
-
-trait MixinAware1 {
-  def dummyMethod1: String
-}
-
-trait MixinAware2 {
-  def dummyMethod2: String
-}
-
-trait MixinAware3 {
-  def dummyMethod3: String
 }

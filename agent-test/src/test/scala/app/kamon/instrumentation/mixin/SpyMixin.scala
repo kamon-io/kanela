@@ -16,7 +16,7 @@
 
 package app.kamon.instrumentation.mixin
 
-import app.kamon.specs.SpyAware
+import app.kamon.cases.simple.SpyAware
 import kamon.agent.api.instrumentation.Initializer
 
 import scala.collection.mutable.ListBuffer

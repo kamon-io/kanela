@@ -16,7 +16,7 @@
 
 package app.kamon.instrumentation.mixin
 
-import app.kamon.specs.{ MixinAware1, MixinAware2, MixinAware3 }
+import app.kamon.cases.multimixins.MixinAware.{ MixinAware1, MixinAware2, MixinAware3 }
 import kamon.agent.api.instrumentation.Initializer
 
 object MixinOverMixin {
@@ -24,21 +24,21 @@ object MixinOverMixin {
   class MixinOverMixin1 extends MixinAware1 {
     private var _value1: String = _
     @Initializer
-    def initializer1: Unit = _value1 = "dummy 1"
-    override def dummyMethod1 = _value1
+    def initializer1(): Unit = _value1 = "dummy 1"
+    override def dummyMethod1: String = _value1
   }
 
   class MixinOverMixin2 extends MixinAware2 {
     private var _value2: String = _
     @Initializer
-    def initializer2: Unit = _value2 = "dummy 2"
-    override def dummyMethod2 = _value2
+    def initializer2(): Unit = _value2 = "dummy 2"
+    override def dummyMethod2: String = _value2
   }
 
   class MixinOverMixin3 extends MixinAware3 {
     private var _value3: String = _
     @Initializer
-    def initializer3: Unit = _value3 = "dummy 3"
-    override def dummyMethod3 = _value3
+    def initializer3(): Unit = _value3 = "dummy 3"
+    override def dummyMethod3: String = _value3
   }
 }

@@ -16,6 +16,7 @@
 
 package app.kamon.specs
 
+import app.kamon.cases.simple.{ SpyAware, TestClass }
 import app.kamon.utils.AdditionalJVMParameters
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
@@ -41,11 +42,3 @@ class SimpleInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAft
 
 }
 
-class TestClass {
-  def addValue(values: ListBuffer[String]): ListBuffer[String] = values += "body"
-}
-
-trait SpyAware {
-  def tracks: ListBuffer[String]
-  def addTracks(v: String): Unit
-}

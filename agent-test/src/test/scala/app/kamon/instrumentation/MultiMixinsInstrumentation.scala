@@ -21,7 +21,7 @@ import kamon.agent.scala
 class MultiMixinsInstrumentation extends scala.KamonInstrumentation {
   import app.kamon.instrumentation.mixin.MixinOverMixin._
 
-  forTargetType("app.kamon.specs.WithMultiMixinsClass") { builder ⇒
+  forTargetType("app.kamon.cases.multimixins.WithMultiMixinsClass") { builder ⇒
     builder
       .withMixin(classOf[MixinOverMixin1])
       .withMixin(classOf[MixinOverMixin2])

@@ -26,7 +26,7 @@ import kamon.agent.scala
 class SimpleInstrumentation extends scala.KamonInstrumentation {
   val methodName: Junction[MethodDescription] = named("addValue")
 
-  forTargetType("app.kamon.specs.TestClass") { builder ⇒
+  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
     builder
       .withMixin(classOf[SpyMixin])
       .withAdvisorFor(methodName, classOf[TestMethodAdvisor])

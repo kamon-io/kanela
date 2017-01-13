@@ -14,22 +14,18 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.advisor
+package app.kamon.cases.multimixins
 
-import app.kamon.cases.simple.SpyAware
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
-
-object SpyAdvisor {
-
-  @OnMethodEnter
-  def onMethodEnter(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("enter")
+object MixinAware {
+  trait MixinAware1 {
+    def dummyMethod1: String
   }
 
-  @OnMethodExit
-  def onMethodExit(@This instance: Object): Unit = {
-    instance.asInstanceOf[SpyAware].addTracks("exit")
+  trait MixinAware2 {
+    def dummyMethod2: String
+  }
+
+  trait MixinAware3 {
+    def dummyMethod3: String
   }
 }
-
-class SpyAdvisor
