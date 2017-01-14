@@ -21,7 +21,7 @@ import app.kamon.cases.multimixins.WithMultiMixinsClass
 import app.kamon.utils.AdditionalJVMParameters
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
-@AdditionalJVMParameters(parameters = "-Dkamon.agent.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation")
+@AdditionalJVMParameters(parameters = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation")
 class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "Multiple Mixins over a single subType" should "introduce all types appropriately" in {
