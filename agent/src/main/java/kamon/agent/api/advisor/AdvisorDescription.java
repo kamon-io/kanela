@@ -29,6 +29,6 @@ public class AdvisorDescription {
     Class<?> interceptorClass;
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
+        return (builder, typeDescription, classLoader, module) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
     }
 }

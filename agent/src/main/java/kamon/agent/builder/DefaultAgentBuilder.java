@@ -32,8 +32,8 @@ import java.util.ArrayList;
 @EqualsAndHashCode(callSuper = false)
 class DefaultAgentBuilder extends KamonAgentBuilder {
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config) {
-        return from(config)
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+        return from(config, moduleDescription)
                 .with(DefaultInstrumentationListener.instance())
                 .with(additionalListeners(config));
     }
@@ -46,7 +46,7 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     private AgentBuilder.Listener additionalListeners(AgentConfiguration config) {
         val listeners = new ArrayList<AgentBuilder.Listener>();
-        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance(config.getDump()));
+        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }

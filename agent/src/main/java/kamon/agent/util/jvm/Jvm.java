@@ -31,21 +31,21 @@ import java.util.concurrent.TimeUnit;
 
 @Value
 @NonFinal
-public class JvmTools {
+public class Jvm {
 
-    private static final JvmTools instance = new JvmTools();
+    private static final Jvm instance = new Jvm();
 
     PerfInstrumentation perfInstrumentation;
 
     @SneakyThrows
-    private JvmTools() {
+    private Jvm() {
         val jvm = ManagementFactory.getRuntimeMXBean().getName();
         val pid = Integer.parseInt(jvm.substring(0, jvm.indexOf('@')));
         val buffer = Perf.getPerf().attach(pid, "r");
         this.perfInstrumentation = new PerfInstrumentation(buffer);
     }
 
-    public static JvmTools instance() {
+    public static Jvm instance() {
         return instance;
     }
 
@@ -56,7 +56,7 @@ public class JvmTools {
      *  The names of these counters and the data structures used to represent them are considered private, uncommitted interfaces to the HotSpot JVM.
      *  Users should not become dependent on any counter names, particularly those that start with prefixes other than "java.".
      *
-     *  @return the time spent in run the GC in the current process.
+     *  @return the time spent in show the GC in the current process.
      */
     public long getProcessCPUCollectionTime() {
         val frequency = getPerformanceCounterValue("sun.os.hrt.frequency");
@@ -69,11 +69,14 @@ public class JvmTools {
         return ( (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean() ).getProcessCpuTime();
     }
 
+    public double getGcProcessCpuTimePercent() {
+        return 100.0 * ((double) getProcessCPUCollectionTime() / getProcessCPUTime());
+    }
+
 
     private long getPerformanceCounterValue(String name) {
         return ((LongCounter) perfInstrumentation.findByPattern(name).get(0)).longValue();
     }
-
 
     static boolean isOldGenPool(MemoryPoolMXBean bean) {
         return bean.getName().endsWith("Old Gen") || bean.getName().endsWith("Tenured Gen");

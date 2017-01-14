@@ -16,52 +16,66 @@
 
 package kamon.agent.circuitbreaker;
 
-
 import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
+import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.GcEvent;
-import kamon.agent.util.jvm.JvmTools;
+import kamon.agent.util.jvm.Jvm;
 import kamon.agent.util.log.LazyLogger;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import lombok.val;
-import utils.AnsiColor;
 
 import static java.text.MessageFormat.format;
 
-
 @Value
 @NonFinal
+@RequiredArgsConstructor
 public class SystemThroughputCircuitBreaker {
-    JvmTools jvmTools;
     AgentConfiguration.CircuitBreakerConfig config;
+    Jvm jvm;
 
-    private SystemThroughputCircuitBreaker(AgentConfiguration.CircuitBreakerConfig config, JvmTools jvmTools) {
-        EventBroker.instance().add(this);
-        this.jvmTools = jvmTools;
-        this.config = config;
-    }
+    @NonFinal private volatile int tripped = 0;
 
-    public static void attach(AgentConfiguration.CircuitBreakerConfig config, JvmTools jvmTools) {
+    public static void attach(AgentConfiguration.CircuitBreakerConfig config) { attach(config, Jvm.instance()); }
+
+    public static void attach(AgentConfiguration.CircuitBreakerConfig config, Jvm jvm) {
         if(config.isEnabled()){
-            Try.of(() -> new SystemThroughputCircuitBreaker(config, jvmTools))
+            Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: System Throughput CircuitBreaker was activated."))))
-                    .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate System Throughput CircuitBreaker.")), cause));
+                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker was activated.")))
+                    .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
+                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker is listening for GCEvents.")))
+                    .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate System Throughput CircuitBreaker."), cause));
         }
-    }
-
-    public static void attach(AgentConfiguration.CircuitBreakerConfig config) {
-        attach(config, JvmTools.instance());
     }
 
     @Subscribe
     public void onGCEvent(GcEvent event) {
-        val gcProcessCpuTimePercentage = 100.0 * ((double) jvmTools.getProcessCPUCollectionTime() / jvmTools.getProcessCPUTime());
-        if((gcProcessCpuTimePercentage >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-            LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n: System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), gcProcessCpuTimePercentage)));
+        if((jvm.getGcProcessCpuTimePercent() >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
+            LazyLogger.warnColor(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent()));
+            EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.StopModules.instance());
+            trip();
+        } else {
+            if (isTripped()) {
+                LazyLogger.infoColor(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent()));
+                reset();
+                EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.RestartModules.instance());
+            }
         }
+    }
+
+    private boolean isTripped() {
+        return this.tripped == 1;
+    }
+
+    private void trip() {
+        this.tripped = 1;
+    }
+
+    private void reset() {
+        this.tripped = 0;
     }
 }

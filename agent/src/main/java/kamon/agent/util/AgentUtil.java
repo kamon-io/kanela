@@ -44,7 +44,7 @@ public class AgentUtil {
     public static long timed(final Runnable thunk) {
         val startMillis = System.nanoTime();
         thunk.run();
-        return (System.nanoTime() - startMillis);
+        return MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS);
     }
 
     public static <T> T withTimeLogging(final Callable<T> thunk, String message) {

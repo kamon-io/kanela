@@ -32,12 +32,14 @@ import java.util.Map;
 @Value
 @NonFinal
 public class EventBroker {
-    private static EventBroker Instance = new EventBroker();
-
     Map<Class, List<SubscriberInfo>> map = new LinkedHashMap<>();
 
+    private static class Holder {
+        private static final EventBroker Instance = new EventBroker();
+    }
+
     public static EventBroker instance() {
-        return Instance;
+        return Holder.Instance;
     }
 
     public int publish(Object o) {

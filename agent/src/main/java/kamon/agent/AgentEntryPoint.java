@@ -16,30 +16,37 @@
 
 package kamon.agent;
 
+import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
-import kamon.agent.util.banner.KamonAgentBanner;
+import kamon.agent.reinstrument.Reinstrumenter;
+import kamon.agent.util.banner.AgentBanner;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.OldGarbageCollectorListener;
+import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.val;
 
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.List;
 
-import static kamon.agent.util.AgentUtil.withTimeLogging;
+import static kamon.agent.util.AgentUtil.timed;
 
 @Value
 public class AgentEntryPoint {
-    private static void start(String args, Instrumentation instrumentation) {
-        withTimeLogging(() -> {
-            val configuration = AgentConfiguration.instance();
+    private static List<KamonAgentFileTransformer> filesTransformers = new ArrayList<>();
 
-            KamonAgentBanner.run(configuration);
+    private static void start(String args, Instrumentation instrumentation) {
+        val timeSpent = timed(() -> {
+            val configuration = AgentConfiguration.instance();
+            AgentBanner.show(configuration);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+            val transformers = InstrumentationLoader.load(instrumentation, configuration);
+            Reinstrumenter.attach(instrumentation, configuration, transformers);
+        });
 
-            InstrumentationLoader.load(instrumentation, configuration);
-
-        }, "Startup complete in");
+        LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms");
     }
 
     public static void premain(String args, Instrumentation instrumentation) {
@@ -51,38 +58,3 @@ public class AgentEntryPoint {
         premain(args, instrumentation);
     }
 }
-
-
-
-
-//public class KamonPremain {
-//
-//    public static void premain(String args, Instrumentation instrumentation) {
-//        try {
-//
-//            final CodeSource codeSource = KamonPremain.class.getProtectionDomain().getCodeSource();
-//            final File kamonAgentJar = getKamonAgentJar(codeSource);
-//
-//            instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(kamonAgentJar));
-//
-//            final Class<?> agentClass = Class.forName("kamon.agent.KamonAgent", true, null);
-//            final Method premainMethod = agentClass.getMethod("premain", String.class, Instrumentation.class);
-//
-//            premainMethod.invoke(null, args, instrumentation);
-//
-//        } catch (Throwable t) {
-//            // log error but don't re-throw which would prevent monitored app from starting
-//            System.err.println("Kamon Agent not started: " + t.getMessage());
-//            t.printStackTrace();
-//        }
-//    }
-//
-//    private static File getKamonAgentJar(CodeSource codeSource) throws Exception {
-//        final File codeSourceFile = new File(codeSource.getLocation().toURI());
-//        if (codeSourceFile.getName().endsWith(".jar")) {
-//            return codeSourceFile;
-//        }
-//        throw new IOException("Could not determine kamon-agent jar location");
-//    }
-//}
-

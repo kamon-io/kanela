@@ -43,19 +43,19 @@ import static java.text.MessageFormat.format;
 @Value
 @NonFinal
 public class OldGarbageCollectorListener {
-    JvmTools tools;
+    Jvm tools;
     long jvmStartTime;
     EventBroker broker;
     Option<MemoryPoolMXBean> oldGenPool;
     AgentConfiguration.OldGarbageCollectorConfig config;
 
     @SneakyThrows
-    private OldGarbageCollectorListener(AgentConfiguration.OldGarbageCollectorConfig configuration, JvmTools jvmTools) {
+    private OldGarbageCollectorListener(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         val memoryBeans = List.ofAll(ManagementFactory.getMemoryPoolMXBeans());
 
         this.jvmStartTime = ManagementFactory.getRuntimeMXBean().getStartTime();
-        this.oldGenPool = memoryBeans.find(JvmTools::isOldGenPool);
-        this.tools = jvmTools;
+        this.oldGenPool = memoryBeans.find(Jvm::isOldGenPool);
+        this.tools = jvm;
         this.config = configuration;
         this.broker = EventBroker.instance();
 
@@ -67,17 +67,16 @@ public class OldGarbageCollectorListener {
      *
      * @param configuration @see {{@link AgentConfiguration.OldGarbageCollectorConfig}}
      */
-    public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, JvmTools jvmTools) {
+    public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
-            Try.of(() -> new OldGarbageCollectorListener(configuration, jvmTools))
+            Try.of(() -> new OldGarbageCollectorListener(configuration, jvm))
                .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: Old Garbage Collector Listener was activated."))))
                .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate Old Garbage Collector Listener.")), cause));
         }
     }
 
-
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig config) {
-        attach(config, JvmTools.instance());
+        attach(config, Jvm.instance());
     }
 
     private void startListening() {
@@ -103,11 +102,9 @@ public class OldGarbageCollectorListener {
 
             percentageFreeMemory.forEach((freeMemory) -> {
                 val event = GcEvent.from(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
-
                 if(config.isShouldLogAfterGc()) {
-                    LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n: {0}", event)));
+                    LazyLogger.warnColor(() -> format(":yellow,n: {0}", event));
                 }
-
                 broker.publish(event);
             });
         }
