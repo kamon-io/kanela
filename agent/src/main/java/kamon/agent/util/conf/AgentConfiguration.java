@@ -76,6 +76,7 @@ public class AgentConfiguration {
     }
 
     @Value(staticConstructor = "from")
+    @NonFinal
     public static class AgentModuleDescription {
         String name;
         boolean stoppable;

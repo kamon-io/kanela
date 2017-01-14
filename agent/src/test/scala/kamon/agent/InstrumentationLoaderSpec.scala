@@ -19,26 +19,41 @@ package kamon.agent
 import java.lang.instrument.Instrumentation
 
 import kamon.agent.util.conf.AgentConfiguration
-import org.mockito.ArgumentMatchers
+import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
+import javaslang.collection.{ List ⇒ JList }
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "with the config empty kamon.agent.instrumentations " should "not break" in {
+  "with the config empty kamon.agent.modules.x-module.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentConfiguration = spy(AgentConfiguration.instance())
-    when(agentConfiguration.getInstrumentations(ArgumentMatchers.any())).thenReturn(javaslang.collection.List.empty[String]())
+    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    when(agentModuleDescriptionMock.getInstrumentations)
+      .thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getName)
+      .thenReturn("x-module")
+
+    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
+    when(agentConfiguration.getAgentModules)
+      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 
-    verify(agentConfiguration, times(1)).getInstrumentations
+    verify(agentConfiguration, times(1)).getAgentModules
   }
 
   "with an unknown instrumentation" should "blow up" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentConfiguration = spy(AgentConfiguration.instance())
-    when(agentConfiguration.getInstrumentations).thenReturn(javaslang.collection.List.of[String]("UnknownInstrumentation"))
+    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    when(agentModuleDescriptionMock.getInstrumentations)
+      .thenReturn(JList.of[String]("UnknownInstrumentation"))
+    when(agentModuleDescriptionMock.getName)
+      .thenReturn("x-module")
+
+    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
+    when(agentConfiguration.getAgentModules)
+      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
     intercept[RuntimeException] {
       InstrumentationLoader.load(instrumentationMock, agentConfiguration)
@@ -49,8 +64,15 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
   "with an existing instrumentation" should "register it correctly" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentConfiguration = spy(AgentConfiguration.instance())
-    when(agentConfiguration.getInstrumentations) thenReturn javaslang.collection.List.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation")
+    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    when(agentModuleDescriptionMock.getInstrumentations)
+      .thenReturn(JList.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation"))
+    when(agentModuleDescriptionMock.getName)
+      .thenReturn("x-module")
+
+    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
+    when(agentConfiguration.getAgentModules)
+      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 
