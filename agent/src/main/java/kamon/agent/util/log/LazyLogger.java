@@ -23,6 +23,7 @@ import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
+import utils.AnsiColor;
 
 import java.util.Locale;
 import java.util.function.Supplier;
@@ -36,7 +37,6 @@ public class LazyLogger {
     static {
         Configurator.currentConfig()
                 .locale(Locale.US)
-                .writingThread("main", 1)
                 .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")
                 .writer(new ConsoleWriter())
                 .addWriter(new RollingFileWriter("log.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
@@ -53,25 +53,28 @@ public class LazyLogger {
         org.pmw.tinylog.Logger.trace(msg.get(), t);
     }
 
-    public static void debug(final Supplier<String> msg) {
-        org.pmw.tinylog.Logger.debug(msg.get());
-    }
+    public static void debug(final Supplier<String> msg) { org.pmw.tinylog.Logger.debug(msg.get());}
 
     public static void debug(final Object source, final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.debug(msg.get(),t); }
 
     public static void info(final Supplier<String> msg) { org.pmw.tinylog.Logger.info(msg.get()); }
 
+    public static void infoColor(final Supplier<String> msg) { org.pmw.tinylog.Logger.info(AnsiColor.ParseColors(":green,n:" + msg.get())); }
+
     public static void info(final Supplier<String> msg, final Throwable t) {
         org.pmw.tinylog.Logger.info(msg.get(),t);
     }
 
-    public static void warn(final Supplier<String> msg) {
-        org.pmw.tinylog.Logger.warn(msg.get());
-    }
+    public static void warn(final Supplier<String> msg) { org.pmw.tinylog.Logger.warn(msg.get());}
+
+    public static void warnColor(final Supplier<String> msg) { org.pmw.tinylog.Logger.warn(AnsiColor.ParseColors(":yellow,n:" + msg.get())); }
 
     public static void warn(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(msg.get(), t); }
 
     public static void error(final Supplier<String> msg) { org.pmw.tinylog.Logger.error(msg.get()); }
 
     public static void error(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(msg.get(),t); }
+
+    public static void errorColor(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.error(AnsiColor.ParseColors(":red,n:" + msg.get()),t);}
+
 }

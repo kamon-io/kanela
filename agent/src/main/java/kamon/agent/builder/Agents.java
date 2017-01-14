@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,24 +16,26 @@
 
 package kamon.agent.builder;
 
-import javaslang.collection.List;
-import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.Value;
+import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
 @Value(staticConstructor = "from")
 public class Agents {
     AgentConfiguration config;
-    List<KamonAgentBuilder> agentBuilders = List.of(MixinAgentBuilder.instance(), DefaultAgentBuilder.instance());
+    KamonAgentBuilder builder = DefaultAgentBuilder.instance();
 
-    public void install(Instrumentation instrumentation) {
-        agentBuilders.forEach(builder -> builder.build(config).installOn(instrumentation));
+    public KamonAgentFileTransformer install(Instrumentation instrumentation, AgentConfiguration.AgentModuleDescription moduleDescription) {
+        val agentBuilder = builder.build(config, moduleDescription);
+        val classFileTransformer = agentBuilder.installOn(instrumentation);
+        return KamonAgentFileTransformer.from(agentBuilder, classFileTransformer, moduleDescription.isStoppable());
     }
 
     public Agents addTypeTransformation(TypeTransformation typeTransformation) {
-        agentBuilders.forEach(builder -> builder.addTypeTransformation(typeTransformation));
+        builder.addTypeTransformation(typeTransformation);
         return this;
     }
 }

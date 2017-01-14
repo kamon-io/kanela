@@ -19,6 +19,9 @@ package kamon.agent.api.instrumentation.mixin;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.asm.AsmVisitorWrapper;
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.field.FieldList;
+import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassVisitor;
@@ -31,7 +34,7 @@ public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
     MixinDescription mixin;
 
     @Override
-    public ClassVisitor wrap(TypeDescription instrumentedType, ClassVisitor classVisitor, Implementation.Context implementationContext, TypePool typePool, int writerFlags, int readerFlags) {
+    public ClassVisitor wrap(TypeDescription instrumentedType, ClassVisitor classVisitor, Implementation.Context implementationContext, TypePool typePool, FieldList<FieldDescription.InDefinedShape> fields, MethodList<?> methods, int writerFlags, int readerFlags) {
         return  MixinClassVisitor.from(mixin, instrumentedType.getInternalName(), classVisitor);
     }
 }

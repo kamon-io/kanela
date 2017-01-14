@@ -25,12 +25,18 @@ import utils.AnsiColor;
 
 import static java.text.MessageFormat.format;
 
-@Value(staticConstructor = "instance")
+@Value
 @EqualsAndHashCode(callSuper = false)
 public class DefaultInstrumentationListener extends Listener.Adapter {
 
+    private static final DefaultInstrumentationListener Instance = new DefaultInstrumentationListener();
+
     @Override
-    public void onError(String error, ClassLoader classLoader, JavaModule module, Throwable throwable) {
+    public void onError(String error, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
         LazyLogger.info(() -> AnsiColor.ParseColors(format(":red,n:Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName())));
+    }
+
+    public static DefaultInstrumentationListener instance() {
+        return Instance;
     }
 }

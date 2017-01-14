@@ -25,10 +25,10 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 @Value(staticConstructor = "of")
 public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription.InDefinedShape> methodMatcher;
+    ElementMatcher<? super MethodDescription> methodMatcher;
     Class<?> interceptorClass;
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
+        return (builder, typeDescription, classLoader, module) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
     }
 }

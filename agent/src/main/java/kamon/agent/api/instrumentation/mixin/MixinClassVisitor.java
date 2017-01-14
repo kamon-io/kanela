@@ -26,9 +26,7 @@ import net.bytebuddy.jar.asm.tree.ClassNode;
 import net.bytebuddy.jar.asm.tree.FieldNode;
 import net.bytebuddy.jar.asm.tree.MethodNode;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 @Value
@@ -57,18 +55,6 @@ public class MixinClassVisitor extends ClassVisitor {
             return new MixinInitializer(mv, access, name, desc, type, mixin);
         }
         return super.visitMethod(access, name, desc, signature, exceptions);
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        cv.visit(version, access, name, signature, superName, addInterfaces(mixin, interfaces));
-    }
-
-    private String[] addInterfaces(MixinDescription mixin, String[] interfaces) {
-        if(mixin.getInterfaces().isEmpty()) return interfaces;
-        Set<String> newInterfaces = mixin.getInterfaces();
-        if (interfaces != null) newInterfaces.addAll(Arrays.asList(interfaces));
-        return newInterfaces.toArray(new String[newInterfaces.size()]);
     }
 
     @Override

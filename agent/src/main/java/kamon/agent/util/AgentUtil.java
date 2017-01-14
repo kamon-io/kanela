@@ -41,6 +41,12 @@ public class AgentUtil {
         timeSpent.accept(System.nanoTime() - startMillis);
     }
 
+    public static long timed(final Runnable thunk) {
+        val startMillis = System.nanoTime();
+        thunk.run();
+        return MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS);
+    }
+
     public static <T> T withTimeLogging(final Callable<T> thunk, String message) {
         return withTimeSpent(thunk, (timeSpent) -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":green,n: {0} {1} ms", message, MILLISECONDS.convert(timeSpent, NANOSECONDS)))));
     }

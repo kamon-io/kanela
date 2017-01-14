@@ -32,22 +32,24 @@ import java.io.File;
 @EqualsAndHashCode(callSuper = false)
 public class ClassDumperListener extends Listener.Adapter {
 
-    final File dumpDir;
-    final File jarFile;
-    final AgentConfiguration.DumpConfig config;
+    private static final ClassDumperListener Instance = new ClassDumperListener();
 
-    private ClassDumperListener(AgentConfiguration.DumpConfig config){
-        this.config = config;
+    File dumpDir;
+    File jarFile;
+    AgentConfiguration.DumpConfig config;
+
+    private ClassDumperListener(){
+        this.config = AgentConfiguration.instance().getDump();
         this.dumpDir = new File(config.getDumpDir());
         this.jarFile = new File(config.getDumpDir() + File.separator + config.getJarName() + ".jar");
     }
 
-    public static ClassDumperListener instance(AgentConfiguration.DumpConfig config) {
-        return new ClassDumperListener(config);
+    public static ClassDumperListener instance() {
+        return Instance;
     }
 
     @Override
-    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
+    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
         addClassToDump(dynamicType);
     }
 
@@ -69,6 +71,6 @@ public class ClassDumperListener extends Listener.Adapter {
     }
 
     private <R> void runSafe(Try.CheckedSupplier<R> thunk, String msg) {
-        Try.of(thunk).onFailure((cause) -> LazyLogger.error(() -> msg, cause));
+        Try.of(thunk).onFailure((cause) -> LazyLogger.errorColor(() -> msg, cause));
     }
 }

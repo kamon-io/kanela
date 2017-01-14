@@ -20,26 +20,27 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigResolveOptions;
-import javaslang.collection.HashMap;
 import javaslang.collection.List;
 import javaslang.collection.List.Nil;
-import javaslang.collection.Map;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import lombok.val;
+
+import java.util.HashMap;
 
 
 @Value
 @NonFinal
 public class AgentConfiguration {
-    List<String> instrumentations;
-    Option<String> withinPackage;
     Boolean debugMode;
     DumpConfig dump;
+    CircuitBreakerConfig circuitBreakerConfig;
+    OldGarbageCollectorConfig oldGarbageCollectorConfig;
     Boolean showBanner;
-    Map<String, Object> extraParams;
+    HashMap extraParams;
 
     private static class Holder {
         private static final AgentConfiguration Instance = new AgentConfiguration();
@@ -51,15 +52,39 @@ public class AgentConfiguration {
 
     private AgentConfiguration() {
         Config config = getConfig();
-        this.instrumentations = getInstrumentations(config);
-        this.withinPackage = getWithinConfiguration(config);
         this.debugMode = getDebugMode(config);
         this.showBanner = getShowBanner(config);
-        this.extraParams = HashMap.empty();
+        this.extraParams = new HashMap();
         this.dump = new DumpConfig(config);
+        this.circuitBreakerConfig = new CircuitBreakerConfig(config);
+        this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
+    }
+
+    public List<AgentModuleDescription> getAgentModules() {
+        val config = getConfig().getConfig("modules");
+        return List.ofAll(config.entrySet())
+                   .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
+                   .toSet()
+                   .map(moduleName -> {
+                       val moduleConfig = config.getConfig(moduleName);
+                       val name = moduleConfig.getString("name");
+                       val stoppable = moduleConfig.getBoolean("stoppable");
+                       val instrumentations = getInstrumentations(moduleConfig);
+                       val within = getWithinConfiguration(moduleConfig);
+                       return AgentModuleDescription.from(name, stoppable, instrumentations, within);
+                   }).toList();
+    }
+
+    @Value(staticConstructor = "from")
+    public static class AgentModuleDescription {
+        String name;
+        boolean stoppable;
+        List<String> instrumentations;
+        List<String> withinPackage;
     }
 
     @Value
+    @NonFinal
     public class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
@@ -78,6 +103,38 @@ public class AgentConfiguration {
         }
     }
 
+    @Value
+    @NonFinal
+    public class CircuitBreakerConfig {
+        boolean enabled;
+        double freeMemoryThreshold;
+        double gcProcessCPUThreshold;
+
+        CircuitBreakerConfig(Config config) {
+            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.enabled")).getOrElse(false);
+            this.freeMemoryThreshold = Try.of(() -> config.getDouble("circuit-breaker.free-memory-threshold")).getOrElse(50.0);
+            this.gcProcessCPUThreshold = Try.of(() -> config.getDouble("circuit-breaker.gc-process-cpu-threshold")).getOrElse(10.0);
+        }
+
+        public void circuitBreakerRunning() {
+            AgentConfiguration.this.addExtraParameter("circuit-breaker-running", true);
+        }
+    }
+
+    @Value
+    @NonFinal
+    public class OldGarbageCollectorConfig {
+        boolean shouldLogAfterGc;
+
+        OldGarbageCollectorConfig(Config config) {
+            this.shouldLogAfterGc = Try.of(() -> config.getBoolean("gc-listener.log-after-gc-show")).getOrElse(false);
+        }
+
+        public boolean isCircuitBreakerRunning() {
+            return (boolean) AgentConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
+        }
+    }
+
     public boolean isDebugMode() {
         return this.debugMode;
     }
@@ -87,8 +144,8 @@ public class AgentConfiguration {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Option<T> getExtraParameter(String key) {
-        return (Option<T>) this.extraParams.get(key);
+    public  <T> Option<T> getExtraParameter(String key) {
+        return Option.of((T) this.extraParams.get(key));
     }
 
     public boolean isAttachedInRuntime() {
@@ -111,8 +168,8 @@ public class AgentConfiguration {
                 .getOrElse(Nil.instance());
     }
 
-    private Option<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("within"))).map(within -> within.mkString("|")).toOption();
+    private List<String> getWithinConfiguration(Config config) {
+        return Try.of(() -> List.ofAll(config.getStringList("withinPackage"))).getOrElse(List.empty());
     }
 
 

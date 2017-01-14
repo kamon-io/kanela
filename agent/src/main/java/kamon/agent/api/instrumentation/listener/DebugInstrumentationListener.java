@@ -23,21 +23,21 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
-import utils.AnsiColor;
 
 import static java.text.MessageFormat.format;
+import static utils.AnsiColor.ParseColors;
 
 @Value(staticConstructor = "instance")
 @EqualsAndHashCode(callSuper = false)
 public class DebugInstrumentationListener extends AgentBuilder.Listener.Adapter {
 
     @Override
-    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
-        LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n:Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName())));
+    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
+        LazyLogger.info(() -> ParseColors(format(":yellow,n:Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName())));
     }
 
     @Override
-    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-        LazyLogger.debug(() -> AnsiColor.ParseColors(format(":red,n:Ignored => {0} and loaded from {1}", typeDescription, classLoader)));
+    public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
+        LazyLogger.debug(() -> ParseColors(format(":red,n:Ignored => {0} and loaded from {1}", typeDescription, classLoader)));
     }
 }

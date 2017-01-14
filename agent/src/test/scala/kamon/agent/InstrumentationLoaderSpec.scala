@@ -19,6 +19,7 @@ package kamon.agent
 import java.lang.instrument.Instrumentation
 
 import kamon.agent.util.conf.AgentConfiguration
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 
@@ -27,7 +28,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
   "with the config empty kamon.agent.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
     val agentConfiguration = spy(AgentConfiguration.instance())
-    when(agentConfiguration.getInstrumentations).thenReturn(javaslang.collection.List.empty[String]())
+    when(agentConfiguration.getInstrumentations(ArgumentMatchers.any())).thenReturn(javaslang.collection.List.empty[String]())
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 

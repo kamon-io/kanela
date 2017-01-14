@@ -16,11 +16,11 @@
 
 package kamon.agent.builder;
 
-import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
+import kamon.agent.util.conf.AgentConfiguration;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
@@ -32,23 +32,21 @@ import java.util.ArrayList;
 @EqualsAndHashCode(callSuper = false)
 class DefaultAgentBuilder extends KamonAgentBuilder {
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config) {
-        return from(config)
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+        return from(config, moduleDescription)
                 .with(DefaultInstrumentationListener.instance())
                 .with(additionalListeners(config));
     }
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
-        if (typeTransformation.isActive()) {
-            transformersByTypes.addAll(typeTransformation
-                    .getTransformations()
-                    .map(transformer -> TransformerDescription.of(extractElementMatcher(typeTransformation), transformer)));
-        }
+      if (typeTransformation.isActive()) {
+          typeTransformations.add(typeTransformation);
+      }
     }
 
     private AgentBuilder.Listener additionalListeners(AgentConfiguration config) {
         val listeners = new ArrayList<AgentBuilder.Listener>();
-        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance(config.getDump()));
+        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }
