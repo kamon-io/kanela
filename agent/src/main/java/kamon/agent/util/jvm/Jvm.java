@@ -56,7 +56,7 @@ public class Jvm {
      *  The names of these counters and the data structures used to represent them are considered private, uncommitted interfaces to the HotSpot JVM.
      *  Users should not become dependent on any counter names, particularly those that start with prefixes other than "java.".
      *
-     *  @return the time spent in run the GC in the current process.
+     *  @return the time spent in show the GC in the current process.
      */
     public long getProcessCPUCollectionTime() {
         val frequency = getPerformanceCounterValue("sun.os.hrt.frequency");

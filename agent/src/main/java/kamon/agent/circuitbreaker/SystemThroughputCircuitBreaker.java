@@ -16,7 +16,6 @@
 
 package kamon.agent.circuitbreaker;
 
-
 import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
@@ -26,29 +25,23 @@ import kamon.agent.util.jvm.Jvm;
 import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import utils.AnsiColor;
 
 import static java.text.MessageFormat.format;
-
 
 @Value
 @NonFinal
 public class SystemThroughputCircuitBreaker {
-    Jvm jvm;
     AgentConfiguration.CircuitBreakerConfig config;
-
-    private SystemThroughputCircuitBreaker(AgentConfiguration.CircuitBreakerConfig config, Jvm jvm) {
-        EventBroker.instance().add(this);
-        this.jvm = jvm;
-        this.config = config;
-    }
+    Jvm jvm;
 
     public static void attach(AgentConfiguration.CircuitBreakerConfig config, Jvm jvm) {
         if(config.isEnabled()){
             Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: System Throughput CircuitBreaker was activated."))))
-                    .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate System Throughput CircuitBreaker.")), cause));
+                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker was activated.")))
+                    .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
+                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker is listening for GCEvents.")))
+                    .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate System Throughput CircuitBreaker."), cause));
         }
     }
 
@@ -59,7 +52,8 @@ public class SystemThroughputCircuitBreaker {
     @Subscribe
     public void onGCEvent(GcEvent event) {
         if((jvm.getGcProcessCpuTimePercent() >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-            LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n: System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent())));
+            LazyLogger.warnColor(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent()));
+//            EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.StopModules.instance());
         }
     }
 }

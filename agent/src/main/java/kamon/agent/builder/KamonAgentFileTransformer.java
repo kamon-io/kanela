@@ -16,11 +16,15 @@
 
 package kamon.agent.builder;
 
+import lombok.ToString;
 import lombok.Value;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 
 @Value(staticConstructor = "from")
+@ToString(exclude="classFileTransformer")
 public class KamonAgentFileTransformer {
+    AgentBuilder agentBuilder;
     ResettableClassFileTransformer classFileTransformer;
     boolean stoppable;
 }

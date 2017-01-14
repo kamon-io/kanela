@@ -19,11 +19,12 @@ import java.util.concurrent.Executors
 
 import kamon.testkit.BaseKamonSpec
 import kamon.trace.Tracer
-import org.scalatest.OptionValues
 import org.scalatest.concurrent.{ PatienceConfiguration, ScalaFutures }
+import org.scalatest.{ Ignore, OptionValues }
 
 import scalaz.concurrent.Future
 
+@Ignore
 class FutureInstrumentationSpec extends BaseKamonSpec("future-instrumentation-spec") with ScalaFutures
     with PatienceConfiguration with OptionValues {
 

@@ -20,7 +20,7 @@ import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
 import utils.AnsiColor;
 
-public class KamonAgentBanner {
+public class AgentBanner {
 
     private static final String[] BANNER = { "",
             " _  __                                                      _     __  _  _",
@@ -36,7 +36,7 @@ public class KamonAgentBanner {
 
     private static final int STRAP_LINE_SIZE = 42;
 
-    public static void run(AgentConfiguration configuration) {
+    public static void show(AgentConfiguration configuration) {
         if (configuration.getShowBanner()) {
             val printStream = System.out;
 

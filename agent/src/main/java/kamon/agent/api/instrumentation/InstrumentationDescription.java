@@ -17,6 +17,7 @@
 package kamon.agent.api.instrumentation;
 
 import javaslang.Function3;
+import javaslang.Function4;
 import javaslang.control.Option;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
@@ -25,6 +26,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.utility.JavaModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,12 +86,12 @@ public class InstrumentationDescription {
             return this;
         }
 
-        public Builder withTransformation(Function3<DynamicType.Builder, TypeDescription, ClassLoader, DynamicType.Builder> f) {
+        public Builder withTransformation(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) {
             transformers.add(withTransformer(f));
             return this;
         }
 
-        private AgentBuilder.Transformer withTransformer(Function3<net.bytebuddy.dynamic.DynamicType.Builder, TypeDescription, ClassLoader, net.bytebuddy.dynamic.DynamicType.Builder> f) { return f::apply; }
+        private AgentBuilder.Transformer withTransformer(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) { return f::apply; }
 
         public InstrumentationDescription build() {
             return new InstrumentationDescription(this);

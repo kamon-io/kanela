@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -30,9 +30,9 @@ import static java.text.MessageFormat.format;
 
 public class InstrumentationLoader {
 
-    public static List<List<KamonAgentFileTransformer>> load(Instrumentation instrumentation, AgentConfiguration config) {
+    public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration config) {
         return config.getAgentModules().map( moduleDescription -> {
-            LazyLogger.info(() -> format("Loading Module {0}...",  moduleDescription.getName()));
+            LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
             return moduleDescription.getInstrumentations()
                                     .map(InstrumentationLoader::loadInstrumentation)
                                     .sortBy(KamonInstrumentation::order)
@@ -43,7 +43,7 @@ public class InstrumentationLoader {
     }
 
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {
-        LazyLogger.info(() -> format("Loading {0}...", instrumentationClassName));
+        LazyLogger.infoColor(() -> format("Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, InstrumentationLoader.class.getClassLoader()).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
     }

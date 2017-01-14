@@ -57,7 +57,7 @@ public class MixinDescription {
 
     public AgentBuilder.Transformer makeTransformer() {
         val interfaces = List.ofAll(this.interfaces).map(TypeDescription.ForLoadedType::new).toJavaList();
-        return (builder, typeDescription, classLoader) ->
+        return (builder, typeDescription, classLoader, module) ->
                 builder.implement(interfaces)
                        .visit(MixinClassVisitorWrapper.of(this));
     }

@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.log.LazyLogger;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -51,11 +52,11 @@ abstract class KamonAgentBuilder {
                 .with(TypeValidation.of(config.isDebugMode()))
                 .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
-
         AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
                                                     .with(poolStrategyCache);
 
-        if (config.isAttachedInRuntime()) {
+        if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
+            LazyLogger.infoColor(() -> "Retransformation Strategy was activated.");
             agentBuilder = agentBuilder.disableClassFormatChanges()
                                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
@@ -72,7 +73,8 @@ abstract class KamonAgentBuilder {
                 val transformers = new ArrayList<AgentBuilder.Transformer>();
                 transformers.addAll(typeTransformation.getMixins().toJavaList());
                 transformers.addAll(typeTransformation.getTransformations().toJavaList());
-                return agent.type(typeTransformation.getElementMatcher().get()).transform(new AgentBuilder.Transformer.Compound(transformers));
+                return agent.type(typeTransformation.getElementMatcher().get())
+                            .transform(new AgentBuilder.Transformer.Compound(transformers));
             });
     }
 

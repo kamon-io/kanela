@@ -32,7 +32,7 @@ import java.io.File;
 @EqualsAndHashCode(callSuper = false)
 public class ClassDumperListener extends Listener.Adapter {
 
-    private static ClassDumperListener Instance = new ClassDumperListener();
+    private static final ClassDumperListener Instance = new ClassDumperListener();
 
     File dumpDir;
     File jarFile;
@@ -49,7 +49,7 @@ public class ClassDumperListener extends Listener.Adapter {
     }
 
     @Override
-    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, DynamicType dynamicType) {
+    public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
         addClassToDump(dynamicType);
     }
 
@@ -71,6 +71,6 @@ public class ClassDumperListener extends Listener.Adapter {
     }
 
     private <R> void runSafe(Try.CheckedSupplier<R> thunk, String msg) {
-        Try.of(thunk).onFailure((cause) -> LazyLogger.error(() -> msg, cause));
+        Try.of(thunk).onFailure((cause) -> LazyLogger.errorColor(() -> msg, cause));
     }
 }

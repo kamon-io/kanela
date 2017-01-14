@@ -75,7 +75,6 @@ public class OldGarbageCollectorListener {
         }
     }
 
-
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig config) {
         attach(config, Jvm.instance());
     }
@@ -103,11 +102,9 @@ public class OldGarbageCollectorListener {
 
             percentageFreeMemory.forEach((freeMemory) -> {
                 val event = GcEvent.from(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
-
                 if(config.isShouldLogAfterGc()) {
-                    LazyLogger.warn(() -> AnsiColor.ParseColors(format(":yellow,n: {0}", event)));
+                    LazyLogger.warnColor(() -> format(":yellow,n: {0}", event));
                 }
-
                 broker.publish(event);
             });
         }

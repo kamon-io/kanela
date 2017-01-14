@@ -37,6 +37,8 @@ import static java.text.MessageFormat.format;
 @EqualsAndHashCode(callSuper = false)
 public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCache {
 
+    private static final PoolStrategyCache Instance = new PoolStrategyCache();
+
     Map<ClassLoader, TypePool.CacheProvider> cache;
 
     private PoolStrategyCache() {
@@ -62,10 +64,6 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
     public static PoolStrategyCache instance() {
-        return PoolStrategyCache.Holder.Instance;
-    }
-
-    private static class Holder {
-        private static final PoolStrategyCache Instance = new PoolStrategyCache();
+        return Instance;
     }
 }
