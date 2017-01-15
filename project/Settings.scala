@@ -14,14 +14,14 @@
  * =========================================================================================
  */
 
-import sbt._
-import Keys._
+import Publish.{settings => publishSettings}
+import Release.{settings => releaseSettings}
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import sbt.Keys._
+import sbt._
+
 import scalariform.formatter.preferences._
-import Publish.{settings => publishSettings}
-import Release.{settings => releaseSettings }
-import sbt.Tests.{SubProcess, Group}
 
 object Settings {
 
@@ -33,8 +33,9 @@ object Settings {
     resolvers ++= Dependencies.resolutionRepos,
     fork in run := true,
     parallelExecution in Global := false,
-    javacOptions   := Seq(
-      "-Xlint:-options",
+    javacOptions := Seq(
+      "-Xlint:none",
+      "-XDignore.symbol.file",
       "-source", JavaVersion, "-target", JavaVersion),
     scalacOptions  := Seq(
       "-encoding",
@@ -50,13 +51,6 @@ object Settings {
     )
   ) ++ publishSettings ++ releaseSettings
 
-  def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
-    tests map { test =>
-      Group(
-        name = test.name,
-        tests = Seq(test),
-        runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
-    }
 
   lazy val formatSettings = SbtScalariform.scalariformSettings ++ Seq(
     ScalariformKeys.preferences in Compile := formattingPreferences,

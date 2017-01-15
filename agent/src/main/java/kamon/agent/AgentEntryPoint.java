@@ -30,23 +30,21 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 
-import static kamon.agent.util.AgentUtil.timed;
+import static kamon.agent.util.AgentUtil.withTimeSpent;
 
 @Value
 public class AgentEntryPoint {
     private static List<KamonAgentFileTransformer> filesTransformers = new ArrayList<>();
 
     private static void start(String args, Instrumentation instrumentation) {
-        val timeSpent = timed(() -> {
+        withTimeSpent(() -> {
             val configuration = AgentConfiguration.instance();
             AgentBanner.show(configuration);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
             Reinstrumenter.attach(instrumentation, configuration, transformers);
-        });
-
-        LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms");
+        }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms"));
     }
 
     public static void premain(String args, Instrumentation instrumentation) {

@@ -32,6 +32,8 @@ import java.util.ArrayList;
 @EqualsAndHashCode(callSuper = false)
 class DefaultAgentBuilder extends KamonAgentBuilder {
 
+    String name;
+
     public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
         return from(config, moduleDescription)
                 .with(DefaultInstrumentationListener.instance())
@@ -49,5 +51,10 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
         if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
+    }
+
+    @Override
+    protected String getAgentName() {
+        return this.getName();
     }
 }

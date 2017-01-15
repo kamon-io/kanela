@@ -23,12 +23,23 @@ import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
-@Value(staticConstructor = "from")
+@Value
 public class Agents {
     AgentConfiguration config;
-    KamonAgentBuilder builder = DefaultAgentBuilder.instance();
+    KamonAgentBuilder builder;
+    AgentConfiguration.AgentModuleDescription moduleDescription;
 
-    public KamonAgentFileTransformer install(Instrumentation instrumentation, AgentConfiguration.AgentModuleDescription moduleDescription) {
+    private Agents(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+        this.config = config;
+        this.moduleDescription = moduleDescription;
+        this.builder = DefaultAgentBuilder.instance(moduleDescription.getName());
+    }
+
+    public static Agents from(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+        return new Agents(config, moduleDescription);
+    }
+
+    public KamonAgentFileTransformer install(Instrumentation instrumentation) {
         val agentBuilder = builder.build(config, moduleDescription);
         val classFileTransformer = agentBuilder.installOn(instrumentation);
         return KamonAgentFileTransformer.from(agentBuilder, classFileTransformer, moduleDescription.isStoppable());
