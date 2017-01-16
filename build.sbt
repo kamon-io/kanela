@@ -70,7 +70,6 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(notAggregateInAssembly: _*)
   .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
 
-//should be moved to Kamon repo
 lazy val kamonServlet = (project in file("kamon-servlet"))
   .dependsOn(agentScala)
   .settings(moduleName := "kamon-servlet")
@@ -85,20 +84,6 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
-lazy val kamonAkka = (project in file("kamon-akka"))
-  .dependsOn(agentScala, kamonScala  % "test->test")
-  .settings(moduleName := "kamon-akka")
-  .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
-  .settings(agentSettings: _*)
-  .settings(libraryDependencies ++=
-    compileScope(kamonCore) ++
-    providedScope(javaslang, typesafeConfig, kamonAgent) ++
-    testScope(scalatest, akkaTestKit, kamonTestkit, akkaSlf4j, logbackCore, slf4jApi))
-  .settings(excludeScalaLib: _*)
-  .settings(noPublishing: _*)
-  .settings(notAggregateInAssembly: _*)
-
 lazy val kamonScala = (project in file("kamon-scala"))
   .dependsOn(agentScala)
   .settings(moduleName := "kamon-scala")
@@ -107,8 +92,8 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(agentSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(kamonCore) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent, scalazConcurrent) ++
-    testScope(scalatest, akkaTestKit, akkaSlf4j))
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    testScope(scalatest, akkaTestKit))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
