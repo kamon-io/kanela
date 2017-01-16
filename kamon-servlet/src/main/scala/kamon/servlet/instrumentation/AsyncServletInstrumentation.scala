@@ -22,7 +22,7 @@ import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.servlet.instrumentation.advisor._
 import kamon.servlet.instrumentation.mixin.AsyncContextMixin
-import kamon.trace.{ TraceContextAware, Tracer }
+import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
 
 class AsyncServletInstrumentation extends KamonInstrumentation {
 
@@ -59,7 +59,7 @@ object AsyncServletInstrumentation {
    * Wrap a Runnable in order to propagate the current TraceContext
    */
   class TraceContextAwareRunnable(underlying: Runnable) extends TraceContextAware with Runnable {
-    val traceContext = Tracer.currentContext
+    val traceContext: TraceContext = Tracer.currentContext
 
     override def run(): Unit = {
       Tracer.withContext(traceContext) {

@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -22,6 +22,10 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Designates a method in a Mixin class that should be called exactly once
+ * during the construction of each target type.
+ */
 @Target(METHOD)
 @Retention(RUNTIME)
 public @interface Initializer {}
