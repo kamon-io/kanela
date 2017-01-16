@@ -28,19 +28,21 @@ public class Agents {
     AgentConfiguration config;
     KamonAgentBuilder builder;
     AgentConfiguration.AgentModuleDescription moduleDescription;
+    Instrumentation instrumentation;
 
-    private Agents(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+    private Agents(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
         this.config = config;
         this.moduleDescription = moduleDescription;
         this.builder = DefaultAgentBuilder.instance(moduleDescription.getName());
+        this.instrumentation = instrumentation;
     }
 
-    public static Agents from(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
-        return new Agents(config, moduleDescription);
+    public static Agents from(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+        return new Agents(config, moduleDescription, instrumentation);
     }
 
-    public KamonAgentFileTransformer install(Instrumentation instrumentation) {
-        val agentBuilder = builder.build(config, moduleDescription);
+    public KamonAgentFileTransformer install() {
+        val agentBuilder = builder.build(config, moduleDescription, instrumentation);
         val classFileTransformer = agentBuilder.installOn(instrumentation);
         return KamonAgentFileTransformer.from(agentBuilder, classFileTransformer, moduleDescription.isStoppable());
     }

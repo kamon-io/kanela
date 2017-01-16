@@ -22,6 +22,7 @@ import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.builder.KamonAgentFileTransformer;
+import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
@@ -35,6 +36,7 @@ import static java.text.MessageFormat.format;
 
 @Value
 @NonFinal
+@Experimental
 public class Reinstrumenter {
     Instrumentation instrumentation;
     AgentConfiguration configuration;

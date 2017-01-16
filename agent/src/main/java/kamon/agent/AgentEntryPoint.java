@@ -16,7 +16,6 @@
 
 package kamon.agent;
 
-import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.banner.AgentBanner;
@@ -27,14 +26,11 @@ import lombok.Value;
 import lombok.val;
 
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.List;
 
 import static kamon.agent.util.AgentUtil.withTimeSpent;
 
 @Value
 public class AgentEntryPoint {
-    private static List<KamonAgentFileTransformer> filesTransformers = new ArrayList<>();
 
     private static void start(String args, Instrumentation instrumentation) {
         withTimeSpent(() -> {

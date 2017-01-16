@@ -37,8 +37,8 @@ public class InstrumentationLoader {
                                     .map(InstrumentationLoader::loadInstrumentation)
                                     .sortBy(KamonInstrumentation::order)
                                     .flatMap(KamonInstrumentation::collectTransformations)
-                                    .foldLeft(Agents.from(config, moduleDescription), Agents::addTypeTransformation)
-                                    .install(instrumentation);
+                                    .foldLeft(Agents.from(config, moduleDescription, instrumentation), Agents::addTypeTransformation)
+                                    .install();
         });
     }
 

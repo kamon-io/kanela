@@ -16,6 +16,7 @@
 
 package kamon.agent.cache;
 
+import kamon.agent.util.NamedThreadFactory;
 import kamon.agent.util.log.LazyLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -25,7 +26,6 @@ import net.bytebuddy.pool.TypePool;
 import net.jodah.expiringmap.ExpirationListener;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import net.jodah.expiringmap.internal.NamedThreadFactory;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +42,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
 
     private PoolStrategyCache() {
         super(TypePool.Default.ReaderMode.EXTENDED);
-        ExpiringMap.setThreadFactory(new NamedThreadFactory("kamon-agent-strategy-cache-listener-%s"));
+        ExpiringMap.setThreadFactory(NamedThreadFactory.instance("strategy-cache-listener"));
         this.cache = ExpiringMap
                 .builder()
                 .entryLoader((key) -> TypePool.CacheProvider.Simple.withObjectType())
