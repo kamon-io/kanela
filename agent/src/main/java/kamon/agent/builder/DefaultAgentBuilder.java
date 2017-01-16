@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ package kamon.agent.builder;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
+import kamon.agent.api.instrumentation.listener.PeriodicResubmitterListener;
 import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.EqualsAndHashCode;
@@ -26,6 +27,7 @@ import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
 @Value(staticConstructor = "instance")
@@ -34,9 +36,10 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     String name;
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
         return from(config, moduleDescription)
                 .with(DefaultInstrumentationListener.instance())
+                .with(PeriodicResubmitterListener.instance(instrumentation))
                 .with(additionalListeners(config));
     }
 
@@ -54,7 +57,7 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
     }
 
     @Override
-    protected String getAgentName() {
+    protected String agentName() {
         return this.getName();
     }
 }
