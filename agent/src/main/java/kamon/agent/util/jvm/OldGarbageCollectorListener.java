@@ -64,7 +64,7 @@ public class OldGarbageCollectorListener {
     }
 
     /**
-     * Attach and start the listener
+     * Attach and start the listener.
      *
      * @param configuration @see {{@link AgentConfiguration.OldGarbageCollectorConfig}}
      */

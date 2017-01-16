@@ -16,13 +16,12 @@
 
 package kamon.scala.instrumentation
 
-import kamon.agent.api.instrumentation.Initializer
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import kamon.scala.instrumentation.advisor.RunMethodAdvisor
+import kamon.scala.instrumentation.mixin.TraceContextMixin
 
 class FutureInstrumentation extends KamonInstrumentation {
 
@@ -56,22 +55,3 @@ class FutureInstrumentation extends KamonInstrumentation {
   }
 }
 
-class TraceContextMixin extends TraceContextAware {
-  var traceContext: TraceContext = _
-
-  @Initializer
-  def init(): Unit = this.traceContext = Tracer.currentContext
-}
-
-/**
- * Advisor for scala.concurrent.impl.CallbackRunnable::run
- * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
- */
-class RunMethodAdvisor
-object RunMethodAdvisor {
-  @OnMethodEnter
-  def onEnter(@This runnable: TraceContextAware): Unit = Tracer.setCurrentContext(runnable.traceContext)
-
-  @OnMethodExit
-  def onExit(): Unit = Tracer.currentContext.finish()
-}

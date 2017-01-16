@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -32,6 +32,12 @@ import static kamon.agent.util.AgentUtil.withTimeSpent;
 @Value
 public class AgentEntryPoint {
 
+    /**
+     * Kamon Agent entry point.
+     *
+     * @param args Agent argument list
+     * @param instrumentation {@link Instrumentation}
+     */
     private static void start(String args, Instrumentation instrumentation) {
         withTimeSpent(() -> {
             val configuration = AgentConfiguration.instance();
