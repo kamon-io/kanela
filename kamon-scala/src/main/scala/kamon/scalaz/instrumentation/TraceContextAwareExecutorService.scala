@@ -17,9 +17,9 @@
 package kamon.scalaz.instrumentation
 
 import java.util
-import java.util.concurrent.{ Callable, ExecutorService, Future, TimeUnit }
+import java.util.concurrent.{Callable, ExecutorService, Future, TimeUnit}
 
-import kamon.trace.{ TraceContextAware, Tracer }
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
 class TraceContextAwareExecutorService(underlying: ExecutorService) extends ExecutorService {
   override def isShutdown: Boolean = underlying.isShutdown
@@ -63,7 +63,7 @@ class TraceContextAwareExecutorService(underlying: ExecutorService) extends Exec
 }
 
 class TraceContextAwareRunnable(r: Runnable) extends TraceContextAware with Runnable {
-  val traceContext = Tracer.currentContext
+  val traceContext: TraceContext = Tracer.currentContext
 
   override def run(): Unit = {
     Tracer.withContext(traceContext) {
@@ -73,7 +73,7 @@ class TraceContextAwareRunnable(r: Runnable) extends TraceContextAware with Runn
 }
 
 class TraceContextAwareCallable[A](c: Callable[A]) extends TraceContextAware with Callable[A] {
-  val traceContext = Tracer.currentContext
+  val traceContext: TraceContext = Tracer.currentContext
 
   override def call(): A = {
     Tracer.withContext(traceContext) {

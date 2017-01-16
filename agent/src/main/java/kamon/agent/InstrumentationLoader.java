@@ -30,8 +30,15 @@ import static java.text.MessageFormat.format;
 
 public class InstrumentationLoader {
 
+    /**
+     * Load from the current classpath all defined instrumentations {@link KamonInstrumentation}.
+     *
+     * @param instrumentation {@link Instrumentation}
+     * @param config {@link AgentConfiguration}
+     * @return a list of {@link KamonAgentFileTransformer}
+     */
     public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration config) {
-        return config.getAgentModules().map( moduleDescription -> {
+        return config.getAgentModules().map((moduleDescription) -> {
             LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
             return moduleDescription.getInstrumentations()
                                     .map(InstrumentationLoader::loadInstrumentation)
