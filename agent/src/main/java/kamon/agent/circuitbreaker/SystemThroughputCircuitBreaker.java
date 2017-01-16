@@ -49,7 +49,7 @@ public class SystemThroughputCircuitBreaker {
                     .andThen(config::circuitBreakerRunning)
                     .andThen(() -> LazyLogger.infoColor(() -> "System Throughput CircuitBreaker was activated."))
                     .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
-                    .andThen(() -> LazyLogger.infoColor(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
+                    .andThen(() -> LazyLogger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
                     .onFailure((cause) -> LazyLogger.errorColor(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
         }
     }

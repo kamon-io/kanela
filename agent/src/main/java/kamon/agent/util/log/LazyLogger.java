@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -39,7 +39,7 @@ public class LazyLogger {
                 .locale(Locale.US)
                 .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")
                 .writer(new ConsoleWriter())
-                .addWriter(new RollingFileWriter("log.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
+                .addWriter(new RollingFileWriter("kamon-agent.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
                 .activate();
     }
 

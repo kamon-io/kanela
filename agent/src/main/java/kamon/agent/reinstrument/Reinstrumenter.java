@@ -46,7 +46,7 @@ public class Reinstrumenter {
         Try.of(() -> new Reinstrumenter(instrumentation, configuration, transformers))
                 .andThen(() -> LazyLogger.infoColor(() -> format("Reinstrumenter was activated.")))
                 .andThen(reinstrumenter -> EventBroker.instance().add(reinstrumenter))
-                .andThen(() -> LazyLogger.infoColor(() -> format("Reinstrumenter is listening for Reinstrumentation Events.")))
+                .andThen(() -> LazyLogger.debug(() -> format("Reinstrumenter is listening for Reinstrumentation Events.")))
                 .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate Reinstrumenter."), cause));
     }
 
@@ -57,13 +57,13 @@ public class Reinstrumenter {
                                           .map(KamonAgentFileTransformer::getClassFileTransformer)
                                           .map(transformer -> transformer.reset(this.instrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION));
 
-        if(stoppables.forAll(s -> s.equals(true))) LazyLogger.warnColor(() -> "All modules are been stopped");
-        else LazyLogger.warnColor(() -> "Error trying stop some modules");
+        if(stoppables.forAll(s -> s.equals(true))) LazyLogger.warnColor(() -> "All modules are been stopped.");
+        else LazyLogger.warnColor(() -> "Error trying stop some modules.");
     }
 
     @Subscribe
     public void onRestartModules(ReinstrumentationProtocol.RestartModules restartEvent) {
-        LazyLogger.warnColor(() -> "Trying to reapply the removed transformations....");
+        LazyLogger.warnColor(() -> "Trying to reapply the removed transformations...");
         this.transformers.filter(KamonAgentFileTransformer::isStoppable)
                          .map(KamonAgentFileTransformer::getAgentBuilder)
                          .map(transformer -> transformer.installOn(this.instrumentation));

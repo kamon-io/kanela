@@ -26,7 +26,7 @@ import static java.lang.annotation.ElementType.*;
 /**
  * An experimental feature.
  *
- * Experimental features's might change or be removed in minor versions of the Agent, or be adopted as
+ * Experimental features might change or be removed in minor versions of the Agent, or be adopted as
  * first-class Agent feature.
  */
 @Documented

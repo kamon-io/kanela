@@ -41,7 +41,7 @@ public class PeriodicResubmitterListener {
 
     private static Function1<Instrumentation, AgentBuilder.Listener> newResubmittingListener() {
         return (instrumentation) -> {
-            LazyLogger.infoColor(() -> "Periodic Class Resubmitter was activated.");
+            LazyLogger.infoColor(() -> "Periodic Resubmitter Listener was activated.");
             return new AgentBuilder.Listener.Resubmitting(instrumentation).scheduled(executor, 10, TimeUnit.SECONDS);
         };
     }
