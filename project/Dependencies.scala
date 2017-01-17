@@ -49,7 +49,7 @@ object Dependencies {
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
 
-  val kamonAgent      = "io.kamon"          % "agent_2.12"        % "0.1-SNAPSHOT" classifier "assembly"
+  val kamonAgent      = "io.kamon"          % "agent_2.12"        % "0.0.1-SNAPSHOT" classifier "assembly"
 
   def compileScope   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")
   def providedScope  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")
