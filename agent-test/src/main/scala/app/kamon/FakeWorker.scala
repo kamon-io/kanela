@@ -14,21 +14,15 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon
 
-import app.kamon.instrumentation.advisor.FakeWorkerAdvisor
-import app.kamon.instrumentation.mixin.MonitorMixin
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import scala.util.Random
 
-class MonitorInstrumentation extends scala.KamonInstrumentation {
+final case class FakeWorker() {
 
-  forTargetType("app.kamon.FakeWorker") { builder ⇒
-    builder
-      .withMixin(classOf[MonitorMixin])
-      .withAdvisorFor(named("heavyTask"), classOf[FakeWorkerAdvisor])
-      .withAdvisorFor(named("lightTask"), classOf[FakeWorkerAdvisor])
-      .build()
-  }
+  private val r = Random.self
+
+  def heavyTask(): Unit = Thread.sleep((r.nextFloat() * 500) toLong)
+
+  def lightTask(): Unit = Thread.sleep((r.nextFloat() * 10) toLong)
 }
-

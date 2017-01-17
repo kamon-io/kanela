@@ -16,20 +16,32 @@
 
 package app.kamon
 
+import app.kamon.instrumentation.mixin.MonitorAware
 import org.slf4j.LoggerFactory
 
 object ScalaMainWithAgent {
+  import collection.JavaConverters._
+  import scala.collection.breakOut
 
   private val logger = LoggerFactory.getLogger(ScalaMainWithAgent.getClass)
 
   def main(args: Array[String]) {
     logger.info("Start Run Agent Test")
-    val kamonTeam = GreetingsKamonTeam()
+    logger.info("Greetings from Kamon Team!")
+    val worker = FakeWorker()
     (1 to 10) foreach { _ ⇒
-      kamonTeam.salute()
-      kamonTeam.welcome()
+      worker.heavyTask()
+      worker.lightTask()
     }
+    logMetrics(worker.asInstanceOf[MonitorAware])
     logger.info("Exit Run Agent Test")
+  }
+
+  private def logMetrics(monitor: MonitorAware): Unit = {
+    monitor.execTimings foreach {
+      case (methodName, samples) ⇒
+        MetricsReporter.report(methodName, samples.map(sample ⇒ double2Double(sample.toDouble))(breakOut).toBuffer.asJava)
+    }
   }
 
 }

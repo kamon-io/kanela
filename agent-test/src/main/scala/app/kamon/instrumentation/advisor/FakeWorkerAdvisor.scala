@@ -14,9 +14,23 @@
  * =========================================================================================
  */
 
-package app.kamon
+package app.kamon.instrumentation.advisor
 
-final case class GreetingsKamonTeam() {
-  def salute() = println("Greetings from Kamon Team!")
-  def welcome() = println("Thank you for your contributions!")
+import app.kamon.instrumentation.mixin.MonitorAware
+import kamon.agent.libs.net.bytebuddy.asm.Advice._
+
+class FakeWorkerAdvisor
+object FakeWorkerAdvisor {
+
+  @OnMethodEnter
+  def onMethodEnter(): Long = {
+    System.nanoTime() // Return current time, entering as parameter in the onMethodExist
+  }
+
+  @OnMethodExit
+  def onMethodExit(@This instance: Object, @Enter start: Long, @Origin origin: String): Unit = {
+    val timing = System.nanoTime() - start
+    instance.asInstanceOf[MonitorAware].addExecTimings(origin, timing)
+    println(s"Method $origin was executed in $timing ns.")
+  }
 }

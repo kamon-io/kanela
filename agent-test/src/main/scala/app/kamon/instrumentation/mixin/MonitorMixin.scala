@@ -20,8 +20,11 @@ import java.util.concurrent.{ ConcurrentHashMap, ConcurrentMap }
 import kamon.agent.api.instrumentation.Initializer
 
 class MonitorMixin extends MonitorAware {
+  import collection.JavaConverters._
 
   private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
+
+  def execTimings: Map[String, Vector[Long]] = this._execTimings.asScala.toMap
 
   def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
 
@@ -36,5 +39,6 @@ class MonitorMixin extends MonitorAware {
 
 trait MonitorAware {
   def execTimings(methodName: String): Vector[Long]
+  def execTimings: Map[String, Vector[Long]]
   def addExecTimings(methodName: String, time: Long): Vector[Long]
 }
