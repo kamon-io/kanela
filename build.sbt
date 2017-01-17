@@ -26,6 +26,8 @@ lazy val root = (project in file("."))
 
 lazy val agent = (project in file("agent"))
   .dependsOn(agentApi)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
   .settings(moduleName := "agent")
   .settings(basicSettings: _*)
   .settings(formatSettings: _*)

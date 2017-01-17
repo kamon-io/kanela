@@ -66,7 +66,7 @@ public class Reinstrumenter {
         LazyLogger.warnColor(() -> "Trying to reapply the removed transformations...");
         this.transformers.filter(KamonAgentFileTransformer::isStoppable)
                          .map(KamonAgentFileTransformer::getAgentBuilder)
-                         .map(transformer -> transformer.installOn(this.instrumentation));
+                         .forEach(transformer -> transformer.installOn(this.instrumentation));
     }
 
     public interface ReinstrumentationProtocol {

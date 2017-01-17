@@ -50,7 +50,7 @@ object Assembly {
     )
   ) ++ addArtifact(artifact in(Compile, assembly), assembly) ++ (test in assembly := {}) ++ assemblyArtifact
 
-  lazy val assemblyArtifact = artifact in (Compile, assembly) := {
+  lazy val assemblyArtifact: Setting[Artifact] = artifact in (Compile, assembly) := {
     val art = (artifact in (Compile, assembly)).value
     art.copy(`classifier` = Some("assembly"))
   }
