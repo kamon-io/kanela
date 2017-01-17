@@ -14,27 +14,21 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.mixin
+package app.kamon.instrumentation
 
-import java.util.concurrent.{ ConcurrentHashMap, ConcurrentMap }
-import kamon.agent.api.instrumentation.Initializer
+import app.kamon.instrumentation.advisor.GreetingsKamonTeamAdvisor
+import app.kamon.instrumentation.mixin.MonitorMixin
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
+import kamon.agent.scala
 
-class ExampleMixin extends MonitorAware {
+class MonitorInstrumentation extends scala.KamonInstrumentation {
 
-  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
-
-  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
-
-  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
-    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
+  forTargetType("app.kamon.GreetingsKamonTeam") { builder ⇒
+    builder
+      .withMixin(classOf[MonitorMixin])
+      .withAdvisorFor(named("salute"), classOf[GreetingsKamonTeamAdvisor])
+      .withAdvisorFor(named("welcome"), classOf[GreetingsKamonTeamAdvisor])
+      .build()
   }
-
-  @Initializer
-  def init(): Unit = this._execTimings = new ConcurrentHashMap()
-
 }
 
-trait MonitorAware {
-  def execTimings(methodName: String): Vector[Long]
-  def addExecTimings(methodName: String, time: Long): Vector[Long]
-}

@@ -21,8 +21,8 @@ import kamon.agent.libs.net.bytebuddy.asm.Advice._
 
 import scala.util.Random
 
-class MethodAdvisor
-object MethodAdvisor {
+class GreetingsKamonTeamAdvisor
+object GreetingsKamonTeamAdvisor {
 
   private val ratioInform = 1
   private val r = Random.self

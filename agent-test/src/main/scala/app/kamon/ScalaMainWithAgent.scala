@@ -18,16 +18,16 @@ package app.kamon
 
 import org.slf4j.LoggerFactory
 
-object MainWithAgent {
+object ScalaMainWithAgent {
 
-  val logger = LoggerFactory.getLogger(MainWithAgent.getClass)
+  private val logger = LoggerFactory.getLogger(ScalaMainWithAgent.getClass)
 
   def main(args: Array[String]) {
     logger.info("Start Run Agent Test")
-    val exampleClass = ExampleClass()
+    val kamonTeam = GreetingsKamonTeam()
     (1 to 10) foreach { _ ⇒
-      exampleClass.hello()
-      exampleClass.bye()
+      kamonTeam.salute()
+      kamonTeam.welcome()
     }
     logger.info("Exit Run Agent Test")
   }

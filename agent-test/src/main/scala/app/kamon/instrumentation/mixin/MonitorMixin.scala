@@ -14,9 +14,27 @@
  * =========================================================================================
  */
 
-package app.kamon
+package app.kamon.instrumentation.mixin
 
-final case class ExampleClass() {
-  def hello() = println("Hi, all")
-  def bye() = println("good bye")
+import java.util.concurrent.{ ConcurrentHashMap, ConcurrentMap }
+import kamon.agent.api.instrumentation.Initializer
+
+class MonitorMixin extends MonitorAware {
+
+  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
+
+  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
+
+  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
+    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
+  }
+
+  @Initializer
+  def init(): Unit = this._execTimings = new ConcurrentHashMap()
+
+}
+
+trait MonitorAware {
+  def execTimings(methodName: String): Vector[Long]
+  def addExecTimings(methodName: String, time: Long): Vector[Long]
 }

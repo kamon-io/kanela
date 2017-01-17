@@ -70,7 +70,7 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
-  .settings(mainClass in Compile := Some("app.kamon.MainWithAgent"))
+  .settings(mainClass in Compile := Some("app.kamon.ScalaMainWithAgent"))
 
 //should be moved to Kamon repo
 lazy val kamonServlet = (project in file("kamon-servlet"))

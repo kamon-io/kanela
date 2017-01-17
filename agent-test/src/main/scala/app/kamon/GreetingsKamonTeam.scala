@@ -14,21 +14,9 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package app.kamon
 
-import app.kamon.instrumentation.advisor.MethodAdvisor
-import app.kamon.instrumentation.mixin.ExampleMixin
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
-
-class ExampleInstrumentation extends scala.KamonInstrumentation {
-
-  forTargetType("app.kamon.ExampleClass") { builder ⇒
-    builder
-      .withMixin(classOf[ExampleMixin])
-      .withAdvisorFor(named("hello"), classOf[MethodAdvisor])
-      .withAdvisorFor(named("bye"), classOf[MethodAdvisor])
-      .build()
-  }
+final case class GreetingsKamonTeam() {
+  def salute() = println("Greetings from Kamon Team!")
+  def welcome() = println("Thank you for your contributions!")
 }
-
