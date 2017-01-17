@@ -14,23 +14,27 @@
  * =========================================================================================
  */
 
-package app.kamon
+package app.kamon.instrumentation.mixin
 
-import org.slf4j.LoggerFactory
+import java.util.concurrent.{ ConcurrentHashMap, ConcurrentMap }
+import kamon.agent.api.instrumentation.Initializer
 
-object MainWithAgent {
+class ExampleMixin extends MonitorAware {
 
-  val logger = LoggerFactory.getLogger(MainWithAgent.getClass)
+  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
 
-  def main(args: Array[String]) {
-    logger.info("Start Run Agent Test")
-    val exampleClass = ExampleClass()
-    (1 to 10) foreach { _ ⇒
-      exampleClass.hello()
-      exampleClass.bye()
-    }
-    logger.info("Exit Run Agent Test")
+  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
+
+  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
+    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
   }
+
+  @Initializer
+  def init(): Unit = this._execTimings = new ConcurrentHashMap()
 
 }
 
+trait MonitorAware {
+  def execTimings(methodName: String): Vector[Long]
+  def addExecTimings(methodName: String, time: Long): Vector[Long]
+}

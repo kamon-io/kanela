@@ -16,21 +16,7 @@
 
 package app.kamon
 
-import org.slf4j.LoggerFactory
-
-object MainWithAgent {
-
-  val logger = LoggerFactory.getLogger(MainWithAgent.getClass)
-
-  def main(args: Array[String]) {
-    logger.info("Start Run Agent Test")
-    val exampleClass = ExampleClass()
-    (1 to 10) foreach { _ ⇒
-      exampleClass.hello()
-      exampleClass.bye()
-    }
-    logger.info("Exit Run Agent Test")
-  }
-
+final case class ExampleClass() {
+  def hello() = println("Hi, all")
+  def bye() = println("good bye")
 }
-

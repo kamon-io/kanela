@@ -14,23 +14,15 @@
  * =========================================================================================
  */
 
-package app.kamon
+package app.kamon.instrumentation.interceptor
 
-import org.slf4j.LoggerFactory
+import java.util.concurrent.Callable
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{ RuntimeType, SuperCall }
 
-object MainWithAgent {
+object ExampleClassInterceptor {
 
-  val logger = LoggerFactory.getLogger(MainWithAgent.getClass)
-
-  def main(args: Array[String]) {
-    logger.info("Start Run Agent Test")
-    val exampleClass = ExampleClass()
-    (1 to 10) foreach { _ ⇒
-      exampleClass.hello()
-      exampleClass.bye()
-    }
-    logger.info("Exit Run Agent Test")
+  @RuntimeType
+  def prepareStatement(@SuperCall callable: Callable[_]): Any = {
+    callable.call()
   }
-
 }
-

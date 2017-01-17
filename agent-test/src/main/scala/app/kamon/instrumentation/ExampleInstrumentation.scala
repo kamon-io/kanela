@@ -16,57 +16,19 @@
 
 package app.kamon.instrumentation
 
-import java.util.concurrent.Callable
-
-import kamon.agent.api.instrumentation.Initializer
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ Enter, OnMethodEnter, OnMethodExit }
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{ RuntimeType, SuperCall }
+import app.kamon.instrumentation.advisor.MethodAdvisor
+import app.kamon.instrumentation.mixin.ExampleMixin
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
 import kamon.agent.scala
 
 class ExampleInstrumentation extends scala.KamonInstrumentation {
 
-  forTargetType("app.kamon.instrumentation.ExampleClass") { builder ⇒
-    builder.withMixin(classOf[MixinTest])
+  forTargetType("app.kamon.ExampleClass") { builder ⇒
+    builder
+      .withMixin(classOf[ExampleMixin])
       .withAdvisorFor(named("hello"), classOf[MethodAdvisor])
-      .build()
-  }
-
-  forSubtypeOf("app.kamon.instrumentation.ExampleClass") { builder ⇒
-    builder.withAdvisorFor(named("bye"), classOf[MethodAdvisor])
+      .withAdvisorFor(named("bye"), classOf[MethodAdvisor])
       .build()
   }
 }
 
-class MethodAdvisor
-object MethodAdvisor {
-  @OnMethodEnter
-  def onMethodEnter(): Long = {
-    System.currentTimeMillis() // Return current time, entering as parameter in the onMethodExist
-  }
-
-  @OnMethodExit
-  def onMethodExit(@Enter start: Long): Unit = {
-    println(s"Method took ${System.currentTimeMillis() - start} ms.")
-  }
-}
-
-class MixinTest extends Serializable {
-  var a: String = _
-
-  @Initializer
-  def init() = this.a = { println("HeeeeeLooooo"); "fruta" }
-
-}
-
-object ExampleClassInterceptor {
-  @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[_]): Any = {
-    callable.call()
-  }
-}
-
-final case class ExampleClass() {
-  def hello() = println("Hi, all")
-  def bye() = { println("good bye"); Thread.sleep(100) }
-}
