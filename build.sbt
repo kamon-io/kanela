@@ -64,13 +64,12 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(agentSettings: _*)
   .settings(agentTestSettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(slf4jApi, logbackCore, logbackClassic) ++
+    compileScope(slf4jApi, logbackCore, logbackClassic, javaslang) ++
       testScope(scalatest, mockito) ++
-    providedScope(javaslang, lombok, typesafeConfig, kamonAgent))
+    providedScope(lombok, typesafeConfig, kamonAgent))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
-  .settings(mainClass in Compile := Some("app.kamon.ScalaMainWithAgent"))
 
 //should be moved to Kamon repo
 lazy val kamonServlet = (project in file("kamon-servlet"))
