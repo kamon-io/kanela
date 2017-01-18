@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 
 package kamon.agent;
 
-import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.banner.AgentBanner;
@@ -27,26 +26,27 @@ import lombok.Value;
 import lombok.val;
 
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.List;
 
-import static kamon.agent.util.AgentUtil.timed;
+import static kamon.agent.util.AgentUtil.withTimeSpent;
 
 @Value
 public class AgentEntryPoint {
-    private static List<KamonAgentFileTransformer> filesTransformers = new ArrayList<>();
 
+    /**
+     * Kamon Agent entry point.
+     *
+     * @param args Agent argument list
+     * @param instrumentation {@link Instrumentation}
+     */
     private static void start(String args, Instrumentation instrumentation) {
-        val timeSpent = timed(() -> {
+        withTimeSpent(() -> {
             val configuration = AgentConfiguration.instance();
             AgentBanner.show(configuration);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
             Reinstrumenter.attach(instrumentation, configuration, transformers);
-        });
-
-        LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms");
+        }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms"));
     }
 
     public static void premain(String args, Instrumentation instrumentation) {

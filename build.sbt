@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -26,6 +26,8 @@ lazy val root = (project in file("."))
 
 lazy val agent = (project in file("agent"))
   .dependsOn(agentApi)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
   .settings(moduleName := "agent")
   .settings(basicSettings: _*)
   .settings(formatSettings: _*)
@@ -71,7 +73,6 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
-//should be moved to Kamon repo
 lazy val kamonServlet = (project in file("kamon-servlet"))
   .dependsOn(agentScala)
   .settings(moduleName := "kamon-servlet")
@@ -86,20 +87,6 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
-lazy val kamonAkka = (project in file("kamon-akka"))
-  .dependsOn(agentScala, kamonScala  % "test->test")
-  .settings(moduleName := "kamon-akka")
-  .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
-  .settings(agentSettings: _*)
-  .settings(libraryDependencies ++=
-    compileScope(kamonCore) ++
-    providedScope(javaslang, typesafeConfig, kamonAgent) ++
-    testScope(scalatest, akkaTestKit, kamonTestkit, akkaSlf4j, logbackCore, slf4jApi))
-  .settings(excludeScalaLib: _*)
-  .settings(noPublishing: _*)
-  .settings(notAggregateInAssembly: _*)
-
 lazy val kamonScala = (project in file("kamon-scala"))
   .dependsOn(agentScala)
   .settings(moduleName := "kamon-scala")
@@ -108,8 +95,8 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(agentSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(kamonCore) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent, scalazConcurrent) ++
-    testScope(scalatest, akkaTestKit, akkaSlf4j))
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    testScope(scalatest, akkaTestKit))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)

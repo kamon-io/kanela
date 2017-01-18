@@ -14,14 +14,14 @@
  * =========================================================================================
  */
 
-import sbt.Def.Setting
-import sbt._
-import Keys._
+import Publish.{settings => publishSettings}
+import Release.{settings => releaseSettings}
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import sbt.Keys._
+import sbt._
+
 import scalariform.formatter.preferences._
-import Publish.{settings => publishSettings}
-import Release.{settings => releaseSettings }
 
 object Settings {
 
@@ -33,8 +33,9 @@ object Settings {
     resolvers ++= Dependencies.resolutionRepos,
     fork in run := true,
     parallelExecution in Global := false,
-    javacOptions   := Seq(
-      "-Xlint:-options",
+    javacOptions := Seq(
+      "-Xlint:none",
+      "-XDignore.symbol.file",
       "-source", JavaVersion, "-target", JavaVersion),
     scalacOptions  := Seq(
       "-encoding",
@@ -49,6 +50,7 @@ object Settings {
       "-Xlog-reflective-calls"
     )
   ) ++ publishSettings ++ releaseSettings
+
 
   lazy val formatSettings = SbtScalariform.scalariformSettings ++ Seq(
     ScalariformKeys.preferences in Compile := formattingPreferences,

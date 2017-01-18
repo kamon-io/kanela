@@ -16,6 +16,7 @@
 
 package kamon.agent.util.banner;
 
+import kamon.agent.BuildInfo;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
 import utils.AnsiColor;
@@ -44,8 +45,8 @@ public class AgentBanner {
                 System.out.println(line);
             }
 
-            String version = "0.1.0";
-            version = (version == null ? "" : " (v" + version + ")");
+            String version = BuildInfo.version();
+            version =  (version == null ? "" : " (v" + version + ")");
             String padding = "";
 
             while (padding.length() < STRAP_LINE_SIZE - (version.length() + KAMON_AGENT.length())) {

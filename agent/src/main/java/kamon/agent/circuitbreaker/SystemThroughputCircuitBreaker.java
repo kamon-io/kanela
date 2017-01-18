@@ -20,6 +20,7 @@ import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.reinstrument.Reinstrumenter;
+import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.GcEvent;
 import kamon.agent.util.jvm.Jvm;
@@ -32,6 +33,7 @@ import static java.text.MessageFormat.format;
 
 @Value
 @NonFinal
+@Experimental
 @RequiredArgsConstructor
 public class SystemThroughputCircuitBreaker {
     AgentConfiguration.CircuitBreakerConfig config;
@@ -45,10 +47,10 @@ public class SystemThroughputCircuitBreaker {
         if(config.isEnabled()){
             Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker was activated.")))
+                    .andThen(() -> LazyLogger.infoColor(() -> "System Throughput CircuitBreaker was activated."))
                     .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
-                    .andThen(() -> LazyLogger.infoColor(() -> format("System Throughput CircuitBreaker is listening for GCEvents.")))
-                    .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate System Throughput CircuitBreaker."), cause));
+                    .andThen(() -> LazyLogger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
+                    .onFailure((cause) -> LazyLogger.errorColor(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
         }
     }
 

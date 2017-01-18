@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 
 package kamon.agent.cache;
 
+import kamon.agent.util.NamedThreadFactory;
 import kamon.agent.util.log.LazyLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -25,8 +26,6 @@ import net.bytebuddy.pool.TypePool;
 import net.jodah.expiringmap.ExpirationListener;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import net.jodah.expiringmap.internal.NamedThreadFactory;
-import utils.AnsiColor;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +42,11 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
 
     private PoolStrategyCache() {
         super(TypePool.Default.ReaderMode.EXTENDED);
-        ExpiringMap.setThreadFactory(new NamedThreadFactory("kamon-agent-strategy-cache-listener-%s"));
+        ExpiringMap.setThreadFactory(NamedThreadFactory.instance("strategy-cache-listener"));
         this.cache = ExpiringMap
                 .builder()
                 .entryLoader((key) -> TypePool.CacheProvider.Simple.withObjectType())
-                .expiration(5, TimeUnit.SECONDS) //TODO: configuration
+                .expiration(10, TimeUnit.MINUTES)
                 .expirationPolicy(ExpirationPolicy.ACCESSED)
                 .asyncExpirationListener(LogExpirationListener())
                 .build();
@@ -60,7 +59,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
     private ExpirationListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value) ->   LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n:Expiring key: " + key + "with value" + value)));
+        return (key, value) ->   LazyLogger.infoColor(() -> format("Expiring key: " + key + "with value" + value));
     }
 
     public static PoolStrategyCache instance() {

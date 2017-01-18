@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -30,7 +30,7 @@ object ServletExtension {
   val log = LazyLogger("kamon.servlet.ServletExtension")
   log.info("Starting the Kamon(Servlet) extension")
 
-  val httpServerMetrics = Kamon.metrics.entity(HttpServerMetrics, "servlet")
+  val httpServerMetrics: HttpServerMetrics = Kamon.metrics.entity(HttpServerMetrics, "servlet")
 
   private val config = Kamon.config.getConfig("kamon.servlet")
   private val dynamic = new ReflectiveDynamicAccess(getClass.getClassLoader)
@@ -38,8 +38,8 @@ object ServletExtension {
   private val nameGeneratorFQN = config.getString("name-generator")
   private val nameGenerator: NameGenerator = dynamic.createInstanceFor[NameGenerator](nameGeneratorFQN, Nil).get
 
-  def generateTraceName(httpRequest: HttpServletRequest) = nameGenerator.generateTraceName(httpRequest)
-  def generateServletSegmentName(request: ServletRequest) = nameGenerator.generateServletSegmentName(request)
+  def generateTraceName(httpRequest: HttpServletRequest): String = nameGenerator.generateTraceName(httpRequest)
+  def generateServletSegmentName(request: ServletRequest): String = nameGenerator.generateServletSegmentName(request)
 }
 
 trait NameGenerator {

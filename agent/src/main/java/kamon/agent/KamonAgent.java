@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -26,8 +26,8 @@ public class KamonAgent {
      * After the Java Virtual Machine (JVM) has initialized, the premain method
      * will be called. Then the real application main method will be called.
      *
-     * @param args
-     * @param instrumentation
+     * @param args Agent argument list
+     * @param instrumentation {@link Instrumentation}
      * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
@@ -40,8 +40,8 @@ public class KamonAgent {
      * The agent class may have an agentmain method for use when the agent is
      * started after VM startup.
      *
-     * @param args
-     * @param instrumentation
+     * @param args Agent argument list
+     * @param instrumentation {@link Instrumentation}
      * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {

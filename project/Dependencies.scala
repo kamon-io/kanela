@@ -1,5 +1,5 @@
 /* =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -41,7 +41,6 @@ object Dependencies {
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
-  val akkaSlf4j         = "com.typesafe.akka"        %% "akka-slf4j"              % akkaVersion
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % akkaVersion
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
   val springWeb         = "org.springframework"       % "spring-web"              % "4.2.5.RELEASE"
@@ -49,10 +48,8 @@ object Dependencies {
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
-  val scalazConcurrent  = "org.scalaz"               %% "scalaz-concurrent"       % "7.2.8"
 
-
-  val kamonAgent      = "io.kamon"          % "agent_2.12"        % "0.1-SNAPSHOT" classifier "assembly"
+  val kamonAgent      = "io.kamon"          % "agent_2.12"        % "0.0.1-SNAPSHOT" classifier "assembly"
 
   def compileScope   (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile")
   def providedScope  (deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")

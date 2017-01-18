@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,22 +14,20 @@
  * =========================================================================================
  */
 
-package akka.kamon.instrumentation.advisor;
+package kamon.scala.instrumentation.advisor
 
-import akka.actor.Cell;
-import akka.kamon.instrumentation.ActorInstrumentation;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
-import kamon.trace.logging.MdcKeysSupport$;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
+import kamon.trace.{ TraceContextAware, Tracer }
 
 /**
- * Advisor for akka.actor.UnstartedCell::replaceWith
+ * Advisor for scala.concurrent.impl.CallbackRunnable::run
+ * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
  */
-public class ParameterWrapperAdvisor {
-    @OnMethodEnter
-    public static void onEnter(@Argument(value = 0, readOnly = false) Cell cell) {
-        cell = new akka.kamon.instrumentation.Wrappers.TraceContextAwareCell(cell);
-    }
+class RunMethodAdvisor
+object RunMethodAdvisor {
+  @OnMethodEnter
+  def onEnter(@This runnable: TraceContextAware): Unit = Tracer.setCurrentContext(runnable.traceContext)
+
+  @OnMethodExit
+  def onExit(): Unit = Tracer.currentContext.finish()
 }
-
-

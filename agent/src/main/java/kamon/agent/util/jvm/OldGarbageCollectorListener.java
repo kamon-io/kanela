@@ -21,13 +21,13 @@ import javaslang.collection.List;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import kamon.agent.broker.EventBroker;
+import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import lombok.val;
-import utils.AnsiColor;
 
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
@@ -42,6 +42,7 @@ import static java.text.MessageFormat.format;
 
 @Value
 @NonFinal
+@Experimental
 public class OldGarbageCollectorListener {
     Jvm tools;
     long jvmStartTime;
@@ -63,15 +64,15 @@ public class OldGarbageCollectorListener {
     }
 
     /**
-     * Attach and start the listener
+     * Attach and start the listener.
      *
      * @param configuration @see {{@link AgentConfiguration.OldGarbageCollectorConfig}}
      */
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
             Try.of(() -> new OldGarbageCollectorListener(configuration, jvm))
-               .andThen(() -> LazyLogger.info(() -> AnsiColor.ParseColors(format(":yellow,n: Old Garbage Collector Listener was activated."))))
-               .onFailure((cause) -> LazyLogger.error(() -> AnsiColor.ParseColors(format(":red,n: Error when trying to activate Old Garbage Collector Listener.")), cause));
+               .andThen(() -> LazyLogger.infoColor(() -> format("Old Garbage Collector Listener was activated.")))
+               .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
         }
     }
 
@@ -103,7 +104,7 @@ public class OldGarbageCollectorListener {
             percentageFreeMemory.forEach((freeMemory) -> {
                 val event = GcEvent.from(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
                 if(config.isShouldLogAfterGc()) {
-                    LazyLogger.warnColor(() -> format(":yellow,n: {0}", event));
+                    LazyLogger.warnColor(() -> format("{0}", event));
                 }
                 broker.publish(event);
             });
