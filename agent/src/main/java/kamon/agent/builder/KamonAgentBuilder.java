@@ -18,7 +18,6 @@ package kamon.agent.builder;
 
 import javaslang.Function1;
 import javaslang.collection.List;
-import javaslang.control.Option;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
@@ -65,8 +64,8 @@ abstract class KamonAgentBuilder {
         return configuredMatcherList.apply(moduleDescription)
                                     .foldLeft(agentBuilder, AgentBuilder::ignore)
                                     .ignore(any(), withTimeSpent(agentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
-                                    .or(any(), withTimeSpent(agentName(),"classloader", "extension", isExtensionClassLoader()))
-                                    .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
+                                    .ignore(any(), withTimeSpent(agentName(),"classloader", "extension", isExtensionClassLoader()))
+                                    .ignore(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
     AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
@@ -80,8 +79,8 @@ abstract class KamonAgentBuilder {
     }
 
     private static Function1<AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
-        return (moduleDescription) -> withinPackageOpt(moduleDescription)
-                .map(within -> within.map( w -> not(nameMatches(w))))
+        return (moduleDescription) -> moduleDescription.getWithinPackage()
+                .map(within -> List.of(not(nameMatches(within))))
                 .getOrElse(List.of(
                         nameMatches("sun\\..*"),
                         nameMatches("com\\.sun\\..*"),
@@ -99,11 +98,6 @@ abstract class KamonAgentBuilder {
                         nameMatches("org\\.scalatest\\..*"),
                         nameMatches("scala\\.(?!concurrent).*")
                 ));
-    }
-
-    private static Option<List<String>> withinPackageOpt(AgentModuleDescription moduleDescription) {
-        return moduleDescription.getWithinPackage().nonEmpty() ?
-                Option.some(moduleDescription.getWithinPackage()) : Option.none();
     }
 
     protected String agentName() {

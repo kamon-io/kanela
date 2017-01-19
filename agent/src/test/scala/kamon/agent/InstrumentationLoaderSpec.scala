@@ -23,6 +23,7 @@ import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 import javaslang.collection.{ List ⇒ JList }
+import javaslang.control.{ Option ⇒ JOption }
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
@@ -39,7 +40,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     when(dumpConfigMock.getDumpEnabled).thenReturn(false)
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.empty[String]())
-    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JOption.none[String]())
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
@@ -79,7 +80,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     when(dumpConfigMock.getDumpEnabled).thenReturn(false)
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation"))
-    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JOption.none[String]())
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
