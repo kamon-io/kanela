@@ -169,7 +169,7 @@ public class AgentConfiguration {
     }
 
     private List<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("withinPackage"))).getOrElse(List.empty());
+        return Try.of(() -> List.ofAll(config.getStringList("within"))).getOrElse(List.empty());
     }
 
 

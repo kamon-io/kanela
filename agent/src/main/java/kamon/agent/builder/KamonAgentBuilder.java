@@ -77,26 +77,28 @@ abstract class KamonAgentBuilder {
             });
     }
 
-    private static Function1<AgentConfiguration.AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
-        return (moduleDescription) -> moduleDescription.getWithinPackage()
-                .map(within -> List.of(not(nameMatches(within))))
-                .getOrElse(List.of(
-                        nameMatches("sun\\..*"),
-                        nameMatches("com\\.sun\\..*"),
-                        nameMatches("java\\..*"),
-                        nameMatches("javax\\..*"),
-                        nameMatches("org\\.aspectj.\\..*"),
-                        nameMatches("com\\.newrelic.\\..*"),
-                        nameMatches("org\\.groovy.\\..*"),
-                        nameMatches("net\\.bytebuddy.\\..*"),
-                        nameMatches("\\.asm.\\..*"),
-                        nameMatches("kamon\\.agent\\..*"),
-                        nameMatches("kamon\\.testkit\\..*"),
-                        nameMatches("kamon\\.instrumentation\\..*"),
-                        nameMatches("akka\\.testkit\\..*"),
-                        nameMatches("org\\.scalatest\\..*"),
-                        nameMatches("scala\\.(?!concurrent).*")
-                ));
+    private static Function1<AgentConfiguration.AgentModuleDescription, List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+        return (moduleDescription) -> {
+            List<ElementMatcher.Junction<NamedElement>> matcherList = moduleDescription.getWithinPackage()
+                                                                                       .foldLeft(List.empty(), (xs, s) -> xs.append(not(nameMatches(s))));
+            if (!matcherList.isEmpty()) return matcherList;
+
+            return List.of(nameMatches("sun\\..*"),
+                           nameMatches("com\\.sun\\..*"),
+                           nameMatches("java\\..*"),
+                           nameMatches("javax\\..*"),
+                           nameMatches("org\\.aspectj.\\..*"),
+                           nameMatches("com\\.newrelic.\\..*"),
+                           nameMatches("org\\.groovy.\\..*"),
+                           nameMatches("net\\.bytebuddy.\\..*"),
+                           nameMatches("\\.asm.\\..*"),
+                           nameMatches("kamon\\.agent\\..*"),
+                           nameMatches("kamon\\.testkit\\..*"),
+                           nameMatches("kamon\\.instrumentation\\..*"),
+                           nameMatches("akka\\.testkit\\..*"),
+                           nameMatches("org\\.scalatest\\..*"),
+                           nameMatches("scala\\.(?!concurrent).*"));
+        };
     }
 
     protected String agentName() {
