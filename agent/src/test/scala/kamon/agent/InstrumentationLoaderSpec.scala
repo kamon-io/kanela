@@ -18,8 +18,8 @@ package kamon.agent
 
 import java.lang.instrument.Instrumentation
 
-import kamon.agent.util.conf.AgentConfiguration
 import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription
+import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 import javaslang.collection.{ List ⇒ JList }
@@ -28,15 +28,19 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
   "with the config empty kamon.agent.modules.x-module.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
-    when(agentModuleDescriptionMock.getInstrumentations)
-      .thenReturn(JList.empty[String]())
-    when(agentModuleDescriptionMock.getName)
-      .thenReturn("x-module")
 
-    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
-    when(agentConfiguration.getAgentModules)
-      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
+    val agentConfiguration = spy(AgentConfiguration.instance())
+    val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
+
+    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+
+    when(agentConfiguration.getAgentModules).thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
+
+    when(dumpConfigMock.getDumpEnabled).thenReturn(false)
+
+    when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 
@@ -64,15 +68,19 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
   "with an existing instrumentation" should "register it correctly" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
-    when(agentModuleDescriptionMock.getInstrumentations)
-      .thenReturn(JList.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation"))
-    when(agentModuleDescriptionMock.getName)
-      .thenReturn("x-module")
 
-    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
-    when(agentConfiguration.getAgentModules)
-      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
+    val agentConfiguration = spy(AgentConfiguration.instance())
+    val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
+
+    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+
+    when(agentConfiguration.getAgentModules).thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
+
+    when(dumpConfigMock.getDumpEnabled).thenReturn(false)
+
+    when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kamon.agent.instrumentation.KamonFakeInstrumentation"))
+    when(agentModuleDescriptionMock.getWithinPackage).thenReturn(JList.empty[String]())
+    when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 

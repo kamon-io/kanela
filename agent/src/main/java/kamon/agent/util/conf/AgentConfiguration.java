@@ -72,7 +72,9 @@ public class AgentConfiguration {
                        val instrumentations = getInstrumentations(moduleConfig);
                        val within = getWithinConfiguration(moduleConfig);
                        return AgentModuleDescription.from(name, stoppable, instrumentations, within);
-                   }).toList();
+                   })
+                   .filter(agentModule -> agentModule.getInstrumentations().nonEmpty())
+                   .toList();
     }
 
     @Value(staticConstructor = "from")
@@ -170,7 +172,7 @@ public class AgentConfiguration {
     }
 
     private List<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("withinPackage"))).getOrElse(List.empty());
+        return Try.of(() -> List.ofAll(config.getStringList("within"))).getOrElse(List.empty());
     }
 
 

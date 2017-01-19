@@ -25,13 +25,11 @@ import static kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 public class MonitorInstrumentation extends KamonInstrumentation {
 
     public MonitorInstrumentation() {
-        super();
         forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
-            builder
-                    .withMixin(() -> MonitorMixin.class)
-                    .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
-                    .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
-                    .build()
+            builder.withMixin(() -> MonitorMixin.class)
+                   .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
+                   .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
+                   .build()
         );
     }
 

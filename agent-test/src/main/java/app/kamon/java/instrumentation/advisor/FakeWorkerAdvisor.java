@@ -17,21 +17,20 @@
 package app.kamon.java.instrumentation.advisor;
 
 import app.kamon.java.instrumentation.mixin.MonitorAware;
-import kamon.agent.libs.net.bytebuddy.asm.Advice;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.*;
 import lombok.val;
 
 public class FakeWorkerAdvisor {
 
-    @Advice.OnMethodEnter
+    @OnMethodEnter
     public static long onMethodEnter() {
         return System.nanoTime(); // Return current time, entering as parameter in the onMethodExist
     }
 
-    @Advice.OnMethodExit
-    public static void onMethodExit(@This Object instance, @Enter long start, @Origin String origin) {
+    @OnMethodExit
+    public static void onMethodExit(@This MonitorAware instance, @Enter long start, @Origin String origin) {
         val timing = System.nanoTime() - start;
-        ((MonitorAware) instance).addExecTimings(origin, timing);
+        instance.addExecTimings(origin, timing);
         System.out.println(String.format("Method %s was executed in %10.2f ns.", origin, (float) timing));
     }
 }

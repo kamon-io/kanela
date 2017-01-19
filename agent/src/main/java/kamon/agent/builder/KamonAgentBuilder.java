@@ -18,10 +18,12 @@ package kamon.agent.builder;
 
 import javaslang.Function1;
 import javaslang.collection.List;
+import javaslang.control.Option;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription;
 import kamon.agent.util.log.LazyLogger;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
@@ -40,14 +42,14 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    private static final Function1<AgentConfiguration.AgentModuleDescription, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private static final Function1<AgentModuleDescription, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
-    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation);
+    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
-    AgentBuilder from(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
+    AgentBuilder from(AgentConfiguration config, AgentModuleDescription moduleDescription) {
         val byteBuddy = new ByteBuddy().with(TypeValidation.of(config.isDebugMode()))
                                        .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
@@ -67,7 +69,7 @@ abstract class KamonAgentBuilder {
                                     .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
-    AgentBuilder build(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+    AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
             return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription, instrumentation), (agent, typeTransformation) -> {
                 val transformers = new ArrayList<AgentBuilder.Transformer>();
                 transformers.addAll(typeTransformation.getMixins().toJavaList());
@@ -77,9 +79,9 @@ abstract class KamonAgentBuilder {
             });
     }
 
-    private static Function1<AgentConfiguration.AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
-        return (moduleDescription) -> moduleDescription.getWithinPackage()
-                .map(within -> List.of(not(nameMatches(within))))
+    private static Function1<AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+        return (moduleDescription) -> withinPackageOpt(moduleDescription)
+                .map(within -> within.map( w -> not(nameMatches(w))))
                 .getOrElse(List.of(
                         nameMatches("sun\\..*"),
                         nameMatches("com\\.sun\\..*"),
@@ -97,6 +99,11 @@ abstract class KamonAgentBuilder {
                         nameMatches("org\\.scalatest\\..*"),
                         nameMatches("scala\\.(?!concurrent).*")
                 ));
+    }
+
+    private static Option<List<String>> withinPackageOpt(AgentModuleDescription moduleDescription) {
+        return moduleDescription.getWithinPackage().nonEmpty() ?
+                Option.some(moduleDescription.getWithinPackage()) : Option.none();
     }
 
     protected String agentName() {

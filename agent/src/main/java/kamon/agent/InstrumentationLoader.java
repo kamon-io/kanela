@@ -19,12 +19,11 @@ package kamon.agent;
 import javaslang.collection.List;
 import javaslang.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
-import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.builder.Agents;
 import kamon.agent.builder.KamonAgentFileTransformer;
-import kamon.agent.util.ListUtil;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
+
 import java.lang.instrument.Instrumentation;
 
 import static java.text.MessageFormat.format;
@@ -39,15 +38,14 @@ public class InstrumentationLoader {
      * @return a list of {@link KamonAgentFileTransformer}
      */
     public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration config) {
-        return config.getAgentModules().flatMap( moduleDescription -> {
+        return config.getAgentModules().map((moduleDescription) -> {
             LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
-            final List<TypeTransformation> transformations = moduleDescription.getInstrumentations()
-                    .map(InstrumentationLoader::loadInstrumentation)
-                    .sortBy(KamonInstrumentation::order)
-                    .flatMap(KamonInstrumentation::collectTransformations);
-            return ListUtil.foldLeftOption(transformations, Agents.from(config, moduleDescription, instrumentation), Agents::addTypeTransformation)
-                                    .map(agents -> agents.install())
-                                    .toList();
+            return moduleDescription.getInstrumentations()
+                                    .map(InstrumentationLoader::loadInstrumentation)
+                                    .sortBy(KamonInstrumentation::order)
+                                    .flatMap(KamonInstrumentation::collectTransformations)
+                                    .foldLeft(Agents.from(config, moduleDescription, instrumentation), Agents::addTypeTransformation)
+                                    .install();
         });
     }
 
