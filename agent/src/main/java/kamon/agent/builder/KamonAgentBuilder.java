@@ -61,7 +61,8 @@ abstract class KamonAgentBuilder {
                                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
 
-        return agentBuilder.ignore(configuredMatcherList.apply(moduleDescription))
+        return agentBuilder
+                        .ignore(configuredMatcherList.apply(moduleDescription))
                         .or(any(), withTimeSpent(agentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
                         .or(any(), withTimeSpent(agentName(),"classloader", "extension", isExtensionClassLoader()))
                         .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
