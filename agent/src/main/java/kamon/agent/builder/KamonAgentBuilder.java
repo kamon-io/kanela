@@ -41,7 +41,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 abstract class KamonAgentBuilder {
 
-    private static final Function1<AgentModuleDescription, List<ElementMatcher.Junction<NamedElement>>> configuredMatcherList = ignoredMatcherList().memoized();
+    private static final Function1<AgentModuleDescription, ElementMatcher.Junction<NamedElement>> configuredMatcherList = ignoredMatcherList().memoized();
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
@@ -61,11 +61,10 @@ abstract class KamonAgentBuilder {
                                        .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
         }
 
-        return configuredMatcherList.apply(moduleDescription)
-                                    .foldLeft(agentBuilder, AgentBuilder::ignore)
-                                    .ignore(any(), withTimeSpent(agentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
-                                    .ignore(any(), withTimeSpent(agentName(),"classloader", "extension", isExtensionClassLoader()))
-                                    .ignore(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
+        return agentBuilder.ignore(configuredMatcherList.apply(moduleDescription))
+                        .or(any(), withTimeSpent(agentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
+                        .or(any(), withTimeSpent(agentName(),"classloader", "extension", isExtensionClassLoader()))
+                        .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
     AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
@@ -78,26 +77,28 @@ abstract class KamonAgentBuilder {
             });
     }
 
-    private static Function1<AgentModuleDescription,List<ElementMatcher.Junction<NamedElement>>> ignoredMatcherList() {
+    private static Function1<AgentModuleDescription,ElementMatcher.Junction<NamedElement>> ignoredMatcherList() {
         return (moduleDescription) -> moduleDescription.getWithinPackage()
-                .map(within -> List.of(not(nameMatches(within))))
-                .getOrElse(List.of(
-                        nameMatches("sun\\..*"),
-                        nameMatches("com\\.sun\\..*"),
-                        nameMatches("java\\..*"),
-                        nameMatches("javax\\..*"),
-                        nameMatches("org\\.aspectj.\\..*"),
-                        nameMatches("com\\.newrelic.\\..*"),
-                        nameMatches("org\\.groovy.\\..*"),
-                        nameMatches("net\\.bytebuddy.\\..*"),
-                        nameMatches("\\.asm.\\..*"),
-                        nameMatches("kamon\\.agent\\..*"),
-                        nameMatches("kamon\\.testkit\\..*"),
-                        nameMatches("kamon\\.instrumentation\\..*"),
-                        nameMatches("akka\\.testkit\\..*"),
-                        nameMatches("org\\.scalatest\\..*"),
-                        nameMatches("scala\\.(?!concurrent).*")
-                ));
+                .map(within -> not(nameMatches(within)))
+                .getOrElse(not(nameMatches(
+                                List.of(
+                                "sun\\..*",
+                                "com\\.sun\\..*",
+                                "java\\..*",
+                                "javax\\..*",
+                                "org\\.aspectj.\\..*",
+                                "com\\.newrelic.\\..*",
+                                "org\\.groovy.\\..*",
+                                "net\\.bytebuddy.\\..*",
+                                "\\.asm.\\..*",
+                                "kamon\\.agent\\..*",
+                                "kamon\\.testkit\\..*",
+                                "kamon\\.instrumentation\\..*",
+                                "akka\\.testkit\\..*",
+                                "org\\.scalatest\\..*",
+                                "scala\\.(?!concurrent).*").mkString("|")
+                        ))
+                );
     }
 
     protected String agentName() {
