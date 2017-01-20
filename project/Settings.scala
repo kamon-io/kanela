@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -28,7 +28,7 @@ object Settings {
   val JavaVersion = "1.8"
   val ScalaVersion = "2.12.1"
 
-  lazy val basicSettings = Seq(
+  lazy val basicSettings: Seq[Setting[_]] = Seq(
     scalaVersion := ScalaVersion,
     resolvers ++= Dependencies.resolutionRepos,
     fork in run := true,
@@ -61,6 +61,7 @@ object Settings {
   lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
   lazy val excludeScalaLib = Assembly.excludeScalaLib
   lazy val agentSettings = Agent.settings
+  lazy val agentTestSettings = AgentTest.settings
 
   def formattingPreferences =
     FormattingPreferences()

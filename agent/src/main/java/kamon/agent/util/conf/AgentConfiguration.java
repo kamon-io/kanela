@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -72,15 +72,18 @@ public class AgentConfiguration {
                        val instrumentations = getInstrumentations(moduleConfig);
                        val within = getWithinConfiguration(moduleConfig);
                        return AgentModuleDescription.from(name, stoppable, instrumentations, within);
-                   }).toList();
+                   })
+                   .filter(agentModule -> agentModule.getInstrumentations().nonEmpty())
+                   .toList();
     }
 
     @Value(staticConstructor = "from")
+    @NonFinal
     public static class AgentModuleDescription {
         String name;
         boolean stoppable;
         List<String> instrumentations;
-        List<String> withinPackage;
+        Option<String> withinPackage;
     }
 
     @Value
@@ -168,8 +171,8 @@ public class AgentConfiguration {
                 .getOrElse(Nil.instance());
     }
 
-    private List<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("within"))).getOrElse(List.empty());
+    private Option<String> getWithinConfiguration(Config config) {
+        return Try.of(() -> List.ofAll(config.getStringList("within")).mkString("|")).getOption();
     }
 
 
