@@ -18,11 +18,14 @@ package kamon.agent.api.instrumentation.listener;
 
 import javaslang.Function1;
 import kamon.agent.util.NamedThreadFactory;
+import kamon.agent.util.ShutdownHook;
 import kamon.agent.util.log.LazyLogger;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +45,7 @@ public class PeriodicResubmitterListener {
     private static Function1<Instrumentation, AgentBuilder.Listener> newResubmittingListener() {
         return (instrumentation) -> {
             LazyLogger.infoColor(() -> "Periodic Resubmitter Listener was activated.");
+            ShutdownHook.register(executor);
             return new AgentBuilder.Listener.Resubmitting(instrumentation).scheduled(executor, 10, TimeUnit.SECONDS);
         };
     }
