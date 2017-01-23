@@ -37,6 +37,7 @@ public class LazyLogger {
     static {
         Configurator.currentConfig()
                 .locale(Locale.US)
+                .writingThread("main")
                 .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")
                 .writer(new ConsoleWriter())
                 .addWriter(new RollingFileWriter("kamon-agent.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))

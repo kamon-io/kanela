@@ -34,23 +34,23 @@ public class InstrumentationLoader {
      * Load from the current classpath all defined instrumentations {@link KamonInstrumentation}.
      *
      * @param instrumentation {@link Instrumentation}
-     * @param config {@link AgentConfiguration}
+     * @param configuration {@link AgentConfiguration}
      * @return a list of {@link KamonAgentFileTransformer}
      */
-    public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration config) {
-        return config.getAgentModules().map((moduleDescription) -> {
+    public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration configuration) {
+        return configuration.getAgentModules().map((moduleDescription) -> {
             LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
             return moduleDescription.getInstrumentations()
-                                    .map(InstrumentationLoader::loadInstrumentation)
+                                    .map(instrumentationClassName -> loadInstrumentation(instrumentationClassName, configuration))
                                     .sortBy(KamonInstrumentation::order)
                                     .flatMap(KamonInstrumentation::collectTransformations)
-                                    .foldLeft(Agents.from(config, moduleDescription, instrumentation), Agents::addTypeTransformation)
+                                    .foldLeft(Agents.from(configuration, moduleDescription, instrumentation), Agents::addTypeTransformation)
                                     .install();
         });
     }
 
-    private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {
-        LazyLogger.infoColor(() -> format("Loading {0} ", instrumentationClassName));
+    private static KamonInstrumentation loadInstrumentation(String instrumentationClassName, AgentConfiguration configuration) {
+        if(configuration.isDebugMode()) LazyLogger.infoColor(() -> format("Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, InstrumentationLoader.class.getClassLoader()).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
     }
