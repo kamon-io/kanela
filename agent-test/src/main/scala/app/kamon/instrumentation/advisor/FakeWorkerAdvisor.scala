@@ -28,9 +28,9 @@ object FakeWorkerAdvisor {
   }
 
   @OnMethodExit
-  def onMethodExit(@This instance: Object, @Enter start: Long, @Origin origin: String): Unit = {
+  def onMethodExit(@This instance: MonitorAware, @Enter start: Long, @Origin origin: String): Unit = {
     val timing = System.nanoTime() - start
-    instance.asInstanceOf[MonitorAware].addExecTimings(origin, timing)
+    instance.addExecTimings(origin, timing)
     println(s"Method $origin was executed in $timing ns.")
   }
 }
