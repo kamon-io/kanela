@@ -1,31 +1,58 @@
 # Kamon Agent
 
-The `kamon-agent` is developed in order to provide a simple way to implement an application running on the JVM and
+The `kamon-agent` is developed in order to provide a simple way to instrument an application running on the JVM and
 introduce kamon features such as, creation of traces, metric measures, trace propagation, and so on.
 
-It's a simple Java Agent written in Java 8 and is powered by [ByteBuddy] and some additionally [ASM] features. It has a Pure-Java API and a
+It's a simple Java Agent written in Java 8 and powered by [ByteBuddy] with some additionally [ASM] features. It has a Pure-Java API and a
 Scala-Friendly API to define the custom instrumentation in a declarative manner.
+
+Kamon has several module that need to instrument the app to introduce itself in the internal components. Introducing this Agent,
+you have other way to instrument your app / library /framework through a simple and declarative api and get additional features such as
+retransformation of the loaded classes (so it's possible to attach agent on the runtime), revoke the instrumentation
+when the app is in a critical state, and so on.
+
+This is not an intended to remove AspectJ Weaver instrumentation, but only an alternative way to do the same with some extra features.
 
 ### How to use the Agent API?
 
-The agent is able to modify the code during the runtime of a Java application. It uses [ByteBuddy] as a facility
-library to manipulate the desirable classes and exposes an API to define the transformation to be made.
-
-The agent provides 2 kinds of transformation:
+The agent provides 3 kinds of transformation:
 
 * **Advisor:** introduce changes on methods and constructors for a given type matcher.
+* **Interceptor:** intercept a method execution, introducing a proxy method in the middle.
 * **Mixin:** compose existing types with new types in order to enrich them with new capabilities.
 
 The API has a version for *Java* and other one for *Scala*. To define the transformations you have to extends the
-`KamonInstrumentation` type (picking the Java or the Scala version) and call the available methods to introduce transformations:
+`KamonInstrumentation` type (picking the Java or the Scala version) and define a new module in the configuration, as you can see
+in the following example.
 
-* `forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription)`
-* `forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription)`
+## Example
 
-In the builder introduced in the function argument, you must define the transformations for a particular type matcher,
-as shown in the following example.
+Suppose you have a simple worker that perform a simple operation:
 
-A simple use case using the Scala version:
+```scala
+import scala.util.Random
+
+case class FakeWorker() {
+
+  private val r = Random.self
+
+  def heavyTask(): Unit = Thread.sleep((r.nextFloat() * 500) toLong)
+
+  def lightTask(): Unit = Thread.sleep((r.nextFloat() * 10) toLong)
+}
+```
+
+You might want to mixin it with a type that provide a way to accumulate metrics, such as the following:
+
+```scala
+trait MonitorAware {
+  def execTimings(methodName: String): Vector[Long]
+  def execTimings: Map[String, Vector[Long]]
+  def addExecTimings(methodName: String, time: Long): Vector[Long]
+}
+```
+
+And introduce some transformations in order to modify the bytecode as our convenient.
 
 ```scala
 
@@ -33,31 +60,73 @@ import kamon.agent.scala.KamonInstrumentation
 
 // And other imports !
 
-class ServletInstrumentation extends KamonInstrumentation {
+class MonitorInstrumentation extends KamonInstrumentation {
 
-    val SetStatusMethod: Junction[MethodDescription] = named("setStatus")
-    val SendErrorMethod: Junction[MethodDescription] = named("sendError").and(takesArguments(classOf[Int]))
-
-    forSubtypeOf("javax.servlet.http.HttpServletResponse") { builder ⇒
-        builder
-          .withMixin(classOf[HttpServletResponseMixin])
-          .withAdvisorFor(SetStatusMethod, classOf[ResponseStatusAdvisor])
-          .withAdvisorFor(SendErrorMethod, classOf[ResponseStatusAdvisor])
-          .build()
-    }
+  forTargetType("app.kamon.Worker") { builder ⇒
+    builder
+      .withMixin(classOf[MonitorMixin])
+      .withAdvisorFor(named("heavyTask"), classOf[WorkerAdvisor])
+      .withAdvisorFor(named("lightTask"), classOf[WorkerAdvisor])
+      .build()
+  }
 }
 
-class ResponseStatusAdvisor
-object ResponseStatusAdvisor {
+
+class MonitorMixin extends MonitorAware {
+  import collection.JavaConverters._
+
+  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
+
+  def execTimings: Map[String, Vector[Long]] = this._execTimings.asScala.toMap
+
+  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
+
+  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
+    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
+  }
+
+  @Initializer
+  def init(): Unit = this._execTimings = new ConcurrentHashMap()
+
+}
+
+class WorkerAdvisor
+object WorkerAdvisor {
+
   @OnMethodEnter
-  def onEnter(@This response: TraceContextAwareExtension, @Argument(0) status: Int): Unit = {
-    response.traceContext().collect { ctx ⇒
-      ServletExtension.httpServerMetrics.recordResponse(ctx.name, status.toString)
-    }
+  def onMethodEnter(): Long = {
+    System.nanoTime() // Return current time, entering as parameter in the onMethodExist
+  }
+
+  @OnMethodExit
+  def onMethodExit(@This instance: MonitorAware, @Enter start: Long, @Origin origin: String): Unit = {
+    val timing = System.nanoTime() - start
+    instance.addExecTimings(origin, timing)
+    println(s"Method $origin was executed in $timing ns.")
   }
 }
 
 ```
+
+Finally, we need to define a new module in the kamon agent configuration:
+
+```hocon
+kamon.agent {
+  modules {
+    example-module {
+      name = "Example Module"
+      stoppable = false
+      instrumentations = [
+        "app.kamon.instrumentation.MonitorInstrumentation"
+      ]
+      within = [ "app.kamon\\..*" ] // List of patterns to match the types to instrument.
+    }
+  }
+}
+```
+
+Some other configuration that you can define is indicated in the agent [`reference.conf`](https://github.com/kamon-io/kamon-agent/blob/master/agent/src/main/resources/reference.conf)
+
 ## Lombok
 This project uses [Lombok](https://projectlombok.org/) to reduce boilerplate. You can setup
  the [IntelliJ plugin](https://plugins.jetbrains.com/plugin/6317) to add IDE support. 
