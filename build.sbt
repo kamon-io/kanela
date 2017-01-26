@@ -60,9 +60,10 @@ lazy val agentScala = (project in file("agent-scala"))
 
 lazy val agentTest = (project in file("agent-test"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
   .settings(moduleName := "agent-test")
   .settings(basicSettings: _*)
-  .settings(agentSettings: _*)
+  .settings(agentSettings)
   .settings(agentTestSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(slf4jApi, logbackCore, logbackClassic, javaslang) ++
@@ -74,9 +75,10 @@ lazy val agentTest = (project in file("agent-test"))
 
 lazy val kamonServlet = (project in file("kamon-servlet"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
   .settings(moduleName := "kamon-servlet")
   .settings(basicSettings: _*)
-  .settings(agentSettings: _*)
+  .settings(agentSettings)
   .settings(libraryDependencies ++=
     compileScope(kamonCore, servletApi) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
@@ -88,7 +90,7 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
 lazy val kamonScala = (project in file("kamon-scala"))
   .dependsOn(agentScala)
   .enablePlugins(JavaAgent)
-  .settings(javaAgents += "io.kamon" % "agent" % "0.0.1" % "test" classifier "assembly")
+  .settings(agentSettings)
   .settings(moduleName := "kamon-scala")
   .settings(basicSettings: _*)
   .settings(libraryDependencies ++=
@@ -98,3 +100,5 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
+
+  lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")

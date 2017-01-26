@@ -44,13 +44,11 @@ object Settings {
       "-language:implicitConversions",
       "-Xlog-reflective-calls"
     )
-  ) 
+  )
 
 
   lazy val assemblySettings = Assembly.settings
   lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
   lazy val excludeScalaLib = Assembly.excludeScalaLib
-  lazy val agentSettings = Agent.settings
   lazy val agentTestSettings = AgentTest.settings
-
 }
