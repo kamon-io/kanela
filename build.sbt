@@ -29,6 +29,7 @@ lazy val agent = (project in file("agent"))
   .settings(moduleName := "agent")
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
   .settings(basicSettings: _*)
+  .settings(Seq(publishArtifact in (Compile, packageDoc) := false, publishArtifact in packageDoc := false, sources in (Compile,doc) := Seq.empty))
   .settings(crossPaths := false,  autoScalaLibrary := false)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
@@ -42,6 +43,7 @@ lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
   .settings(basicSettings: _*)
   .settings(crossPaths := false,  autoScalaLibrary := false)
+  .settings(Seq(publishArtifact in (Compile, packageDoc) := false, publishArtifact in packageDoc := false, sources in (Compile,doc) := Seq.empty))
   .settings(libraryDependencies ++=
     providedScope(javaslang, typesafeConfig, slf4jApi, bytebuddy))
   .settings(excludeScalaLib: _*)
@@ -85,9 +87,10 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
 
 lazy val kamonScala = (project in file("kamon-scala"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
+  .settings(javaAgents += "io.kamon" % "agent" % "0.0.1" % "test" classifier "assembly")
   .settings(moduleName := "kamon-scala")
   .settings(basicSettings: _*)
-  .settings(agentSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(kamonCore) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++

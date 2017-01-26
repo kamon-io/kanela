@@ -47,5 +47,5 @@ object Dependencies {
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
   val scala             = "org.scala-lang"            % "scala-library"           % "2.12.1"
 
-  val kamonAgent      = "io.kamon"          % "agent"        % "0.0.1-SNAPSHOT" classifier "assembly"
+  val kamonAgent      = "io.kamon"          % "agent"        % "0.0.1" classifier "assembly"
 }
