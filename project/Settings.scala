@@ -14,14 +14,9 @@
  * =========================================================================================
  */
 
-import Publish.{settings => publishSettings}
-import Release.{settings => releaseSettings}
-import com.typesafe.sbt.SbtScalariform
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Keys._
 import sbt._
 
-import scalariform.formatter.preferences._
 
 object Settings {
 
@@ -49,13 +44,8 @@ object Settings {
       "-language:implicitConversions",
       "-Xlog-reflective-calls"
     )
-  ) ++ publishSettings ++ releaseSettings
+  ) 
 
-
-  lazy val formatSettings = SbtScalariform.scalariformSettings ++ Seq(
-    ScalariformKeys.preferences in Compile := formattingPreferences,
-    ScalariformKeys.preferences in Test := formattingPreferences
-  )
 
   lazy val assemblySettings = Assembly.settings
   lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
@@ -63,10 +53,4 @@ object Settings {
   lazy val agentSettings = Agent.settings
   lazy val agentTestSettings = AgentTest.settings
 
-  def formattingPreferences =
-    FormattingPreferences()
-      .setPreference(RewriteArrowSymbols, true)
-      .setPreference(AlignParameters, false)
-      .setPreference(AlignSingleLineCaseStatements, true)
-      .setPreference(DoubleIndentClassDeclaration, true)
 }
