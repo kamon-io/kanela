@@ -44,7 +44,7 @@ trait MonitorAware {
 }
 ```
 
-And introduce some transformations in order to modify the bytecode as our convenient.
+And introduce some transformations in order to modify the bytecode and hook into the internal app.
 
 ```scala
 
