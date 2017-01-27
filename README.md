@@ -7,11 +7,9 @@ It's a simple Java Agent written in Java 8 and powered by [ByteBuddy] with some 
 Scala-Friendly API to define the custom instrumentation in a declarative manner.
 
 Kamon has several module that need to instrument the app to introduce itself in the internal components. Introducing this Agent,
-you have other way to instrument your app / library /framework through a simple and declarative api and get additional features such as
+you have other way to instrument your app / library /framework through a simple and declarative API and get additional features such as
 retransformation of the loaded classes (so it's possible to attach agent on the runtime), revoke the instrumentation
 when the app is in a critical state, and so on.
-
-This is not an intended to remove AspectJ Weaver instrumentation, but only an alternative way to do the same with some extra features.
 
 ### How to use the Agent API?
 
@@ -32,7 +30,7 @@ Suppose you have a simple worker that perform a simple operation:
 ```scala
 import scala.util.Random
 
-case class FakeWorker() {
+case class Worker() {
   def performTask(): Unit = Thread.sleep((Random.self.nextFloat() * 500) toLong)
 }
 ```
