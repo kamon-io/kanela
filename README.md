@@ -33,12 +33,7 @@ Suppose you have a simple worker that perform a simple operation:
 import scala.util.Random
 
 case class FakeWorker() {
-
-  private val r = Random.self
-
-  def heavyTask(): Unit = Thread.sleep((r.nextFloat() * 500) toLong)
-
-  def lightTask(): Unit = Thread.sleep((r.nextFloat() * 10) toLong)
+  def performTask(): Unit = Thread.sleep((Random.self.nextFloat() * 500) toLong)
 }
 ```
 
@@ -46,7 +41,6 @@ You might want to mixin it with a type that provide a way to accumulate metrics,
 
 ```scala
 trait MonitorAware {
-  def execTimings(methodName: String): Vector[Long]
   def execTimings: Map[String, Vector[Long]]
   def addExecTimings(methodName: String, time: Long): Vector[Long]
 }
@@ -65,8 +59,7 @@ class MonitorInstrumentation extends KamonInstrumentation {
   forTargetType("app.kamon.Worker") { builder ⇒
     builder
       .withMixin(classOf[MonitorMixin])
-      .withAdvisorFor(named("heavyTask"), classOf[WorkerAdvisor])
-      .withAdvisorFor(named("lightTask"), classOf[WorkerAdvisor])
+      .withAdvisorFor(named("performTask"), classOf[WorkerAdvisor])
       .build()
   }
 }
@@ -78,9 +71,6 @@ class MonitorMixin extends MonitorAware {
   private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
 
   def execTimings: Map[String, Vector[Long]] = this._execTimings.asScala.toMap
-
-  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
-
   def addExecTimings(methodName: String, time: Long): Vector[Long] = {
     this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
   }
