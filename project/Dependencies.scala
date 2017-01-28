@@ -24,7 +24,6 @@ object Dependencies {
     "Kamon Snapshots" at "http://snapshots.kamon.io"
   )
 
-  val akkaVersion       = "2.4.14"
 
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
@@ -38,7 +37,7 @@ object Dependencies {
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
-  val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % akkaVersion
+  val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % "2.4.14"
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
   val springWeb         = "org.springframework"       % "spring-web"              % "4.2.5.RELEASE"
   val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
