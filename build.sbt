@@ -34,7 +34,6 @@ lazy val agent = (project in file("agent"))
     providedScope(lombok))
   .settings(excludeScalaLib: _*)
 
-
 lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
   .settings(javaCommonSettings: _*)
@@ -121,9 +120,6 @@ lazy val basicSettings = Seq(
     "utf8",
     "-g:vars",
     "-feature",
-    "-unchecked",
-    "-optimise",
-    "-deprecation",
     "-language:postfixOps",
     "-language:implicitConversions",
     "-Xlog-reflective-calls"

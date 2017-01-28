@@ -21,6 +21,7 @@ import kamon.agent.util.conf.AgentConfiguration;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.matcher.ElementMatcher;
+import kamon.agent.util.log.LazyLogger;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,8 +61,7 @@ public class TimedMatcher<T> implements ElementMatcher<T> {
     }
 
     private  void logMetrics() {
-       //FIXME: change System::out for a real logger!!!
-       accumulatedTimeByType.forEach((key, value) -> System.out.println("The time spent to match a type: " + key + " for agent: " + agentName + " with value:" + value));
+       accumulatedTimeByType.forEach((key, value) -> LazyLogger.infoColor(() -> "The time spent to match a type: " + key + " for agent: " + agentName + " with value:" + value));
     }
 
     @Value
