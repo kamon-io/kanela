@@ -15,25 +15,21 @@
  */
 
 import Dependencies._
-import Settings._
 
 lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
-  .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
   .settings(noPublishing: _*)
   .aggregate(agent, agentApi)
 
 lazy val agent = (project in file("agent"))
   .dependsOn(agentApi)
   .enablePlugins(BuildInfoPlugin)
-  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
   .settings(moduleName := "agent")
-  .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
+  .settings(buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
+  .settings(javaCommonSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy, expirinMap) ++
+    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy, expirinMap, scala) ++
     testScope(scalatest, mockito) ++
     providedScope(lombok))
   .settings(excludeScalaLib: _*)
@@ -41,8 +37,7 @@ lazy val agent = (project in file("agent"))
 
 lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
-  .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
+  .settings(javaCommonSettings: _*)
   .settings(libraryDependencies ++=
     providedScope(javaslang, typesafeConfig, slf4jApi, bytebuddy))
   .settings(excludeScalaLib: _*)
@@ -51,7 +46,6 @@ lazy val agentApi = (project in file("agent-api"))
 lazy val agentScala = (project in file("agent-scala"))
   .settings(moduleName := "agent-scala")
   .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(slf4jApi, logbackCore, logbackClassic) ++
     providedScope(kamonAgent))
@@ -60,10 +54,10 @@ lazy val agentScala = (project in file("agent-scala"))
 
 lazy val agentTest = (project in file("agent-test"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
   .settings(moduleName := "agent-test")
   .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
-  .settings(agentSettings: _*)
+  .settings(agentSettings)
   .settings(agentTestSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(slf4jApi, logbackCore, logbackClassic, javaslang) ++
@@ -75,10 +69,10 @@ lazy val agentTest = (project in file("agent-test"))
 
 lazy val kamonServlet = (project in file("kamon-servlet"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
   .settings(moduleName := "kamon-servlet")
   .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
-  .settings(agentSettings: _*)
+  .settings(agentSettings)
   .settings(libraryDependencies ++=
     compileScope(kamonCore, servletApi) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
@@ -89,10 +83,10 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
 
 lazy val kamonScala = (project in file("kamon-scala"))
   .dependsOn(agentScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
   .settings(moduleName := "kamon-scala")
   .settings(basicSettings: _*)
-  .settings(formatSettings: _*)
-  .settings(agentSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(kamonCore) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
@@ -101,5 +95,42 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
-lazy val noPublishing = Seq(publish := (), publishLocal := (), publishArtifact := false)
+  lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
 
+
+lazy val javaCommonSettings = Seq(
+  crossPaths := false,
+  autoScalaLibrary := false,
+  publishArtifact in (Compile, packageDoc) := false,
+  publishArtifact in packageDoc := false,
+  sources in (Compile,doc) := Seq.empty
+) ++ basicSettings
+
+lazy val basicSettings = Seq(
+  scalaVersion := "2.12.1",
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  resolvers ++= Dependencies.resolutionRepos,
+  fork in run := true,
+  parallelExecution in Global := false,
+  javacOptions := Seq(
+    "-Xlint:none",
+    "-XDignore.symbol.file",
+    "-source", "1.8", "-target", "1.8"),
+  scalacOptions  := Seq(
+    "-encoding",
+    "utf8",
+    "-g:vars",
+    "-feature",
+    "-unchecked",
+    "-optimise",
+    "-deprecation",
+    "-language:postfixOps",
+    "-language:implicitConversions",
+    "-Xlog-reflective-calls"
+  )
+)
+
+lazy val assemblySettings = Assembly.settings
+lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
+lazy val excludeScalaLib = Assembly.excludeScalaLib
+lazy val agentTestSettings = AgentTest.settings
