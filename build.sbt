@@ -108,6 +108,7 @@ lazy val javaCommonSettings = Seq(
 
 lazy val basicSettings = Seq(
   scalaVersion := "2.12.1",
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
   resolvers ++= Dependencies.resolutionRepos,
   fork in run := true,
   parallelExecution in Global := false,

@@ -32,6 +32,7 @@ object Dependencies {
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
   val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
+  val scala             = "org.scala-lang"            % "scala-library"           % "2.12.1"
 
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
@@ -44,7 +45,6 @@ object Dependencies {
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
-  val scala             = "org.scala-lang"            % "scala-library"           % "2.12.1"
 
-  val kamonAgent      = "io.kamon"          % "agent"        % "0.0.1" classifier "assembly"
+  val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 }
