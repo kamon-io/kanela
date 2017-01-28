@@ -23,5 +23,5 @@ import java.util.Map;
 public interface MonitorAware {
     List<Long> execTimings(String methodName);
     Map<String, List<Long>> execTimings();
-    List<Long>addExecTimings(String methodName, long time);
+    List<Long> addExecTimings(String methodName, long time);
 }

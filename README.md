@@ -7,17 +7,11 @@ It's a simple Java Agent written in Java 8 and powered by [ByteBuddy] with some 
 Scala-Friendly API to define the custom instrumentation in a declarative manner.
 
 Kamon has several module that need to instrument the app to introduce itself in the internal components. Introducing this Agent,
-you have other way to instrument your app / library /framework through a simple and declarative API and get additional features such as
+you have other way to instrument your `app / library / framework` through a simple and declarative API and get additional features such as
 retransformation of the loaded classes (so it's possible to attach agent on the runtime), revoke the instrumentation
 when the app is in a critical state, and so on.
 
 ### How to use the Agent API?
-
-The agent provides 3 kinds of transformation:
-
-* **Advisor:** introduce changes on methods and constructors for a given type matcher.
-* **Interceptor:** intercept a method execution, introducing a proxy method in the middle.
-* **Mixin:** compose existing types with new types in order to enrich them with new capabilities.
 
 The API has a version for *Java* and other one for *Scala*. To define the transformations you have to extends the
 `KamonInstrumentation` type (picking the Java or the Scala version) and define a new module in the configuration, as you can see
@@ -64,21 +58,24 @@ class MonitorInstrumentation extends KamonInstrumentation {
 
 
 class MonitorMixin extends MonitorAware {
-  import collection.JavaConverters._
 
-  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
+  private var _execTimings: TrieMap[String, CopyOnWriteArrayList[Long]] = _
 
-  def execTimings: Map[String, Vector[Long]] = this._execTimings.asScala.toMap
-  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
-    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
+  def execTimings: TrieMap[String, CopyOnWriteArrayList[Long]] = this._execTimings
+
+  def execTimings(methodName: String): java.util.List[Long] = this._execTimings.getOrElse(methodName, new CopyOnWriteArrayList())
+
+  def addExecTimings(methodName: String, time: Long): java.util.List[Long] = {
+    val update = this._execTimings.getOrElseUpdate(methodName, new CopyOnWriteArrayList())
+    update.add(time)
+    update
   }
 
   @Initializer
-  def init(): Unit = this._execTimings = new ConcurrentHashMap()
-
+  def init(): Unit = this._execTimings = TrieMap[String, CopyOnWriteArrayList[Long]]()
 }
 
-class WorkerAdvisor
+
 object WorkerAdvisor {
 
   @OnMethodEnter
@@ -104,10 +101,8 @@ kamon.agent {
     example-module {
       name = "Example Module"
       stoppable = false
-      instrumentations = [
-        "app.kamon.instrumentation.MonitorInstrumentation"
-      ]
-      within = [ "app.kamon\\..*" ] // List of patterns to match the types to instrument.
+      instrumentations = ["app.kamon.instrumentation.MonitorInstrumentation"]
+      within = [ "app.kamon..*" ] // List of patterns to match the types to instrument.
     }
   }
 }

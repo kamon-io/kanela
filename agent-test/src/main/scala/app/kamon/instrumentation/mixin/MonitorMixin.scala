@@ -20,13 +20,14 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.{List => JList}
 
 import kamon.agent.api.instrumentation.Initializer
+
 import scala.collection.concurrent.TrieMap
 
 class MonitorMixin extends MonitorAware {
 
-  private var _execTimings: TrieMap[String, JList[Long]] = _
+  private var _execTimings: TrieMap[String, CopyOnWriteArrayList[Long]] = _
 
-  def execTimings: TrieMap[String, JList[Long]] = this._execTimings
+  def execTimings: TrieMap[String, CopyOnWriteArrayList[Long]] = this._execTimings
 
   def execTimings(methodName: String): JList[Long] = this._execTimings.getOrElse(methodName, new CopyOnWriteArrayList())
 
@@ -37,11 +38,11 @@ class MonitorMixin extends MonitorAware {
   }
 
   @Initializer
-  def init(): Unit = this._execTimings = TrieMap[String, JList[Long]]()
+  def init(): Unit = this._execTimings = TrieMap[String, CopyOnWriteArrayList[Long]]()
 }
 
 trait MonitorAware {
   def execTimings(methodName: String): JList[Long]
-  def execTimings: TrieMap[String, JList[Long]]
+  def execTimings: TrieMap[String, CopyOnWriteArrayList[Long]]
   def addExecTimings(methodName: String, time: Long):JList[Long]
 }

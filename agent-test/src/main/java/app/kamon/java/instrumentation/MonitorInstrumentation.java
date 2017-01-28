@@ -23,7 +23,6 @@ import kamon.agent.api.instrumentation.KamonInstrumentation;
 import static kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 
 public class MonitorInstrumentation extends KamonInstrumentation {
-
     public MonitorInstrumentation() {
         forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
             builder.withMixin(() -> MonitorMixin.class)
