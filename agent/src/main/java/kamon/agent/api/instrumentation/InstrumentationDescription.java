@@ -16,7 +16,6 @@
 
 package kamon.agent.api.instrumentation;
 
-import javaslang.Function3;
 import javaslang.Function4;
 import javaslang.control.Option;
 import kamon.agent.api.advisor.AdvisorDescription;

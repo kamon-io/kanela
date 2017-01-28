@@ -83,7 +83,7 @@ public class AgentConfiguration {
         String name;
         boolean stoppable;
         List<String> instrumentations;
-        Option<String> withinPackage;
+        String withinPackage;
     }
 
     @Value
@@ -171,8 +171,10 @@ public class AgentConfiguration {
                 .getOrElse(Nil.instance());
     }
 
-    private Option<String> getWithinConfiguration(Config config) {
-        return Try.of(() -> List.ofAll(config.getStringList("within")).mkString("|")).getOption();
+    private String getWithinConfiguration(Config config) {
+        return Try
+                .of(() -> List.ofAll(config.getStringList("within")).mkString("|"))
+                .getOrElse(DefaultConfiguration.withinPackage);
     }
 
 
@@ -188,5 +190,24 @@ public class AgentConfiguration {
         return ConfigFactory
                 .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
+    }
+
+    private static class DefaultConfiguration {
+        static final String withinPackage = List.of(
+                    "sun\\..*",
+                    "com\\.sun\\..*",
+                    "java\\..*",
+                    "javax\\..*",
+                    "org\\.aspectj.\\..*",
+                    "com\\.newrelic.\\..*",
+                    "org\\.groovy.\\..*",
+                    "net\\.bytebuddy.\\..*",
+                    "\\.asm.\\..*",
+                    "kamon\\.agent\\..*",
+                    "kamon\\.testkit\\..*",
+                    "kamon\\.instrumentation\\..*",
+                    "akka\\.testkit\\..*",
+                    "org\\.scalatest\\..*",
+                    "scala\\.(?!concurrent).*").mkString("|");
     }
 }
