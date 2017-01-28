@@ -17,7 +17,6 @@
 package kamon.agent.builder;
 
 import javaslang.Function1;
-import javaslang.collection.List;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;
@@ -79,27 +78,7 @@ abstract class KamonAgentBuilder {
     }
 
     private static Function1<AgentModuleDescription,ElementMatcher.Junction<NamedElement>> ignoredMatcherList() {
-        return (moduleDescription) -> moduleDescription.getWithinPackage()
-                .map(within -> not(nameMatches(within)))
-                .getOrElse(not(nameMatches(
-                                List.of(
-                                "sun\\..*",
-                                "com\\.sun\\..*",
-                                "java\\..*",
-                                "javax\\..*",
-                                "org\\.aspectj.\\..*",
-                                "com\\.newrelic.\\..*",
-                                "org\\.groovy.\\..*",
-                                "net\\.bytebuddy.\\..*",
-                                "\\.asm.\\..*",
-                                "kamon\\.agent\\..*",
-                                "kamon\\.testkit\\..*",
-                                "kamon\\.instrumentation\\..*",
-                                "akka\\.testkit\\..*",
-                                "org\\.scalatest\\..*",
-                                "scala\\.(?!concurrent).*").mkString("|")
-                        ))
-                );
+        return (moduleDescription) -> not(nameMatches(moduleDescription.getWithinPackage()));
     }
 
     protected String agentName() {
