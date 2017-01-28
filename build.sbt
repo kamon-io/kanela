@@ -94,9 +94,6 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
-  lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
-
-
 lazy val javaCommonSettings = Seq(
   crossPaths := false,
   autoScalaLibrary := false,
@@ -130,3 +127,6 @@ lazy val assemblySettings = Assembly.settings
 lazy val notAggregateInAssembly = Assembly.notAggregateInAssembly
 lazy val excludeScalaLib = Assembly.excludeScalaLib
 lazy val agentTestSettings = AgentTest.settings
+
+lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
+
