@@ -16,29 +16,32 @@
 
 package app.kamon.instrumentation.mixin
 
-import java.util.concurrent.{ ConcurrentHashMap, ConcurrentMap }
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.{List => JList}
+
 import kamon.agent.api.instrumentation.Initializer
+import scala.collection.concurrent.TrieMap
 
 class MonitorMixin extends MonitorAware {
-  import collection.JavaConverters._
 
-  private var _execTimings: ConcurrentMap[String, Vector[Long]] = _
+  private var _execTimings: TrieMap[String, JList[Long]] = _
 
-  def execTimings: Map[String, Vector[Long]] = this._execTimings.asScala.toMap
+  def execTimings: TrieMap[String, JList[Long]] = this._execTimings
 
-  def execTimings(methodName: String): Vector[Long] = this._execTimings.getOrDefault(methodName, Vector.empty)
+  def execTimings(methodName: String): JList[Long] = this._execTimings.getOrElse(methodName, new CopyOnWriteArrayList())
 
-  def addExecTimings(methodName: String, time: Long): Vector[Long] = {
-    this._execTimings.compute(methodName, (_, oldValues) ⇒ Option(oldValues).map(_ :+ time).getOrElse(Vector(time)))
+  def addExecTimings(methodName: String, time: Long): JList[Long] = {
+    val update = this._execTimings.getOrElseUpdate(methodName, new CopyOnWriteArrayList())
+    update.add(time)
+    update
   }
 
   @Initializer
-  def init(): Unit = this._execTimings = new ConcurrentHashMap()
-
+  def init(): Unit = this._execTimings = TrieMap[String, JList[Long]]()
 }
 
 trait MonitorAware {
-  def execTimings(methodName: String): Vector[Long]
-  def execTimings: Map[String, Vector[Long]]
-  def addExecTimings(methodName: String, time: Long): Vector[Long]
+  def execTimings(methodName: String): JList[Long]
+  def execTimings: TrieMap[String, JList[Long]]
+  def addExecTimings(methodName: String, time: Long):JList[Long]
 }

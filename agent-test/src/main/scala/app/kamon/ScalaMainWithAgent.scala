@@ -20,7 +20,6 @@ import app.kamon.instrumentation.mixin.MonitorAware
 import org.slf4j.LoggerFactory
 
 object ScalaMainWithAgent {
-  import collection.JavaConverters._
   import scala.collection.breakOut
 
   private val logger = LoggerFactory.getLogger(ScalaMainWithAgent.getClass)
@@ -38,9 +37,11 @@ object ScalaMainWithAgent {
   }
 
   private def logMetrics(monitor: MonitorAware): Unit = {
+    import collection.JavaConverters._
+
     monitor.execTimings foreach {
       case (methodName, samples) ⇒
-        MetricsReporter.report(methodName, samples.map(sample ⇒ double2Double(sample.toDouble))(breakOut).toBuffer.asJava)
+        MetricsReporter.report(methodName, samples.asScala.map(sample ⇒ double2Double(sample.toDouble))(breakOut).toBuffer.asJava)
     }
   }
 

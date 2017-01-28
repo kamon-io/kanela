@@ -21,7 +21,7 @@ import javaslang.collection.List;
 import java.util.Map;
 
 public interface MonitorAware {
-    public List<Long> execTimings(String methodName);
-    public Map<String, List<Long>> execTimings();
-    public List<Long>addExecTimings(String methodName, long time);
+    List<Long> execTimings(String methodName);
+    Map<String, List<Long>> execTimings();
+    List<Long>addExecTimings(String methodName, long time);
 }
