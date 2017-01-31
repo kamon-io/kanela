@@ -37,6 +37,7 @@ object Dependencies {
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
+  val kamonAutowave     = "io.kamon"                 %% "kamon-autoweave"         % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % "2.4.14"
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"

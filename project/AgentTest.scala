@@ -21,6 +21,8 @@ import sbt.Tests.{ SubProcess, Group }
 
 object AgentTest {
 
+  import ExtractPropMonoids._
+
   lazy val settings: Seq[Setting[_]] = Seq(
     fork in Test         := true,
     getTestsAnnotatedWithAdditionalJVMParameters,
@@ -30,12 +32,13 @@ object AgentTest {
   protected def forkedJvmPerTest(testDefs: Seq[TestDefinition], jvmSettings: Seq[String], testsToFork: Seq[JVMDescription]): Seq[Group] = {
     val testsToForkByName: Map[String, JVMDescription] = testsToFork.map(t => t.className -> t).toMap
     val (forkedTests, otherTests) = testDefs.partition { testDef => testsToForkByName.contains(testDef.name) }
-    val otherTestsGroup = Group(name = "Single JVM tests", tests = otherTests, runPolicy = SubProcess(javaOptions = Seq.empty[String]))
+    val otherTestsGroup = Group(name = "Single JVM tests", tests = otherTests, runPolicy = SubProcess(ForkOptions(runJVMOptions = Seq.empty[String])))
     val forkedTestGroups = forkedTests map { test =>
+      println(s"******************** parameters: ${generateJVMParameters(jvmSettings, testsToForkByName(test.name)).mkString(" | ")}")
       Group(
         name = test.name,
         tests = Seq(test),
-        runPolicy = SubProcess(javaOptions = jvmSettings ++ testsToForkByName(test.name).extraParameters))
+        runPolicy = SubProcess(config = ForkOptions(runJVMOptions = generateJVMParameters(jvmSettings, testsToForkByName(test.name)))))
     }
     Seq(otherTestsGroup) ++ forkedTestGroups
   }
@@ -64,24 +67,55 @@ object AgentTest {
               }
             }
             .map { annotation: xsbti.api.Annotation =>
-              val params: Seq[String] = annotation
-                .arguments()
-                .find(_.name() == "parameters")
-                .map(annotationArgument => {
-                  // FIXME
-                  val sanitizedValue =
-                    if (annotationArgument.value().charAt(0) == '"')
-                      annotationArgument.value().substring(1, annotationArgument.value().length - 1)
-                    else
-                      annotationArgument.value()
-                  Seq(sanitizedValue)
-                }) // FIXME
-                .getOrElse(Seq.empty[String])
-              JVMDescription(definition.name(), params)
+              val params: Seq[String] = extractProperty[String](annotation)("parameters").toSeq.flatMap(_.split(" "))
+              val enableJavaAgent: Boolean = extractProperty[Boolean](annotation)("enableJavaAgent").getOrElse(true)
+              JVMDescription(definition.name(), params, enableJavaAgent)
             }
         }
     ).toSeq
   }
 
-  protected case class JVMDescription(className: String, extraParameters: Seq[String])
+  protected def extractProperty[T: AnnotationPropertyExtractor](annotation: xsbti.api.Annotation)(name: String): Option[T] = {
+    annotation
+      .arguments()
+      .find(_.name() == name)
+      .map(annotationArgument => {
+        implicitly[AnnotationPropertyExtractor[T]].extract(annotationArgument.value())
+      })
+  }
+
+  protected case class JVMDescription(className: String, extraParameters: Seq[String], enableJavaAgent: Boolean = true)
+
+  protected def generateJVMParameters(jvmSettings: Seq[String], jvmDescription: JVMDescription): Seq[String] = {
+    val jvmSettingsWithAgent = if (!jvmDescription.enableJavaAgent) jvmSettings.filterNot(param => param.startsWith("-javaagent:") && param.contains("io.kamon/agent"))
+                    else jvmSettings
+    jvmSettingsWithAgent ++ jvmDescription.extraParameters
+  }
+
+
+}
+
+object ExtractPropMonoids {
+
+  trait AnnotationPropertyExtractor[A] {
+    def extract(value: String): A
+  }
+
+  implicit val StringExtractPropMonoid: AnnotationPropertyExtractor[String] = new AnnotationPropertyExtractor[String] {
+    def extract(value: String): String = {
+      if (value.charAt(0) == '"')
+        value.substring(1, value.length - 1)
+      else
+        value
+    }
+  }
+
+  implicit val BooleanExtractPropMonoid: AnnotationPropertyExtractor[Boolean] = new AnnotationPropertyExtractor[Boolean] {
+    def extract(value: String): Boolean = {
+      if (value.charAt(0) == '"')
+        value.substring(1, value.length - 1).toBoolean
+      else
+        value.toBoolean
+    }
+  }
 }
