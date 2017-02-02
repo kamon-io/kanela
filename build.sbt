@@ -25,7 +25,8 @@ lazy val agent = (project in file("agent"))
   .dependsOn(agentApi)
   .enablePlugins(BuildInfoPlugin)
   .settings(moduleName := "agent")
-  .settings(buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent")
+  .settings(buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent",
+    buildInfoRenderer in Compile := JavaClassBuildInfoRender(buildInfoOptions.value, buildInfoPackage.value, buildInfoObject.value))
   .settings(javaCommonSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
