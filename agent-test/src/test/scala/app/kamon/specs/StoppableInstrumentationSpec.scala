@@ -18,15 +18,14 @@ package app.kamon.specs
 
 import app.kamon.cases.simple.{SpyAware, TestClass}
 import app.kamon.utils.AdditionalJVMParameters
-import kamon.agent.AgentEntryPoint
-import kamon.autoweave.loader.AgentLoader
+import kamon.agent.KamonAgent
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
 @AdditionalJVMParameters(enableJavaAgent = false,
   parameters =
-  "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation " +
+  "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
   "-Dkamon.agent.modules.test-module.stoppable=true")
 class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
@@ -36,9 +35,9 @@ class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAnd
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 
     // attach agent
-    AgentLoader.attachAgentToJVM(classOf[AgentEntryPoint])
+    AgentLoader.attachAgentToJVM(classOf[KamonAgent])
 
-    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }
 
 }

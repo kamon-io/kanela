@@ -26,19 +26,27 @@ object AgentTest {
   lazy val settings: Seq[Setting[_]] = Seq(
     fork in Test         := true,
     getTestsAnnotatedWithAdditionalJVMParameters,
-    testGrouping in Test <<= Def.task { forkedJvmPerTest((definedTests in Test).value, (javaOptions in Test).value, (testsAnnotatedWithAdditionalJVMParameters in Test).value) }
+    testGrouping in Test <<= Def.task {
+      forkedJvmPerTest(
+        (definedTests in Test).value,
+        (javaOptions in Test).value,
+        (testsAnnotatedWithAdditionalJVMParameters in Test).value,
+        (javaOptions in Test).value)
+    }
   )
 
-  protected def forkedJvmPerTest(testDefs: Seq[TestDefinition], jvmSettings: Seq[String], testsToFork: Seq[JVMDescription]): Seq[Group] = {
+  protected def forkedJvmPerTest(testDefs: Seq[TestDefinition],
+                                 jvmSettings: Seq[String],
+                                 testsToFork: Seq[JVMDescription],
+                                 javaOptions: Seq[String]): Seq[Group] = {
     val testsToForkByName: Map[String, JVMDescription] = testsToFork.map(t => t.className -> t).toMap
     val (forkedTests, otherTests) = testDefs.partition { testDef => testsToForkByName.contains(testDef.name) }
     val otherTestsGroup = Group(name = "Single JVM tests", tests = otherTests, runPolicy = SubProcess(ForkOptions(runJVMOptions = Seq.empty[String])))
     val forkedTestGroups = forkedTests map { test =>
-      println(s"******************** parameters: ${generateJVMParameters(jvmSettings, testsToForkByName(test.name)).mkString(" | ")}")
       Group(
         name = test.name,
         tests = Seq(test),
-        runPolicy = SubProcess(config = ForkOptions(runJVMOptions = generateJVMParameters(jvmSettings, testsToForkByName(test.name)))))
+        runPolicy = SubProcess(config = testsToForkByName(test.name).buildForkOptions(jvmSettings)))
     }
     Seq(otherTestsGroup) ++ forkedTestGroups
   }
@@ -84,14 +92,27 @@ object AgentTest {
       })
   }
 
-  protected case class JVMDescription(className: String, extraParameters: Seq[String], enableJavaAgent: Boolean = true)
+  protected case class JVMDescription(className: String,
+                                      extraParameters: Seq[String],
+                                      enableJavaAgent: Boolean = true) {
 
-  protected def generateJVMParameters(jvmSettings: Seq[String], jvmDescription: JVMDescription): Seq[String] = {
-    val jvmSettingsWithAgent = if (!jvmDescription.enableJavaAgent) jvmSettings.filterNot(param => param.startsWith("-javaagent:") && param.contains("io.kamon/agent"))
-                    else jvmSettings
-    jvmSettingsWithAgent ++ jvmDescription.extraParameters
+    def buildForkOptions(jvmSettings: Seq[String]): ForkOptions = {
+
+      val (jvmSettingsWithAgent: Seq[String], bootJarPaths: Seq[String]) = {
+        if (enableJavaAgent)
+          (jvmSettings, Seq.empty)
+        else
+          settingsWithoutAgent(jvmSettings)
+      }
+
+      val allParameters = jvmSettingsWithAgent ++ extraParameters
+      ForkOptions(runJVMOptions = allParameters, bootJars = bootJarPaths.map(new File(_)))
+    }
+
+    protected def settingsWithoutAgent(jvmSettings: Seq[String]): (Seq[String], Seq[String]) = {
+      jvmSettings.partition(param => !(param.startsWith("-javaagent:") && param.contains("io.kamon/agent")))
+    }
   }
-
 
 }
 

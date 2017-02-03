@@ -21,7 +21,8 @@ object Dependencies {
     Classpaths.typesafeSnapshots,
     "Typesafe Maven Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
     "Typesafe Maven Releases" at "http://repo.typesafe.com/typesafe/releases/",
-    "Kamon Snapshots" at "http://snapshots.kamon.io"
+    "Kamon Snapshots" at "http://snapshots.kamon.io",
+    Resolver.mavenLocal
   )
 
 
@@ -45,7 +46,7 @@ object Dependencies {
   val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
-  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
+  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-2"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 }
