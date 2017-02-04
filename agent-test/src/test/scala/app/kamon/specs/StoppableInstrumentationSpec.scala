@@ -26,18 +26,21 @@ import scala.collection.mutable.ListBuffer
 @AdditionalJVMParameters(enableJavaAgent = false,
   parameters =
   "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
-  "-Dkamon.agent.modules.test-module.stoppable=true")
+  "-Dkamon.agent.modules.test-module.stoppable=true " +
+  "-Dkamon.agent.show-banner=false")
 class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
+  "Kamon agent" should "be ale to attach in runtime and instrument the loaded classes" in {
     val testClass = new TestClass()
-
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 
     // attach agent
     AgentLoader.attachAgentToJVM(classOf[KamonAgent])
 
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
+  }
+
+  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
   }
 
 }
