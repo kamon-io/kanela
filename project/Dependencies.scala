@@ -21,8 +21,7 @@ object Dependencies {
     Classpaths.typesafeSnapshots,
     "Typesafe Maven Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
     "Typesafe Maven Releases" at "http://repo.typesafe.com/typesafe/releases/",
-    "Kamon Snapshots" at "http://snapshots.kamon.io",
-    Resolver.mavenLocal
+    "Kamon Snapshots" at "http://snapshots.kamon.io"
   )
 
 
