@@ -109,8 +109,9 @@ object AgentTest {
       ForkOptions(runJVMOptions = allParameters, bootJars = bootJarPaths.map(new File(_)))
     }
 
-    protected def settingsWithoutAgent(jvmSettings: Seq[String]): (Seq[String], Seq[String]) = {
-      jvmSettings.partition(param => !(param.startsWith("-javaagent:") && param.contains("io.kamon/agent")))
+    private def settingsWithoutAgent(jvmSettings: Seq[String]): (Seq[String], Seq[String]) = {
+      val (settings, agent) = jvmSettings.partition(param => !(param.startsWith("-javaagent:") && param.contains("io.kamon/agent")))
+      (settings, agent.headOption.map(_.replaceFirst("-javaagent:", "")).toSeq)
     }
   }
 
