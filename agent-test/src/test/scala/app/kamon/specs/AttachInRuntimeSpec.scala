@@ -19,8 +19,6 @@ package app.kamon.specs
 import app.kamon.cases.simple.TestClass
 import app.kamon.utils.AdditionalJVMParameters
 import kamon.agent.KamonAgent
-import kamon.agent.broker.EventBroker
-import kamon.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
@@ -28,21 +26,16 @@ import scala.collection.mutable.ListBuffer
 @AdditionalJVMParameters(enableJavaAgent = false,
   parameters =
     "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
-      "-Dkamon.agent.modules.test-module.stoppable=true " +
       "-Dkamon.agent.show-banner=false")
-class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
+  "Kamon agent" should "be able to attach in runtime and instrument the loaded classes" in {
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
+
     // attach agent
     AgentLoader.attachAgentToJVM(classOf[KamonAgent])
-    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
-    EventBroker.instance.publish(StopModules.instance)
-    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
-    EventBroker.instance.publish(RestartModules.instance)
+
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }
-
 }
-
