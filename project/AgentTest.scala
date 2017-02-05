@@ -17,70 +17,64 @@
 import sbt.Def.Setting
 import sbt._
 import Keys._
-import sbt.Tests.{ SubProcess, Group }
+import sbt.Tests.{Group, SubProcess}
+import xsbti.api.{Annotation, Definition, Projection}
 
 object AgentTest {
 
-  import ExtractPropMonoids._
+  import ExtractProps._
 
   lazy val settings: Seq[Setting[_]] = Seq(
-    fork in Test         := true,
-    getTestsAnnotatedWithAdditionalJVMParameters,
+    fork in Test := true,
+    forkTestSettings,
     testGrouping in Test <<= Def.task {
       forkedJvmPerTest(
         (definedTests in Test).value,
         (javaOptions in Test).value,
-        (testsAnnotatedWithAdditionalJVMParameters in Test).value,
-        (javaOptions in Test).value)
+        (forkTests in Test).value)
     }
   )
 
   protected def forkedJvmPerTest(testDefs: Seq[TestDefinition],
                                  jvmSettings: Seq[String],
-                                 testsToFork: Seq[JVMDescription],
-                                 javaOptions: Seq[String]): Seq[Group] = {
-    val testsToForkByName: Map[String, JVMDescription] = testsToFork.map(t => t.className -> t).toMap
-    val (forkedTests, otherTests) = testDefs.partition { testDef => testsToForkByName.contains(testDef.name) }
+                                 forkTestDescriptions: Seq[ForkTestDescription]): Seq[Group] = {
+    val forkTestDescriptionByName: Map[String, ForkTestDescription] = forkTestDescriptions.map(t => t.className -> t).toMap
+    val (forkTests, otherTests) = testDefs.partition { testDef => forkTestDescriptionByName.contains(testDef.name) }
     val otherTestsGroup = Group(name = "Single JVM tests", tests = otherTests, runPolicy = SubProcess(ForkOptions(runJVMOptions = Seq.empty[String])))
-    val forkedTestGroups = forkedTests map { test =>
+    val forkedTestGroups = forkTests map { test =>
       Group(
         name = test.name,
         tests = Seq(test),
-        runPolicy = SubProcess(config = testsToForkByName(test.name).buildForkOptions(jvmSettings)))
+        runPolicy = SubProcess(config = forkTestDescriptionByName(test.name).buildForkOptions(jvmSettings)))
     }
     Seq(otherTestsGroup) ++ forkedTestGroups
   }
 
-  protected def isAnnotatedWithAdditionalJVMParameters(definition: xsbti.api.Definition): Boolean = {
-    definition.annotations().exists { annotation: xsbti.api.Annotation =>
-      annotation.base match {
-        case proj: xsbti.api.Projection if proj.id() == "AdditionalJVMParameters" => true
-        case _ => false
-      }
-    }
-  }
+  protected lazy val forkTests: TaskKey[Seq[ForkTestDescription]] = taskKey[Seq[ForkTestDescription]]("Returns list of tests annotated with ForkTest")
 
-  protected lazy val testsAnnotatedWithAdditionalJVMParameters: TaskKey[Seq[JVMDescription]] = taskKey[Seq[JVMDescription]]("Returns list of tests annotated with AdditionalJVMParameters")
-
-  protected def getTestsAnnotatedWithAdditionalJVMParameters: Setting[Task[Seq[JVMDescription]]] = testsAnnotatedWithAdditionalJVMParameters in Test := {
+  protected def forkTestSettings: Setting[Task[Seq[ForkTestDescription]]] = forkTests in Test := {
     val analysis = (compile in Test).value
     analysis.apis.internal.values.flatMap(source =>
       source.api().definitions()
-        .foldLeft(Seq.empty[JVMDescription]) { case (acc, definition) =>
-          acc ++ definition.annotations()
-            .find { annotation: xsbti.api.Annotation =>
-              annotation.base match {
-                case proj: xsbti.api.Projection if proj.id() == "AdditionalJVMParameters" => true
-                case _ => false
-              }
-            }
-            .map { annotation: xsbti.api.Annotation =>
-              val params: Seq[String] = extractProperty[String](annotation)("parameters").toSeq.flatMap(_.split(" "))
-              val enableJavaAgent: Boolean = extractProperty[Boolean](annotation)("enableJavaAgent").getOrElse(true)
-              JVMDescription(definition.name(), params, enableJavaAgent)
-            }
+        .foldLeft(Seq.empty[ForkTestDescription]) { case (acc, definition) =>
+          acc ++ forkTestsDescription(definition)
         }
     ).toSeq
+  }
+
+  protected def forkTestsDescription(definition: Definition): Option[ForkTestDescription] = {
+    definition.annotations()
+      .find { annotation: Annotation =>
+        annotation.base match {
+          case proj: Projection if proj.id() == "ForkTest" => true
+          case _ => false
+        }
+      }
+      .map { annotation: Annotation =>
+        val params: Seq[String] = extractProperty[String](annotation)("extraJvmOptions").toSeq.flatMap(_.split(" "))
+        val attachKamonAgent: Boolean = extractProperty[Boolean](annotation)("attachKamonAgent").getOrElse(true)
+        ForkTestDescription(definition.name(), params, attachKamonAgent)
+      }
   }
 
   protected def extractProperty[T: AnnotationPropertyExtractor](annotation: xsbti.api.Annotation)(name: String): Option[T] = {
@@ -92,24 +86,24 @@ object AgentTest {
       })
   }
 
-  protected case class JVMDescription(className: String,
-                                      extraParameters: Seq[String],
-                                      enableJavaAgent: Boolean = true) {
+  protected case class ForkTestDescription(className: String,
+                                           extraJvmOptions: Seq[String],
+                                           attachKamonAgent: Boolean = true) {
 
     def buildForkOptions(jvmSettings: Seq[String]): ForkOptions = {
 
       val (jvmSettingsWithAgent: Seq[String], bootJarPaths: Seq[String]) = {
-        if (enableJavaAgent)
+        if (attachKamonAgent)
           (jvmSettings, Seq.empty)
         else
-          settingsWithoutAgent(jvmSettings)
+          settingsExcludingAgent(jvmSettings)
       }
 
-      val allParameters = jvmSettingsWithAgent ++ extraParameters
+      val allParameters = jvmSettingsWithAgent ++ extraJvmOptions
       ForkOptions(runJVMOptions = allParameters, bootJars = bootJarPaths.map(new File(_)))
     }
 
-    private def settingsWithoutAgent(jvmSettings: Seq[String]): (Seq[String], Seq[String]) = {
+    private def settingsExcludingAgent(jvmSettings: Seq[String]): (Seq[String], Seq[String]) = {
       val (settings, agent) = jvmSettings.partition(param => !(param.startsWith("-javaagent:") && param.contains("io.kamon/agent")))
       (settings, agent.headOption.map(_.replaceFirst("-javaagent:", "")).toSeq)
     }
@@ -117,13 +111,13 @@ object AgentTest {
 
 }
 
-object ExtractPropMonoids {
+object ExtractProps {
 
   trait AnnotationPropertyExtractor[A] {
     def extract(value: String): A
   }
 
-  implicit val StringExtractPropMonoid: AnnotationPropertyExtractor[String] = new AnnotationPropertyExtractor[String] {
+  implicit val StringExtractProp: AnnotationPropertyExtractor[String] = new AnnotationPropertyExtractor[String] {
     def extract(value: String): String = {
       if (value.charAt(0) == '"')
         value.substring(1, value.length - 1)
@@ -132,7 +126,7 @@ object ExtractPropMonoids {
     }
   }
 
-  implicit val BooleanExtractPropMonoid: AnnotationPropertyExtractor[Boolean] = new AnnotationPropertyExtractor[Boolean] {
+  implicit val BooleanExtractProp: AnnotationPropertyExtractor[Boolean] = new AnnotationPropertyExtractor[Boolean] {
     def extract(value: String): Boolean = {
       if (value.charAt(0) == '"')
         value.substring(1, value.length - 1).toBoolean

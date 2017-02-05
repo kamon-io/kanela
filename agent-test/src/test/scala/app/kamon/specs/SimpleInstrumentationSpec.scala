@@ -16,13 +16,13 @@
 
 package app.kamon.specs
 
-import app.kamon.cases.simple.{ SpyAware, TestClass }
-import app.kamon.utils.AdditionalJVMParameters
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
+import app.kamon.cases.simple.{SpyAware, TestClass}
+import app.kamon.utils.ForkTest
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
-@AdditionalJVMParameters(parameters = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation")
+@ForkTest(extraJvmOptions = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation")
 class SimpleInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {

@@ -24,7 +24,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Target({TYPE})
-public @interface AdditionalJVMParameters {
-    String parameters() default "";
-    boolean enableJavaAgent() default true;
+public @interface ForkTest {
+    String extraJvmOptions() default "";
+    boolean attachKamonAgent() default true;
 }

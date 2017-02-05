@@ -17,14 +17,15 @@
 package app.kamon.specs
 
 import app.kamon.cases.simple.TestClass
-import app.kamon.utils.AdditionalJVMParameters
+import app.kamon.utils.ForkTest
 import kamon.agent.KamonAgent
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
-@AdditionalJVMParameters(enableJavaAgent = false,
-  parameters =
+@ForkTest(
+  attachKamonAgent = false,
+  extraJvmOptions =
     "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
       "-Dkamon.agent.show-banner=false")
 class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {

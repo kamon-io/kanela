@@ -16,12 +16,12 @@
 
 package app.kamon.specs
 
-import app.kamon.cases.multimixins.MixinAware.{ MixinAware1, MixinAware2, MixinAware3 }
+import app.kamon.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
 import app.kamon.cases.multimixins.WithMultiMixinsClass
-import app.kamon.utils.AdditionalJVMParameters
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
+import app.kamon.utils.ForkTest
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-@AdditionalJVMParameters(parameters = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation")
+@ForkTest(extraJvmOptions = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation")
 class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "Multiple Mixins over a single subType" should "introduce all types appropriately" in {
