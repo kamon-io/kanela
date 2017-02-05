@@ -15,6 +15,7 @@
  */
 
 import Dependencies._
+import sbt.Tests._
 
 lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
@@ -95,6 +96,26 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
+lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
+//  .dependsOn(kamonScala % "test->test")
+  .enablePlugins(JavaAgent)
+//  .settings(agentSettings)
+//  .settings(basicSettings: _*)
+  .settings(Seq(
+    moduleName := "kamon-play-2.5",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8"),
+    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
+  .settings(aspectJSettings: _*)
+  .settings(libraryDependencies ++=
+    compileScope(kamonCore, kamonScalaAJW, play25, playWS25) ++
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent, aspectJ) ++
+    testScope(playTest25))
+  .settings(Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly"))
+//  .settings(excludeScalaLib: _*)
+//  .settings(noPublishing: _*)
+//  .settings(notAggregateInAssembly: _*)
+
 lazy val javaCommonSettings = Seq(
   crossPaths := false,
   autoScalaLibrary := false,
@@ -131,3 +152,10 @@ lazy val agentTestSettings = AgentTest.settings
 
 lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
 
+def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
+  tests map { test =>
+    Group(
+      name = test.name,
+      tests = Seq(test),
+      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
+  }

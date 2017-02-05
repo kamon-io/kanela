@@ -24,6 +24,7 @@ object Dependencies {
     "Kamon Snapshots" at "http://snapshots.kamon.io"
   )
 
+  val play25Version     = "2.5.4"
 
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
@@ -37,6 +38,7 @@ object Dependencies {
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
+  val kamonScalaAJW     = "io.kamon"                 %%  "kamon-scala"            % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % "2.4.14"
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
@@ -45,6 +47,11 @@ object Dependencies {
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
+
+  //play 2.5.x
+  val play25            = "com.typesafe.play"         %%  "play"                  % play25Version
+  val playWS25          = "com.typesafe.play"         %%  "play-ws"               % play25Version
+  val playTest25        = "org.scalatestplus.play"    %%  "scalatestplus-play"    % "1.5.0"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 }
