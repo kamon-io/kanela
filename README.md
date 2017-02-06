@@ -1,4 +1,6 @@
 # Kamon Agent
+<img align="right" src="https://rawgit.com/kamon-io/Kamon/master/kamon-logo.svg" height="150px" style="padding-left: 20px"/>
+[![Build Status](https://travis-ci.org/kamon-io/Kamon.svg?branch=master)](https://travis-ci.org/kamon-io/Kamon)
 
 The `kamon-agent` is developed in order to provide a simple way to instrument an application running on the JVM and
 introduce kamon features such as, creation of traces, metric measures, trace propagation, and so on.
@@ -106,6 +108,16 @@ kamon.agent {
     }
   }
 }
+```
+
+And you are done!
+
+Next, just run your app with the `kamon-agent` as parameter:
+
+```
+java \
+  -javaagent:~/.ivy2/local/io.kamon/agent/0.0.1/jars/agent-assembly.jar \
+  -jar /path/to/footpath-routing-api.jar
 ```
 
 Some other configuration that you can define is indicated in the agent [`reference.conf`](https://github.com/kamon-io/kamon-agent/blob/master/agent/src/main/resources/reference.conf)
