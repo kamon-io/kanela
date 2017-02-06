@@ -1,11 +1,11 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2015 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -18,7 +18,7 @@ package kamon.play
 
 import akka.actor._
 import kamon.Kamon
-import kamon.play.instrumentation.HttpClientMetrics
+import kamon.play.instrumentation.agent.HttpClientMetrics
 import kamon.util.http.HttpServerMetrics
 import kamon.util.logger.LazyLogger
 import play.api.libs.ws.WSRequest

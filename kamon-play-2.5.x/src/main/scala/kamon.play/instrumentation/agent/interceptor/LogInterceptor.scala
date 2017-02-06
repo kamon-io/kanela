@@ -14,16 +14,19 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent.interceptor
 
-import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import java.util.concurrent.Callable
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.trace.logging.MdcKeysSupport
+
+class LogInterceptor
+object LogInterceptor extends MdcKeysSupport {
+
+  @RuntimeType
+  def aroundLog(@SuperCall callable: Callable[Any]): Any = withMdc {
+    callable.call()
   }
-  lazy val parser = action.parser
+
 }

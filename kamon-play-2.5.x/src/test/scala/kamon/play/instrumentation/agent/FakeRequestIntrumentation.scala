@@ -14,16 +14,16 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent
 
-import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.agent.mixin.InjectTraceContext
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
+class FakeRequestIntrumentation extends KamonInstrumentation {
+
+  forSubtypeOf("play.api.test.FakeRequest") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
   }
-  lazy val parser = action.parser
 }

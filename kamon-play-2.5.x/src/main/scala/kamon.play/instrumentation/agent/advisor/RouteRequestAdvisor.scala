@@ -14,16 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent.advisor
 
+import kamon.Kamon.tracer
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, OnMethodEnter}
+import kamon.play.PlayExtension
 import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import play.api.mvc.RequestHeader
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
+/**
+  * Advisor for play.api.http.DefaultHttpRequestHandler::routeRequest
+  */
+class RouteRequestAdvisor
+object RouteRequestAdvisor {
+
+  @OnMethodEnter
+  def onEnter(@Argument(0) requestHeader: RequestHeader): Unit = {
+    val token = if (PlayExtension.includeTraceToken) {
+      requestHeader.headers.get(PlayExtension.traceTokenHeaderName)
+    } else None
+
+    Tracer.setCurrentContext(tracer.newContext("UnnamedTrace", token))
   }
-  lazy val parser = action.parser
+
 }

@@ -97,6 +97,7 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(notAggregateInAssembly: _*)
 
 lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
+  .dependsOn(agentScala)
 //  .dependsOn(kamonScala % "test->test")
   .enablePlugins(JavaAgent)
   .settings(agentSettings)

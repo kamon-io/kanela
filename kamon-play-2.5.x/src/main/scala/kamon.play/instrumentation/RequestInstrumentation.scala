@@ -1,10 +1,11 @@
-/* =========================================================================================
- * Copyright © 2013-2015 the kamon project <http://kamon.io/>
+/*
+ * =========================================================================================
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -15,16 +16,13 @@
 
 package kamon.play.instrumentation
 
-import akka.util.ByteString
 import kamon.Kamon.tracer
-import kamon.play.{ KamonFilter, PlayExtension }
+import kamon.play.{KamonFilter, PlayExtension}
 import kamon.trace._
-import kamon.util.SameThreadExecutionContext
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation._
-import play.api.libs.streams.Accumulator
 import play.api.mvc.Results._
-import play.api.mvc.{ EssentialFilter, _ }
+import play.api.mvc.{EssentialFilter, _}
 
 @Aspect
 class RequestInstrumentation {

@@ -2,7 +2,7 @@
 
 <aspectj>
   <aspects>
-    <aspect name="kamon.play.instrumentation.FakeRequestIntrumentation"/>
+    <!--<aspect name="kamon.play.instrumentation.FakeRequestIntrumentation"/>-->
   </aspects>
 
   <weaver options="-warn:none">

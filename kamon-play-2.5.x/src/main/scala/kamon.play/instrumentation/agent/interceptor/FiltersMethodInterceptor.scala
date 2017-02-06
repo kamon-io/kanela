@@ -14,16 +14,24 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent.interceptor
 
-import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import java.util.concurrent.Callable
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.play.KamonFilter
+import play.api.mvc.EssentialFilter
+
+class FiltersMethodInterceptor
+object FiltersMethodInterceptor {
+
+  private lazy val filter: EssentialFilter = new KamonFilter()
+
+  @RuntimeType
+  def prepareStatement(@SuperCall callable: Callable[Seq[EssentialFilter]]): Any = {
+    callable.call() match {
+      case Nil => Nil
+      case xs => xs :+ filter
+    }
   }
-  lazy val parser = action.parser
 }

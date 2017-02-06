@@ -14,16 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent
 
-import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.agent.interceptor.LogInterceptor
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
+class JavaLoggerInstrumentation extends KamonInstrumentation {
+
+  val LogMethod: Junction[MethodDescription] = {
+    named("info")
+      .or(named("debug")
+        .or(named("warn")
+          .or(named("error")
+            .or(named("trace"))))) // FIXME fix this ugly code
   }
-  lazy val parser = action.parser
+
+  forSubtypeOf("play.Logger") { builder =>
+    builder
+      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .build()
+  }
 }

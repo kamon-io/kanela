@@ -14,16 +14,15 @@
  * =========================================================================================
  */
 
-package kamon.play.action
+package kamon.play.instrumentation.agent.mixin
 
-import kamon.trace.Tracer
-import play.api.mvc._
-import scala.concurrent.Future
+import kamon.agent.api.instrumentation.Initializer
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
-case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
-  def apply(request: Request[A]): Future[Result] = {
-    Tracer.currentContext.rename(name)
-    action(request)
-  }
-  lazy val parser = action.parser
+class InjectTraceContext extends TraceContextAware {
+
+  @transient var traceContext: TraceContext = _
+
+  @Initializer
+  def _initializer(): Unit = this.traceContext = Tracer.currentContext
 }
