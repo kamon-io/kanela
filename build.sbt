@@ -16,9 +16,7 @@
 
 import Dependencies._
 
-lazy val rootFile = file(".")
-
-lazy val root = (project in rootFile)
+lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
   .settings(noPublishing: _*)
   .aggregate(agent, agentApi)

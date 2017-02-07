@@ -3,13 +3,6 @@
 # Adapted from https://github.com/paulp/psp-std/blob/master/bin/test
 
 runTests () {
-
-  # temporary to play in travis !
-  #sbt "project agent" +publishLocal && sbt "project agentApi" +publishLocal \
-  #  && sbt "project agentScala" +publishLocal && sbt "project kamonScala" +test \
-  #  && sbt "project kamonServlet" +test \
-  #  || exit 1
-
   # TODO: include `sbt "project kamonScala" +test && sbt "project kamonServlet" +test &&`
   sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal \
     && sbt "project agentScala" +publishLocal &&  sbt "project agentTest" +test \
