@@ -16,7 +16,9 @@
 
 import Dependencies._
 
-lazy val root = (project in file("."))
+lazy val rootFile = file(".")
+
+lazy val root = (project in rootFile)
   .settings(moduleName := "kamon-agent")
   .settings(noPublishing: _*)
   .aggregate(agent, agentApi)
@@ -30,16 +32,18 @@ lazy val agent = (project in file("agent"))
   .settings(javaCommonSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy, expirinMap, scala) ++
+    compileScope(tinylog, javaslang, typesafeConfig, expirinMap, scala) ++
     testScope(scalatest, mockito) ++
     providedScope(lombok))
+  .settings(unmanagedJarSettings)
   .settings(excludeScalaLib: _*)
 
 lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
   .settings(javaCommonSettings: _*)
   .settings(libraryDependencies ++=
-    providedScope(javaslang, typesafeConfig, slf4jApi, bytebuddy))
+    providedScope(javaslang, typesafeConfig, slf4jApi))
+  .settings(unmanagedJarSettings)
   .settings(excludeScalaLib: _*)
   .settings(notAggregateInAssembly: _*)
 
