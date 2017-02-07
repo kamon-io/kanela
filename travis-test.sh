@@ -3,10 +3,8 @@
 # Adapted from https://github.com/paulp/psp-std/blob/master/bin/test
 
 runTests () {
-  sbt "project agent" ++2.11.8 test && sbt "project agent" ++2.12.1 test && \
-#    sbt "project agentTest" +test && \
-#    sbt "project kamonScala" +test && sbt "project kamonServlet" +test \
-    || exit 1
+  sbt "project agent" ++2.11.8 test && sbt "project agent" ++2.12.1 test || exit 1
+#    sbt "project agentTest" +test && sbt "project kamonScala" +test && sbt "project kamonServlet" +test
   echo "[info] $(date) - finished sbt test"
 }
 
