@@ -23,7 +23,6 @@ import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
 import javaslang.collection.{ List ⇒ JList }
-import javaslang.control.{ Option ⇒ JOption }
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
