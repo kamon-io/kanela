@@ -16,13 +16,15 @@
 
 package kamon.agent
 
-import java.lang.instrument.Instrumentation
+import java.lang.instrument.{ClassFileTransformer, Instrumentation}
 
 import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
-import javaslang.collection.{ List ⇒ JList }
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import javaslang.collection.{List ⇒ JList}
+
+import org.mockito.ArgumentMatchers._
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
@@ -84,6 +86,6 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     InstrumentationLoader.load(instrumentationMock, agentConfiguration)
 
-    verify(instrumentationMock, times(1))
+    verify(instrumentationMock, times(1)).addTransformer(any(classOf[ClassFileTransformer]), anyBoolean())
   }
 }
