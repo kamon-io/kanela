@@ -10,9 +10,9 @@ runTests () {
   #  && sbt "project kamonServlet" +test \
   #  || exit 1
 
-  # Lack thi: `sbt "project kamonScala" +test &&`
-  sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal && sbt "project agentScala" +publishLocal \
-    &&  sbt "project agentTest" +test && sbt "project kamonServlet" +test \
+  # TODO: include `sbt "project kamonScala" +test && sbt "project kamonServlet" +test &&`
+  sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal \
+    && sbt "project agentScala" +publishLocal &&  sbt "project agentTest" +test \
     || exit 1
   echo "[info] $(date) - finished sbt test"
 }
