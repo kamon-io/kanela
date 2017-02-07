@@ -5,14 +5,15 @@
 runTests () {
 
   # temporary to play in travis !
-  sbt "project agent" +publishLocal && sbt "project agentApi" +publishLocal \
-    && sbt "project agentScala" +publishLocal && sbt "project kamonScala" +test \
-    && sbt "project kamonServlet" +test \
-    || exit 1
-
-  #sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal && sbt "project agentScala" +publishLocal \
-  #  &&  sbt "project agentTest" +test && sbt "project kamonScala" +test && sbt "project kamonServlet" +test \
+  #sbt "project agent" +publishLocal && sbt "project agentApi" +publishLocal \
+  #  && sbt "project agentScala" +publishLocal && sbt "project kamonScala" +test \
+  #  && sbt "project kamonServlet" +test \
   #  || exit 1
+
+  # Lack thi: `sbt "project kamonScala" +test &&`
+  sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal && sbt "project agentScala" +publishLocal \
+    &&  sbt "project agentTest" +test && sbt "project kamonServlet" +test \
+    || exit 1
   echo "[info] $(date) - finished sbt test"
 }
 
