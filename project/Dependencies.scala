@@ -13,7 +13,7 @@
  * =========================================================================================
  */
 
-import sbt.Keys.{Classpath, unmanagedJars}
+import sbt.Keys._
 import sbt._
 
 object Dependencies {
@@ -53,5 +53,11 @@ object Dependencies {
   private def fetchUnmanagedJars : Keys.Classpath = {
     val baseDirectories = file(".").getAbsoluteFile / "libs"
     (baseDirectories ** "*.jar").classpath
+  }
+
+  lazy val scalaDependency = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
+
+  private def resolveScalaDependency(version: String) = {
+    "org.scala-lang" % "scala-library" % version
   }
 }
