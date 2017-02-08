@@ -17,6 +17,9 @@ package project
 
 import sbt._
 
+/**
+  * A temporary workaround until sbt/sbt-assembly introduce PR #233 that fix #200 (Thank to @damdev)
+  */
 object PluginDef extends Build {
   override lazy val projects = Seq(root)
   lazy val root = Project("plugins", file(".")) dependsOn( assemblyPlugin )
