@@ -25,21 +25,25 @@ lazy val agent = (project in file("agent"))
   .dependsOn(agentApi)
   .enablePlugins(BuildInfoPlugin)
   .settings(moduleName := "agent")
+  .settings(fork in Test := true)
   .settings(buildInfoKeys := Seq(name, version, scalaVersion, sbtVersion), buildInfoPackage := "kamon.agent",
     buildInfoRenderer in Compile := JavaClassBuildInfoRender(buildInfoOptions.value, buildInfoPackage.value, buildInfoObject.value))
   .settings(javaCommonSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(tinylog, javaslang, typesafeConfig, bytebuddy, expirinMap, scala) ++
+    compileScope(tinylog, javaslang, typesafeConfig, expirinMap) ++
     testScope(scalatest, mockito) ++
     providedScope(lombok))
+  .settings(scalaDependency)
+  .settings(unmanagedJarSettings)
   .settings(excludeScalaLib: _*)
 
 lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
   .settings(javaCommonSettings: _*)
   .settings(libraryDependencies ++=
-    providedScope(javaslang, typesafeConfig, slf4jApi, bytebuddy))
+    providedScope(javaslang, typesafeConfig, slf4jApi))
+  .settings(unmanagedJarSettings)
   .settings(excludeScalaLib: _*)
   .settings(notAggregateInAssembly: _*)
 

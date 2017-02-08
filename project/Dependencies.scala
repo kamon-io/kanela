@@ -13,6 +13,7 @@
  * =========================================================================================
  */
 
+import sbt.Keys._
 import sbt._
 
 object Dependencies {
@@ -28,7 +29,6 @@ object Dependencies {
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
   val javaslang         = "io.javaslang"              % "javaslang"               % "2.0.5"
-  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.6.4"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
   val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
@@ -47,4 +47,17 @@ object Dependencies {
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
+
+  lazy val unmanagedJarSettings: Setting[Task[Classpath]] = (unmanagedJars in Compile) := fetchUnmanagedJars
+
+  private def fetchUnmanagedJars : Keys.Classpath = {
+    val baseDirectories = file(".").getAbsoluteFile / "libs"
+    (baseDirectories ** "*.jar").classpath
+  }
+
+  lazy val scalaDependency = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
+
+  private def resolveScalaDependency(version: String) = {
+    "org.scala-lang" % "scala-library" % version
+  }
 }
