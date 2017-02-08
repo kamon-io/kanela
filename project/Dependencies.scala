@@ -45,18 +45,17 @@ object Dependencies {
   val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
-  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-2"
+  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-3"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 
   lazy val unmanagedJarSettings: Setting[Task[Classpath]] = (unmanagedJars in Compile) := fetchUnmanagedJars
+  lazy val scalaDependency: Setting[Seq[ModuleID]] = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
 
   private def fetchUnmanagedJars : Keys.Classpath = {
     val baseDirectories = file(".").getAbsoluteFile / "libs"
     (baseDirectories ** "*.jar").classpath
   }
-
-  lazy val scalaDependency = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
 
   private def resolveScalaDependency(version: String) = {
     "org.scala-lang" % "scala-library" % version
