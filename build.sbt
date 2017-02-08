@@ -67,6 +67,7 @@ lazy val agentTest = (project in file("agent-test"))
     compileScope(kamonAutowave, slf4jApi, logbackCore, logbackClassic, javaslang) ++
       testScope(scalatest, mockito) ++
     providedScope(lombok, typesafeConfig, kamonAgent))
+  .settings((javaOptions in Test) ++= Seq("-Xcheck:jni"))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
