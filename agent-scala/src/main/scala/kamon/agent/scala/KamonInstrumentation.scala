@@ -29,12 +29,18 @@ import kamon.agent.libs.net.bytebuddy.utility.JavaModule
 
 trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrumentation {
 
-  implicit def toJavaSupplier[A](f: ⇒ A): JSupplier[A] = () ⇒ f
-  implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] = (a: A) ⇒ f(a)
-
   private implicit def toJavaFunction2[A, B, C](f: (A, B) ⇒ C): JFunction2[A, B, C] = (a: A, b: B) ⇒ f(a, b)
-  private implicit def toJavaFunction4[A, B, C, D, E](f: (A, B, C, D) ⇒ E): JFunction4[A, B, C, D, E] = (a: A, b: B, c: C, d: D) ⇒ f(a, b, c, d)
-  private implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] = (a: A, b: B) ⇒ f(a, b)
+
+  private implicit def toJavaFunction4[A, B, C, D, E](f: (A, B, C, D) ⇒ E): JFunction4[A, B, C, D, E] =
+    (a: A, b: B, c: C, d: D) ⇒ f(a, b, c, d)
+
+  private implicit def toJavaBiFunction[A, B, C](f: (A, B) ⇒ C): JBifunction[A, B, C] =
+    new JBifunction[A, B, C]() { def apply(t: A, u: B): C = f(t, u) }
+
+  implicit def toJavaSupplier[A](f: ⇒ A): JSupplier[A] = new JSupplier[A]() {  def get: A = f }
+
+  implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] =
+    new JFunction1[A, B]() { def apply(t1: A): B = f(t1) }
 
   def forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
     super.forSubtypeOf(name, builder)
