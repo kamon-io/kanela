@@ -12,4 +12,4 @@ before_script:
 after_failure:
   - cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log
   - jstack $(cat app.pid)
-sudo: true
+sudo: false

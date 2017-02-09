@@ -101,6 +101,7 @@ object AgentLoader {
 
   private def registerPid(pid: String) = {
     import java.io._
+    println(s"......................... Creating app.pid with value $pid")
     val pw = new PrintWriter(new File("/home/travis/app.pid"))
     pw.write(pid)
     pw.close()
@@ -114,17 +115,17 @@ object AgentLoader {
    */
   private def attachToRunningJVM(agent: Class[_], resources: Seq[Class[_]]): Unit = {
     Try {
-      println(s"***************** Trying to attach: ${agent.getSimpleName}")
+      println(s"......................... Trying to attach: ${agent.getSimpleName}")
       AttachmentProviders.resolve() match {
         case Some(virtualMachine) ⇒
-          println(s"***************** Virtual Machine resolved: $virtualMachine")
+          println(s"......................... Virtual Machine resolved: $virtualMachine")
           registerPid(getPidFromRuntimeMBean)
           val virtualMachineInstance = virtualMachine.getDeclaredMethod("attach", classOf[String]).invoke(null, getPidFromRuntimeMBean)
-          println(s"***************** invoked attach()")
+          println(s"......................... invoked attach()")
           virtualMachine.getDeclaredMethod("loadAgent", classOf[String], classOf[String]).invoke(virtualMachineInstance, generateAgentJar(agent, resources).getAbsolutePath, "")
-          println(s"***************** invoked loadAgent()")
+          println(s"......................... invoked loadAgent()")
           virtualMachine.getDeclaredMethod("detach").invoke(virtualMachineInstance)
-          println(s"***************** invoked detach()")
+          println(s"......................... invoked detach()")
         case None ⇒ throw new IllegalStateException("Cannot read the virtual machine type...") with NoStackTrace
       }
     } recover { case exc: Throwable =>
