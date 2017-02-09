@@ -6,10 +6,10 @@ scala:
 jdk:
    - oraclejdk8
 before_script:
-  - ulimit -c unlimited
   - ulimit -c -l
   - mkdir $TRAVIS_BUILD_DIR/tmp
   - export SBT_OPTS="-Djava.io.tmpdir=$TRAVIS_BUILD_DIR/tmp"
 after_failure:
-  "cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log"
-sudo: false
+  - cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log
+  - jstack $(cat app.pid)
+sudo: true
