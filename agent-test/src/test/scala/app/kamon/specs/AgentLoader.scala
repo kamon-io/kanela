@@ -23,7 +23,6 @@ import java.util.jar.{JarEntry, JarOutputStream, Manifest}
 
 import kamon.autoweave.loader.AttachmentProviders
 
-import scala.util._
 import scala.util.control.NoStackTrace
 
 
@@ -99,14 +98,6 @@ object AgentLoader {
 
   private def getClassLoader(clazz: Class[_]): ClassLoader = if (clazz.getClassLoader == null) ClassLoader.getSystemClassLoader() else clazz.getClassLoader
 
-  private def registerPid(pid: String) = {
-    import java.io._
-    println(s"......................... Creating app.pid with value $pid")
-    val pw = new PrintWriter(new File("/home/travis/app.pid"))
-    pw.write(pid)
-    pw.close()
-  }
-
   /**
    * Attach to the running JVM.
    *
@@ -114,22 +105,12 @@ object AgentLoader {
    * Returns the attached VirtualMachine
    */
   private def attachToRunningJVM(agent: Class[_], resources: Seq[Class[_]]): Unit = {
-    Try {
-      println(s"......................... Trying to attach: ${agent.getSimpleName}")
-      AttachmentProviders.resolve() match {
-        case Some(virtualMachine) ⇒
-          println(s"......................... Virtual Machine resolved: $virtualMachine")
-          registerPid(getPidFromRuntimeMBean)
-          val virtualMachineInstance = virtualMachine.getDeclaredMethod("attach", classOf[String]).invoke(null, getPidFromRuntimeMBean)
-          println(s"......................... invoked attach()")
-          virtualMachine.getDeclaredMethod("loadAgent", classOf[String], classOf[String]).invoke(virtualMachineInstance, generateAgentJar(agent, resources).getAbsolutePath, "")
-          println(s"......................... invoked loadAgent()")
-          virtualMachine.getDeclaredMethod("detach").invoke(virtualMachineInstance)
-          println(s"......................... invoked detach()")
-        case None ⇒ throw new IllegalStateException("Cannot read the virtual machine type...") with NoStackTrace
-      }
-    } recover { case exc: Throwable =>
-        exc.printStackTrace()
+    AttachmentProviders.resolve() match {
+      case Some(virtualMachine) ⇒
+        val virtualMachineInstance = virtualMachine.getDeclaredMethod("attach", classOf[String]).invoke(null, getPidFromRuntimeMBean)
+        virtualMachine.getDeclaredMethod("loadAgent", classOf[String], classOf[String]).invoke(virtualMachineInstance, generateAgentJar(agent, resources).getAbsolutePath, "")
+        virtualMachine.getDeclaredMethod("detach").invoke(virtualMachineInstance)
+      case None ⇒ throw new IllegalStateException("Cannot read the virtual machine type...") with NoStackTrace
     }
   }
 
