@@ -13,6 +13,7 @@
  * =========================================================================================
  */
 
+import sbt.Keys._
 import sbt._
 
 object Dependencies {
@@ -29,7 +30,6 @@ object Dependencies {
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
   val javaslang         = "io.javaslang"              % "javaslang"               % "2.0.5"
-  val bytebuddy         = "net.bytebuddy"             % "byte-buddy"              % "1.6.4"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
   val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
@@ -38,6 +38,7 @@ object Dependencies {
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
+  val kamonAutowave     = "io.kamon"                 %% "kamon-autoweave"         % "0.6.5"
   val kamonScalaAJW     = "io.kamon"                 %%  "kamon-scala"            % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % "2.4.14"
@@ -46,7 +47,7 @@ object Dependencies {
   val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
-  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
+  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-3"
 
   //play 2.5.x
   val play25            = "com.typesafe.play"         %%  "play"                  % play25Version
@@ -54,4 +55,16 @@ object Dependencies {
   val playTest25        = "org.scalatestplus.play"    %%  "scalatestplus-play"    % "1.5.0"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
+
+  lazy val unmanagedJarSettings: Setting[Task[Classpath]] = (unmanagedJars in Compile) := fetchUnmanagedJars
+  lazy val scalaDependency: Setting[Seq[ModuleID]] = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
+
+  private def fetchUnmanagedJars : Keys.Classpath = {
+    val baseDirectories = file(".").getAbsoluteFile / "libs"
+    (baseDirectories ** "*.jar").classpath
+  }
+
+  private def resolveScalaDependency(version: String) = {
+    "org.scala-lang" % "scala-library" % version
+  }
 }

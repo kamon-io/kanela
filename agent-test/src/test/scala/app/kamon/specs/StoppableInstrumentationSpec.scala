@@ -16,28 +16,32 @@
 
 package app.kamon.specs
 
-import app.kamon.cases.simple.{SpyAware, TestClass}
+import app.kamon.cases.simple.TestClass
 import app.kamon.utils.ForkTest
+import kamon.agent.KamonAgent
+import kamon.agent.broker.EventBroker
+import kamon.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
-@ForkTest(extraJvmOptions = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation")
-class SimpleInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+@ForkTest(attachKamonAgent = false,
+  extraJvmOptions =
+    "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
+      "-Dkamon.agent.modules.test-module.stoppable=true " +
+      "-Dkamon.agent.show-banner=false")
+class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {
+  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
     val testClass = new TestClass()
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
+    // attach agent
+    AgentLoader.attachAgentToJVM(classOf[KamonAgent])
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
-  }
-
-  "A Mixin" should "introduce a Type to a simple class" in {
-    new TestClass().asInstanceOf[SpyAware]
-  }
-
-  it should "be able to initialize any value from a @Initializer method" in {
-    val testClass = new TestClass()
-    testClass.addValue(ListBuffer())
-    testClass.asInstanceOf[SpyAware].tracks shouldBe ListBuffer("init", "enter", "exit")
+    EventBroker.instance.publish(StopModules.instance)
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
+    EventBroker.instance.publish(RestartModules.instance)
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }
 
 }

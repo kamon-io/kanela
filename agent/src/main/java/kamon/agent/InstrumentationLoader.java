@@ -51,7 +51,11 @@ public class InstrumentationLoader {
 
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName, AgentConfiguration configuration) {
         if(configuration.isDebugMode()) LazyLogger.infoColor(() -> format("Loading {0} ", instrumentationClassName));
-        return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, InstrumentationLoader.class.getClassLoader()).newInstance())
+        return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
+    }
+
+    private static ClassLoader getClassLoader(Class<?> clazz) {
+      return clazz.getClassLoader() == null ? ClassLoader.getSystemClassLoader() : clazz.getClassLoader();
     }
 }

@@ -16,19 +16,27 @@
 
 package app.kamon.specs
 
-import app.kamon.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
-import app.kamon.cases.multimixins.WithMultiMixinsClass
+import app.kamon.cases.simple.TestClass
 import app.kamon.utils.ForkTest
+import kamon.agent.KamonAgent
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-@ForkTest(extraJvmOptions = "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation")
-class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+import scala.collection.mutable.ListBuffer
 
-  "Multiple Mixins over a single subType" should "introduce all types appropriately" in {
-    val mixinsClass = new WithMultiMixinsClass()
-    mixinsClass.process shouldBe "Hi"
-    mixinsClass.isInstanceOf[MixinAware1] shouldBe true
-    mixinsClass.isInstanceOf[MixinAware2] shouldBe true
-    mixinsClass.isInstanceOf[MixinAware3] shouldBe true
+@ForkTest(
+  attachKamonAgent = false,
+  extraJvmOptions =
+    "-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation " +
+      "-Dkamon.agent.show-banner=false")
+class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+
+  "Kamon agent" should "be able to attach in runtime and instrument the loaded classes" in {
+    val testClass = new TestClass()
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
+
+    // attach agent
+    AgentLoader.attachAgentToJVM(classOf[KamonAgent])
+
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }
 }

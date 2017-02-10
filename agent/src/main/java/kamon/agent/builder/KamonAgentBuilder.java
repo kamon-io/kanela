@@ -31,7 +31,6 @@ import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
 import static kamon.agent.util.matcher.ClassLoaderMatcher.isReflectionClassLoader;
@@ -44,7 +43,7 @@ abstract class KamonAgentBuilder {
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
-    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation);
+    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentModuleDescription moduleDescription);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
     AgentBuilder from(AgentConfiguration config, AgentModuleDescription moduleDescription) {
@@ -57,7 +56,8 @@ abstract class KamonAgentBuilder {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
             LazyLogger.infoColor(() -> "Retransformation Strategy was activated.");
             agentBuilder = agentBuilder.disableClassFormatChanges()
-                                       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+                                       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                                       .withResubmission(PeriodicResubmitter.instance());
         }
 
         return agentBuilder
@@ -67,8 +67,8 @@ abstract class KamonAgentBuilder {
                         .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
-    AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
-            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription, instrumentation), (agent, typeTransformation) -> {
+    AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription) {
+            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription), (agent, typeTransformation) -> {
                 val transformers = new ArrayList<AgentBuilder.Transformer>();
                 transformers.addAll(typeTransformation.getMixins().toJavaList());
                 transformers.addAll(typeTransformation.getTransformations().toJavaList());

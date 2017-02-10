@@ -19,7 +19,6 @@ package kamon.agent.builder;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
-import kamon.agent.api.instrumentation.listener.PeriodicResubmitterListener;
 import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.EqualsAndHashCode;
@@ -27,7 +26,6 @@ import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
 @Value(staticConstructor = "instance")
@@ -36,10 +34,9 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     String name;
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
         return from(config, moduleDescription)
                 .with(DefaultInstrumentationListener.instance())
-                .with(PeriodicResubmitterListener.instance(instrumentation))
                 .with(additionalListeners(config));
     }
 
