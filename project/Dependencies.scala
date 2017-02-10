@@ -37,6 +37,7 @@ object Dependencies {
 
   val servletApi        = "javax.servlet"             % "javax.servlet-api"       % "3.1.0"
   val kamonCore         = "io.kamon"                 %% "kamon-core"              % "0.6.5"
+  val kamonAutowave     = "io.kamon"                 %% "kamon-autoweave"         % "0.6.5"
   val kamonTestkit      = "io.kamon"                 %% "kamon-testkit"           % "0.6.5"
   val akkaTestKit       = "com.typesafe.akka"        %% "akka-testkit"            % "2.4.14"
   val springTest        = "org.springframework"       % "spring-test"             % "4.2.5.RELEASE"
@@ -44,18 +45,17 @@ object Dependencies {
   val jetty             = "org.eclipse.jetty"         % "jetty-server"            % "9.3.8.v20160314"
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
-  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.1"
+  val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-3"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 
   lazy val unmanagedJarSettings: Setting[Task[Classpath]] = (unmanagedJars in Compile) := fetchUnmanagedJars
+  lazy val scalaDependency: Setting[Seq[ModuleID]] = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
 
   private def fetchUnmanagedJars : Keys.Classpath = {
     val baseDirectories = file(".").getAbsoluteFile / "libs"
     (baseDirectories ** "*.jar").classpath
   }
-
-  lazy val scalaDependency = libraryDependencies ++= Seq(resolveScalaDependency((scalaVersion in Compile).value))
 
   private def resolveScalaDependency(version: String) = {
     "org.scala-lang" % "scala-library" % version

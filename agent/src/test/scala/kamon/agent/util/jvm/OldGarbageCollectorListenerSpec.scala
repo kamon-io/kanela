@@ -36,7 +36,7 @@ class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with Be
 
       System.gc()
 
-      Thread.sleep(500) // the event is async, we need wait..
+      Thread.sleep(1000) // the event is async, we need wait..
 
       verify(gcListener, times(1)).onGCEvent(argumentCaptor.capture())
 

@@ -3,9 +3,12 @@
 # Adapted from https://github.com/paulp/psp-std/blob/master/bin/test
 
 runTests () {
-  # TODO: include `sbt "project kamonScala" +test && sbt "project kamonServlet" +test &&`
-  sbt "project agent" +test +publishLocal && sbt "project agentApi" +publishLocal \
-    && sbt "project agentScala" +publishLocal &&  sbt "project agentTest" +test \
+  sbt "project agent" +test +publishLocal \
+    && sbt "project agentApi" +publishLocal \
+    && sbt "project agentScala" +publishLocal \
+    && sbt "project agentTest" +test \
+    && sbt "project kamonScala" +test \
+    && sbt "project kamonServlet" +test \
     || exit 1
   echo "[info] $(date) - finished sbt test"
 }

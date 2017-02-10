@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,16 +14,20 @@
  * =========================================================================================
  */
 
-package app.kamon.utils;
+package app.kamon.instrumentation
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import app.kamon.instrumentation.advisor.TestMethodAdvisor
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
+import kamon.agent.scala
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+class StoppableInstrumentation extends scala.KamonInstrumentation {
+  val methodName: Junction[MethodDescription] = named("addValue")
 
-@Retention(RUNTIME)
-@Target({TYPE})
-public @interface AdditionalJVMParameters {
-    String parameters() default "";
+  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
+    builder
+      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
+      .build()
+  }
 }
