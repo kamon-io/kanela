@@ -14,39 +14,37 @@
  * =========================================================================================
  */
 
-package kamon.agent.api.instrumentation.listener;
+package kamon.agent.builder;
 
-import javaslang.Function1;
+import javaslang.Function0;
 import kamon.agent.util.NamedThreadFactory;
 import kamon.agent.util.ShutdownHook;
 import kamon.agent.util.log.LazyLogger;
-import lombok.EqualsAndHashCode;
 import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
 
-import java.lang.instrument.Instrumentation;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.ResubmissionScheduler;
 
 @Value
-public class PeriodicResubmitterListener {
+public class PeriodicResubmitter {
 
-    private static final Function1<Instrumentation, AgentBuilder.Listener> resubmittingListener = newResubmittingListener().memoized();
-    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(NamedThreadFactory.instance("periodic-resubmitter-listener"));
+    private static final Function0<ResubmissionScheduler> resubmitting = newResubmitting().memoized();
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(NamedThreadFactory.instance("periodic-resubmitter-scheduler"));
+    private static final long TIMEOUT = 10L;
 
-    private PeriodicResubmitterListener(){}
+    private PeriodicResubmitter() { }
 
-    public static AgentBuilder.Listener instance(Instrumentation instrumentation) {
-        return resubmittingListener.apply(instrumentation);
+    public static ResubmissionScheduler instance() {
+        return resubmitting.apply();
     }
 
-    private static Function1<Instrumentation, AgentBuilder.Listener> newResubmittingListener() {
-        return (instrumentation) -> {
-            LazyLogger.infoColor(() -> "Periodic Resubmitter Listener was activated.");
+    private static Function0<ResubmissionScheduler> newResubmitting() {
+        return () -> {
+            LazyLogger.infoColor(() -> "Periodic Resubmitter was activated.");
             ShutdownHook.register(executor);
-            return new AgentBuilder.Listener.Resubmitting(instrumentation).scheduled(executor, 10, TimeUnit.SECONDS);
+            return new ResubmissionScheduler.WithFixedDelay(executor, TIMEOUT, TimeUnit.SECONDS);
         };
     }
 }
