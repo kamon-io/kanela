@@ -22,7 +22,7 @@ import kamon.util.SameThreadExecutionContext
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{ EssentialAction, EssentialFilter, RequestHeader, Result }
 
-class KamonFilter extends EssentialFilter {
+object KamonFilter extends EssentialFilter {
 
   override def apply(next: EssentialAction): EssentialAction = new EssentialAction {
     override def apply(requestHeader: RequestHeader): Accumulator[ByteString, Result] = {

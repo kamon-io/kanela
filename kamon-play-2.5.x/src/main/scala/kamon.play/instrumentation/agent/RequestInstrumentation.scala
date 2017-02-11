@@ -16,18 +16,22 @@
 
 package kamon.play.instrumentation.agent
 
-import kamon.agent.libs.net.bytebuddy.description.NamedElement
-import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.play.instrumentation.agent.advisor.RouteRequestAdvisor
-import kamon.play.instrumentation.agent.interceptor.{ErrorInterceptor, FiltersMethodInterceptor}
+import kamon.play.instrumentation.agent.advisor.{FiltersFieldAdvisor, RouteRequestAdvisor}
+import kamon.play.instrumentation.agent.interceptor.{ErrorInterceptor, GlocalSettingsFiltersInterceptor}
 import kamon.play.instrumentation.agent.mixin.InjectTraceContext
+import play.api.mvc.EssentialFilter
 
 class RequestInstrumentation extends KamonInstrumentation {
+
+  val HandlerConstructorDescription: Junction[MethodDescription] = isConstructor()
+    .and(takesArgument(3, classOf[Seq[EssentialFilter]]))
+  val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
+  val FiltersMethod: Junction[MethodDescription] = named("filters")
+  val OnServerErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
 
   forSubtypeOf("play.api.mvc.RequestHeader") { builder =>
     builder
@@ -35,29 +39,20 @@ class RequestInstrumentation extends KamonInstrumentation {
       .build()
   }
 
-  val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
   forTargetType("play.api.http.DefaultHttpRequestHandler") { builder =>
     builder
       .withAdvisorFor(RouteRequestMethod, classOf[RouteRequestAdvisor])
+      .withAdvisorFor(HandlerConstructorDescription, classOf[FiltersFieldAdvisor])
       .build()
   }
 
-  val FiltersMethod: Junction[MethodDescription] = named("filters")
-  def HttpFiltersType: ElementMatcher[_ >: TypeDescription] = {
-    nameMatches[NamedElement]("play.api.http..*")
-      .or(nameMatches[NamedElement]("kamon.play..*"))
-      .and(not(nameContains[NamedElement]("$")))
-      .and(not(nameContains[NamedElement]("play.api.http.NoHttpFilters")))
-      .and(hasSuperType(named("play.api.http.HttpFilters")))
-  }
-  forType(HttpFiltersType) { builder =>
+  forTargetType("play.api.GlobalSettings") { builder =>
     builder
-      .withTransformationFor(FiltersMethod, classOf[FiltersMethodInterceptor])
+      .withTransformationFor(FiltersMethod, classOf[GlocalSettingsFiltersInterceptor])
       .build()
   }
 
 //  val OnClientServerErrorMethod: Junction[MethodDescription] = named("onClientServerError").and(takesArguments(3))
-  val OnServerErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
   forSubtypeOf("play.api.http.HttpErrorHandler") { builder =>
     builder
       .withTransformationFor(OnServerErrorMethod, classOf[ErrorInterceptor])

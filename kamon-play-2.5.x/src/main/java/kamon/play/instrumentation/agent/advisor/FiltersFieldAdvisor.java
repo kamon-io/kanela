@@ -14,27 +14,20 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.interceptor
+package kamon.play.instrumentation.agent.advisor;
 
-import java.util.concurrent.Callable
+import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
+import kamon.play.KamonFilter;
+import kamon.play.utils.SeqUtils;
+import play.api.mvc.EssentialFilter;
+import scala.collection.Seq;
 
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.play.KamonFilter
-import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
 
+public class FiltersFieldAdvisor {
 
-
-class GlocalSettingsFiltersInterceptor
-object GlocalSettingsFiltersInterceptor {
-
-  // FIXME Test this code
-  @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
-    KamonHttpFilters(callable.call(), KamonFilter)
+  @OnMethodExit
+  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
+    filters = SeqUtils.append(filters, KamonFilter.asJava());
   }
-}
-
-case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
 }

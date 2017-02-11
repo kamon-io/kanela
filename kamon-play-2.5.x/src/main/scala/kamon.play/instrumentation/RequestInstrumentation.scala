@@ -27,8 +27,6 @@ import play.api.mvc.{EssentialFilter, _}
 @Aspect
 class RequestInstrumentation {
 
-  private lazy val filter: EssentialFilter = new KamonFilter()
-
   @DeclareMixin("play.api.mvc.RequestHeader+")
   def mixinContextAwareToRequestHeader: TraceContextAware = TraceContextAware.default
 
@@ -43,7 +41,7 @@ class RequestInstrumentation {
 
   @Around("call(* play.api.http.HttpFilters.filters(..))")
   def filters(pjp: ProceedingJoinPoint): Any = {
-    pjp.proceed().asInstanceOf[Seq[EssentialFilter]] :+ filter
+    pjp.proceed().asInstanceOf[Seq[EssentialFilter]] :+ KamonFilter
   }
 
   @Before("call(* play.api.http.HttpErrorHandler.onClientServerError(..)) && args(requestContextAware, statusCode, *)")
