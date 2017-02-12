@@ -10,6 +10,7 @@
   </aspects>
 
   <weaver options="-warn:none">
+      <!--<dump within="play.api..*" />-->
       <include within="play.api..*"/>
   </weaver>
 </aspectj>

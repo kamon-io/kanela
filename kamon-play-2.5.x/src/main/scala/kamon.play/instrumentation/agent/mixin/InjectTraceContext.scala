@@ -16,13 +16,13 @@
 
 package kamon.play.instrumentation.agent.mixin
 
-import kamon.agent.api.instrumentation.Initializer
 import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
 class InjectTraceContext extends TraceContextAware {
 
-  @transient var traceContext: TraceContext = _
-
-  @Initializer
-  def _initializer(): Unit = this.traceContext = Tracer.currentContext
+  @transient private var _traceContext: TraceContext = _
+  def traceContext: TraceContext = {
+    if (_traceContext == null) this._traceContext = Tracer.currentContext
+    this._traceContext
+  }
 }

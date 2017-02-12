@@ -31,7 +31,7 @@ class RequestInstrumentation extends KamonInstrumentation {
     .and(takesArgument(3, classOf[Seq[EssentialFilter]]))
   val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
   val FiltersMethod: Junction[MethodDescription] = named("filters")
-  val OnServerErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
+  val OnServerOrOnClientErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
 
   forSubtypeOf("play.api.mvc.RequestHeader") { builder =>
     builder
@@ -52,10 +52,9 @@ class RequestInstrumentation extends KamonInstrumentation {
       .build()
   }
 
-//  val OnClientServerErrorMethod: Junction[MethodDescription] = named("onClientServerError").and(takesArguments(3))
   forSubtypeOf("play.api.http.HttpErrorHandler") { builder =>
     builder
-      .withTransformationFor(OnServerErrorMethod, classOf[ErrorInterceptor])
+      .withTransformationFor(OnServerOrOnClientErrorMethod, classOf[ErrorInterceptor])
       .build()
   }
 }
