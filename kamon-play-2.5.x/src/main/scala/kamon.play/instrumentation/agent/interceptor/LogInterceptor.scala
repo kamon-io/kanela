@@ -22,10 +22,10 @@ import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeTyp
 import kamon.trace.logging.MdcKeysSupport
 
 class LogInterceptor
-object LogInterceptor extends MdcKeysSupport {
+object LogInterceptor {
 
   @RuntimeType
-  def aroundLog(@SuperCall callable: Callable[Any]): Any = withMdc {
+  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
     callable.call()
   }
 

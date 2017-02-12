@@ -37,4 +37,10 @@ class LoggerLikeInstrumentation extends KamonInstrumentation {
       .withTransformationFor(LogMethod, classOf[LogInterceptor])
       .build()
   }
+
+  forSubtypeOf("play.LoggerLike") { builder =>
+    builder
+      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .build()
+  }
 }
