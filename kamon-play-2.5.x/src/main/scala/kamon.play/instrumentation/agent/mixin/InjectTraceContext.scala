@@ -19,10 +19,6 @@ package kamon.play.instrumentation.agent.mixin
 import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
 class InjectTraceContext extends TraceContextAware {
-
-  @transient private var _traceContext: TraceContext = _
-  def traceContext: TraceContext = {
-    if (_traceContext == null) this._traceContext = Tracer.currentContext
-    this._traceContext
-  }
+  // It has be a lazy val
+  @transient lazy val traceContext: TraceContext = Tracer.currentContext
 }
