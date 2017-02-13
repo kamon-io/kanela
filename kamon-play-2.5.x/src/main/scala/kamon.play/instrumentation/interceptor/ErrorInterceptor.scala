@@ -24,6 +24,10 @@ import kamon.trace.TraceContextAware
 import play.api.mvc.RequestHeader
 import play.api.mvc.Results.InternalServerError
 
+/**
+  * Interceptor for play.api.http.HttpErrorHandler::onClientError
+  * Interceptor for play.api.http.HttpErrorHandler::onServerError
+  */
 class ErrorInterceptor
 object ErrorInterceptor {
 

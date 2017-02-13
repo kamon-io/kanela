@@ -17,10 +17,13 @@
 package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
-
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
 import kamon.trace.logging.MdcKeysSupport
 
+/**
+  * Interceptor for play.api.LoggerLike::{ info | debug | warn | error | trace }
+  * Interceptor for play.LoggerLike::{ info | debug | warn | error | trace }
+  */
 class LogInterceptor
 object LogInterceptor {
 

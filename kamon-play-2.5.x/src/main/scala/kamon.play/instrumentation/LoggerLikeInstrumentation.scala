@@ -29,7 +29,7 @@ class LoggerLikeInstrumentation extends KamonInstrumentation {
       .or(named("debug")
         .or(named("warn")
           .or(named("error")
-            .or(named("trace"))))) // FIXME fix this ugly code
+            .or(named("trace")))))
   }
 
   forSubtypeOf("play.api.LoggerLike") { builder =>

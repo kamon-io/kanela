@@ -21,6 +21,10 @@ import java.util.concurrent.Callable
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall, This}
 import kamon.trace.{TraceContextAware, Tracer}
 
+/**
+  * Interceptor for scala.concurrent.impl.CallbackRunnable::run
+  * Interceptor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
+  */
 class FutureInterceptor
 object FutureInterceptor {
 

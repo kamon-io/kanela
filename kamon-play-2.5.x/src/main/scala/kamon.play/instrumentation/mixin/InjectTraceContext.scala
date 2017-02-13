@@ -18,6 +18,9 @@ package kamon.play.instrumentation.mixin
 
 import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
+/**
+  * Mixin for play.api.mvc.RequestHeader
+  */
 class InjectTraceContext extends TraceContextAware {
   // This has be a lazy val
   @transient lazy val traceContext: TraceContext = Tracer.currentContext

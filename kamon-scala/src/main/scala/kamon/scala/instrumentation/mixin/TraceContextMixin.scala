@@ -19,6 +19,10 @@ package kamon.scala.instrumentation.mixin
 import kamon.agent.api.instrumentation.Initializer
 import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
 
+/**
+  * Mixin for scala.concurrent.impl.CallbackRunnable
+  * Mixin for scala.concurrent.impl.Future$PromiseCompletingRunnable
+  */
 class TraceContextMixin extends TraceContextAware {
   var traceContext: TraceContext = _
 

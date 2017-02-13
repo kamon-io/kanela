@@ -23,7 +23,9 @@ import kamon.play.utils.SeqUtils;
 import play.api.mvc.EssentialFilter;
 import scala.collection.Seq;
 
-
+/**
+ * Advisor for play.api.http.DefaultHttpRequestHandler::new
+ */
 public class FiltersFieldAdvisor {
 
   @OnMethodExit

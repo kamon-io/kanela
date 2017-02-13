@@ -23,8 +23,9 @@ import kamon.play.KamonFilter
 import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter
 
-
-
+/**
+  * Interceptor for play.api.GlobalSettings::filters
+  */
 class GlocalSettingsFiltersInterceptor
 object GlocalSettingsFiltersInterceptor {
 

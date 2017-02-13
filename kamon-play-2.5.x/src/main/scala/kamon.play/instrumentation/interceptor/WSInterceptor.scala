@@ -17,16 +17,17 @@
 package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
-
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall, This}
 import kamon.play.PlayExtension
 import kamon.trace.{SegmentCategory, Tracer}
 import kamon.util.SameThreadExecutionContext
 import play.api.libs.ws.{WSRequest, WSResponse}
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
+/**
+  * Interceptor for play.api.libs.ws.WSRequest::execute
+  */
 class WSInterceptor
 object WSInterceptor {
 
