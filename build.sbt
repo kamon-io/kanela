@@ -98,12 +98,10 @@ lazy val kamonScala = (project in file("kamon-scala"))
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(scalatest, akkaTestKit))
   .settings(excludeScalaLib: _*)
-  .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
 lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
-  .dependsOn(agentScala)
-//  .dependsOn(kamonScala % "test->test")
+  .dependsOn(agentScala, kamonScala)
   .enablePlugins(JavaAgent)
   .settings(agentSettings)
   .settings(basicSettings: _*)
@@ -112,10 +110,9 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.11.8"),
     testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
-  .settings(aspectJSettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(kamonCore, kamonScalaAJW, play25, playWS25) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent, aspectJ) ++
+    compileScope(kamonCore, play25, playWS25) ++
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(playTest25))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)

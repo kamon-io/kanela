@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.advisor
+package kamon.play.instrumentation.advisor
 
 import kamon.Kamon.tracer
 import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, OnMethodEnter}

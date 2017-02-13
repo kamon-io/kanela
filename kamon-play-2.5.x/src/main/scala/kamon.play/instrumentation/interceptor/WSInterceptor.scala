@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.interceptor
+package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
 

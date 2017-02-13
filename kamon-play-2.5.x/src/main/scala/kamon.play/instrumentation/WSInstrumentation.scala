@@ -16,48 +16,30 @@
 
 package kamon.play.instrumentation
 
-import kamon.metric.{ EntityRecorderFactory, GenericEntityRecorder }
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
+import kamon.agent.scala.KamonInstrumentation
 import kamon.metric.instrument.InstrumentFactory
-import kamon.play.PlayExtension
-import kamon.trace.{ SegmentCategory, Tracer }
-import kamon.util.SameThreadExecutionContext
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation.{ Around, Aspect, Pointcut }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import kamon.metric.{EntityRecorderFactory, GenericEntityRecorder}
+import kamon.play.instrumentation.interceptor.WSInterceptor
 
-import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+class WSInstrumentation extends KamonInstrumentation {
 
-@Aspect
-class WSInstrumentation {
+  val ExecuteMethod: Junction[MethodDescription] = named("execute").and(takesArguments(0))
 
-  @Pointcut("target(request) && call(scala.concurrent.Future<play.api.libs.ws.WSResponse> execute())")
-  def onExecuteRequest(request: WSRequest): Unit = {}
-
-  @Around("onExecuteRequest(request)")
-  def aroundExecuteRequest(pjp: ProceedingJoinPoint, request: WSRequest): Any = {
-    Tracer.currentContext.collect { ctx ⇒
-      val segmentName = PlayExtension.generateHttpClientSegmentName(request)
-      val segment = ctx.startSegment(segmentName, SegmentCategory.HttpClient, PlayExtension.SegmentLibraryName)
-      val response = pjp.proceed().asInstanceOf[Future[WSResponse]]
-
-      response.onComplete {
-        case Success(result) ⇒
-          PlayExtension.httpClientMetrics.recordResponse(segmentName, result.status.toString)
-          segment.finish()
-        case Failure(error) ⇒
-          segment.finishWithError(error)
-      }(SameThreadExecutionContext)
-      response
-    } getOrElse pjp.proceed()
+  forSubtypeOf("play.api.libs.ws.WSRequest") { builder =>
+    builder
+      .withTransformationFor(ExecuteMethod, classOf[WSInterceptor])
+      .build()
   }
 }
 
 /**
- *  Counts HTTP response status codes into per status code and per trace name + status counters. If recording a HTTP
- *  response with status 500 for the trace "http://localhost:9000/badoutside_200", the counter with name "500" as
+  *  Counts HTTP response status codes into per status code and per trace name + status counters. If recording a HTTP
+  *  response with status 500 for the trace "http://localhost:9000/badoutside_200", the counter with name "500" as
   *  well as the counter with name "http://localhost:9000/badoutside_500" will be incremented.
- */
+  */
 class HttpClientMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRecorder(instrumentFactory) {
 
   def recordResponse(statusCode: String): Unit = {

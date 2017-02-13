@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,20 +14,20 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.advisor
+package kamon.play.instrumentation.advisor;
 
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
-import kamon.trace.{ TraceContextAware, Tracer }
+import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
+import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
+import kamon.play.KamonFilter;
+import kamon.play.utils.SeqUtils;
+import play.api.mvc.EssentialFilter;
+import scala.collection.Seq;
 
-/**
- * Advisor for scala.concurrent.impl.CallbackRunnable::run
- * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
- */
-class RunMethodAdvisor
-object RunMethodAdvisor {
-  @OnMethodEnter
-  def onEnter(@This runnable: TraceContextAware): Unit = Tracer.setCurrentContext(runnable.traceContext)
+
+public class FiltersFieldAdvisor {
 
   @OnMethodExit
-  def onExit(): Unit = Tracer.currentContext.finish()
+  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
+    filters = SeqUtils.append(filters, KamonFilter.asJava());
+  }
 }

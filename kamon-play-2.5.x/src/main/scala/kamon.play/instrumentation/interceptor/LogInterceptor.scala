@@ -14,16 +14,19 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent
+package kamon.play.instrumentation.interceptor
 
-import kamon.agent.scala.KamonInstrumentation
-import kamon.play.instrumentation.agent.mixin.InjectTraceContext
+import java.util.concurrent.Callable
 
-class FakeRequestIntrumentation extends KamonInstrumentation {
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.trace.logging.MdcKeysSupport
 
-  forSubtypeOf("play.api.test.FakeRequest") { builder =>
-    builder
-      .withMixin(classOf[InjectTraceContext])
-      .build()
+class LogInterceptor
+object LogInterceptor {
+
+  @RuntimeType
+  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
+    callable.call()
   }
+
 }

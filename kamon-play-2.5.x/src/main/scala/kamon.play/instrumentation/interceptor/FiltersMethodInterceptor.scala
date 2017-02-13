@@ -14,19 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.interceptor
+package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
 
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.trace.logging.MdcKeysSupport
+import kamon.play.KamonFilter
+import play.api.http.HttpFilters
+import play.api.mvc.EssentialFilter
 
-class LogInterceptor
-object LogInterceptor {
 
+
+class GlocalSettingsFiltersInterceptor
+object GlocalSettingsFiltersInterceptor {
+
+  // FIXME Test this code
   @RuntimeType
-  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
-    callable.call()
+  def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+    KamonHttpFilters(callable.call(), KamonFilter)
   }
+}
 
+case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
+  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
 }

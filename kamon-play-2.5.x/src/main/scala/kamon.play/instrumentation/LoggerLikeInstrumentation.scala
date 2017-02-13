@@ -16,31 +16,31 @@
 
 package kamon.play.instrumentation
 
-import kamon.trace.logging.MdcKeysSupport
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation._
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.interceptor.LogInterceptor
 
-@Aspect
-class LoggerLikeInstrumentation extends MdcKeysSupport {
+class LoggerLikeInstrumentation extends KamonInstrumentation {
 
-  @Pointcut("execution(* play.api.LoggerLike+.info(..))")
-  def infoPointcut(): Unit = {}
+  val LogMethod: Junction[MethodDescription] = {
+    named("info")
+      .or(named("debug")
+        .or(named("warn")
+          .or(named("error")
+            .or(named("trace"))))) // FIXME fix this ugly code
+  }
 
-  @Pointcut("execution(* play.api.LoggerLike+.debug(..))")
-  def debugPointcut(): Unit = {}
+  forSubtypeOf("play.api.LoggerLike") { builder =>
+    builder
+      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .build()
+  }
 
-  @Pointcut("execution(* play.api.LoggerLike+.warn(..))")
-  def warnPointcut(): Unit = {}
-
-  @Pointcut("execution(* play.api.LoggerLike+.error(..))")
-  def errorPointcut(): Unit = {}
-
-  @Pointcut("execution(* play.api.LoggerLike+.trace(..))")
-  def tracePointcut(): Unit = {}
-
-  @Around("(infoPointcut() || debugPointcut() || warnPointcut() || errorPointcut() || tracePointcut())")
-  def aroundLog(pjp: ProceedingJoinPoint): Any = withMdc {
-    pjp.proceed()
+  forSubtypeOf("play.LoggerLike") { builder =>
+    builder
+      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .build()
   }
 }
-

@@ -16,45 +16,45 @@
 
 package kamon.play.instrumentation
 
-import kamon.Kamon.tracer
-import kamon.play.{KamonFilter, PlayExtension}
-import kamon.trace._
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation._
-import play.api.mvc.Results._
-import play.api.mvc.{EssentialFilter, _}
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.advisor.{FiltersFieldAdvisor, RouteRequestAdvisor}
+import kamon.play.instrumentation.interceptor.{ErrorInterceptor, GlocalSettingsFiltersInterceptor}
+import kamon.play.instrumentation.mixin.InjectTraceContext
+import play.api.mvc.EssentialFilter
 
-@Aspect
-class RequestInstrumentation {
+class RequestInstrumentation extends KamonInstrumentation {
 
-  @DeclareMixin("play.api.mvc.RequestHeader+")
-  def mixinContextAwareToRequestHeader: TraceContextAware = TraceContextAware.default
+  val HandlerConstructorDescription: Junction[MethodDescription] = isConstructor()
+    .and(takesArgument(3, classOf[Seq[EssentialFilter]]))
+  val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
+  val FiltersMethod: Junction[MethodDescription] = named("filters")
+  val OnServerOrOnClientErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
 
-  @Before("call(* play.api.http.DefaultHttpRequestHandler.routeRequest(..)) && args(requestHeader)")
-  def routeRequest(requestHeader: RequestHeader): Unit = {
-    val token = if (PlayExtension.includeTraceToken) {
-      requestHeader.headers.get(PlayExtension.traceTokenHeaderName)
-    } else None
-
-    Tracer.setCurrentContext(tracer.newContext("UnnamedTrace", token))
+  forSubtypeOf("play.api.mvc.RequestHeader") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
   }
 
-  @Around("call(* play.api.http.HttpFilters.filters(..))")
-  def filters(pjp: ProceedingJoinPoint): Any = {
-    pjp.proceed().asInstanceOf[Seq[EssentialFilter]] :+ KamonFilter
+  forTargetType("play.api.http.DefaultHttpRequestHandler") { builder =>
+    builder
+      .withAdvisorFor(RouteRequestMethod, classOf[RouteRequestAdvisor])
+      .withAdvisorFor(HandlerConstructorDescription, classOf[FiltersFieldAdvisor])
+      .build()
   }
 
-  @Before("call(* play.api.http.HttpErrorHandler.onClientServerError(..)) && args(requestContextAware, statusCode, *)")
-  def onClientError(requestContextAware: TraceContextAware, statusCode: Int): Unit = {
-    requestContextAware.traceContext.collect { ctx ⇒
-      PlayExtension.httpServerMetrics.recordResponse(ctx.name, statusCode.toString)
-    }
+  forTargetType("play.api.GlobalSettings") { builder =>
+    builder
+      .withTransformationFor(FiltersMethod, classOf[GlocalSettingsFiltersInterceptor])
+      .build()
   }
 
-  @Before("call(* play.api.http.HttpErrorHandler.onServerError(..)) && args(requestContextAware, ex)")
-  def onServerError(requestContextAware: TraceContextAware, ex: Throwable): Unit = {
-    requestContextAware.traceContext.collect { ctx ⇒
-      PlayExtension.httpServerMetrics.recordResponse(ctx.name, InternalServerError.header.status.toString)
-    }
+  forSubtypeOf("play.api.http.HttpErrorHandler") { builder =>
+    builder
+      .withTransformationFor(OnServerOrOnClientErrorMethod, classOf[ErrorInterceptor])
+      .build()
   }
 }

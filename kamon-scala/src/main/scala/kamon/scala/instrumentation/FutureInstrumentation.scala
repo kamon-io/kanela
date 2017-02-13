@@ -20,7 +20,7 @@ import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
-import kamon.scala.instrumentation.advisor.RunMethodAdvisor
+import kamon.scala.instrumentation.interceptor.FutureInterceptor
 import kamon.scala.instrumentation.mixin.TraceContextMixin
 
 class FutureInstrumentation extends KamonInstrumentation {
@@ -43,14 +43,14 @@ class FutureInstrumentation extends KamonInstrumentation {
   forTargetType("scala.concurrent.impl.CallbackRunnable") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
-      .withAdvisorFor(RunMethod, classOf[RunMethodAdvisor])
+      .withTransformationFor(RunMethod, classOf[FutureInterceptor])
       .build()
   }
 
   forTargetType("scala.concurrent.impl.Future$PromiseCompletingRunnable") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
-      .withAdvisorFor(RunMethod, classOf[RunMethodAdvisor])
+      .withTransformationFor(RunMethod, classOf[FutureInterceptor])
       .build()
   }
 }

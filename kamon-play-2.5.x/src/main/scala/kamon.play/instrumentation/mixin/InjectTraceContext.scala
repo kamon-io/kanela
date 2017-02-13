@@ -14,27 +14,11 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.interceptor
+package kamon.play.instrumentation.mixin
 
-import java.util.concurrent.Callable
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.play.KamonFilter
-import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
-
-
-
-class GlocalSettingsFiltersInterceptor
-object GlocalSettingsFiltersInterceptor {
-
-  // FIXME Test this code
-  @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
-    KamonHttpFilters(callable.call(), KamonFilter)
-  }
-}
-
-case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
+class InjectTraceContext extends TraceContextAware {
+  // This has be a lazy val
+  @transient lazy val traceContext: TraceContext = Tracer.currentContext
 }

@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,11 +14,21 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.agent.mixin
+package kamon.scala.instrumentation.interceptor
 
-import kamon.trace.{TraceContext, TraceContextAware, Tracer}
+import java.util.concurrent.Callable
 
-class InjectTraceContext extends TraceContextAware {
-  // It has be a lazy val
-  @transient lazy val traceContext: TraceContext = Tracer.currentContext
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall, This}
+import kamon.trace.{TraceContextAware, Tracer}
+
+class FutureInterceptor
+object FutureInterceptor {
+
+  @RuntimeType
+  def aroundExecution(@SuperCall callable: Callable[Any], @This runnable: TraceContextAware): Any = {
+    Tracer.withContext(runnable.traceContext) {
+      callable.call()
+    }
+  }
+
 }

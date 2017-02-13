@@ -16,12 +16,14 @@
 
 package kamon.play.instrumentation
 
-import kamon.trace.TraceContextAware
-import org.aspectj.lang.annotation.{Aspect, DeclareMixin}
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.mixin.InjectTraceContext
 
-@Aspect
-class FakeRequestIntrumentation {
+class FakeRequestIntrumentation extends KamonInstrumentation {
 
-  @DeclareMixin("play.api.test.FakeRequest")
-  def mixinContextAwareNewRequest: TraceContextAware = TraceContextAware.default
+  forSubtypeOf("play.api.test.FakeRequest") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
+  }
 }

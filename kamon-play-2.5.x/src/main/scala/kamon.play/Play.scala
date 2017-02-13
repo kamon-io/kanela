@@ -18,7 +18,7 @@ package kamon.play
 
 import akka.actor._
 import kamon.Kamon
-import kamon.play.instrumentation.agent.HttpClientMetrics
+import kamon.play.instrumentation.HttpClientMetrics
 import kamon.util.http.HttpServerMetrics
 import kamon.util.logger.LazyLogger
 import play.api.libs.ws.WSRequest
