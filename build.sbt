@@ -118,6 +118,24 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
+lazy val kamonPlay24 = (project in file("kamon-play-2.4.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    moduleName := "kamon-play-2.4",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8"),
+    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
+  .settings(libraryDependencies ++=
+    compileScope(kamonCore, play24, playWS24) ++
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    testScope(playTest24))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
 lazy val javaCommonSettings = Seq(
   crossPaths := false,
   autoScalaLibrary := false,
