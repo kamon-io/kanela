@@ -27,7 +27,7 @@ import play.api.mvc.EssentialFilter
 
 class RequestInstrumentation extends KamonInstrumentation {
 
-  val HandlerConstructorDescription: Junction[MethodDescription] = isConstructor()
+  val DefaultHttpRequestHandlerConstructor: Junction[MethodDescription] = isConstructor()
     .and(takesArgument(3, classOf[Seq[EssentialFilter]]))
   val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
   val FiltersMethod: Junction[MethodDescription] = named("filters")
@@ -42,7 +42,7 @@ class RequestInstrumentation extends KamonInstrumentation {
   forTargetType("play.api.http.DefaultHttpRequestHandler") { builder =>
     builder
       .withAdvisorFor(RouteRequestMethod, classOf[RouteRequestAdvisor])
-      .withAdvisorFor(HandlerConstructorDescription, classOf[FiltersFieldAdvisor])
+      .withAdvisorFor(DefaultHttpRequestHandlerConstructor, classOf[FiltersFieldAdvisor])
       .build()
   }
 
