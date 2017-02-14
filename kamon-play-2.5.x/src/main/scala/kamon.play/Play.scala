@@ -63,7 +63,7 @@ class DefaultNameGenerator extends NameGenerator {
     val path = requestHeader.tags(Router.Tags.RoutePattern)
     cache.atomicGetOrElseUpdate(s"$verb$path", {
       val traceName = {
-        // Convert paths from GET /foo/bar/$paramname<regexp>/blah to foo.bar.paramname.blah.get
+        // Convert paths from /foo/bar/$paramname<regexp>/blah to foo.bar.paramname.blah.get
         val p = normalizePattern.replaceAllIn(path, "$1").replace('/', '.').dropWhile(_ == '.')
         val normalisedPath = {
           if (p.lastOption.exists(_ != '.')) s"$p."

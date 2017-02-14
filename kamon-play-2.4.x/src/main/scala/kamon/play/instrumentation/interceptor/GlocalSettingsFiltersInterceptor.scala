@@ -29,7 +29,7 @@ class GlocalSettingsFiltersInterceptor
 object GlocalSettingsFiltersInterceptor {
 
   @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
     KamonHttpFilters(callable.call(), KamonFilter)
   }
 }
