@@ -17,6 +17,21 @@
 import Dependencies._
 import sbt.Tests._
 
+val `akka-2.3` = "2.3.13"
+val `akka-2.4` = "2.4.14"
+
+def akkaDependency(name: String, version: String) = {
+  "com.typesafe.akka" %% s"akka-$name" % version
+}
+
+def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
+  tests map { test =>
+    Group(
+      name = test.name,
+      tests = Seq(test),
+      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
+  }
+
 lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
   .settings(noPublishing: _*)
@@ -136,6 +151,30 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
 
+lazy val kamonAkka24 = (project in file("kamon-akka-2.4.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    bintrayPackage := "kamon-akka",
+    moduleName := "kamon-akka-2.4",
+//    scalaVersion := "2.12.1",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8"/*, "2.12.1"*/)))
+//    fork in Test := true,
+//    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
+//  .settings(aspectJSettings: _*)
+  .settings(
+    libraryDependencies ++=
+      compileScope(akkaDependency("actor", `akka-2.4`), kamonCore) ++
+        providedScope(javaslang, typesafeConfig, slf4jApi, /*aspectJ, */kamonAgent) ++
+        optionalScope(logbackClassic) ++
+        testScope(scalatest, akkaDependency("testkit", `akka-2.4`), akkaDependency("slf4j", `akka-2.4`), logbackClassic))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
 lazy val javaCommonSettings = Seq(
   crossPaths := false,
   autoScalaLibrary := false,
@@ -172,10 +211,3 @@ lazy val agentTestSettings = AgentTest.settings
 
 lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
 
-def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
-  tests map { test =>
-    Group(
-      name = test.name,
-      tests = Seq(test),
-      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
-  }

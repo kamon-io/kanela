@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2016 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -41,6 +41,9 @@ abstract class BaseKamonSpec(actorSystemName: String) extends TestKitBase with W
   def newContext(name: String, token: String): TraceContext =
     Kamon.tracer.newContext(name, Option(token))
 
+  def newContext(name: String, token: String, tags: Map[String, String]): TraceContext =
+    Kamon.tracer.newContext(name, Option(token), tags)
+
   def takeSnapshotOf(name: String, category: String): EntitySnapshot = {
     val recorder = Kamon.metrics.find(name, category).get
     recorder.collect(collectionContext)
@@ -59,8 +62,7 @@ abstract class BaseKamonSpec(actorSystemName: String) extends TestKitBase with W
     subscriptions.tell(SubscriptionsDispatcher.Tick)
   }
 
-  override protected def beforeAll(): Unit = {
+  override protected def beforeAll(): Unit = { }
 
-  }
   override protected def afterAll(): Unit = system.terminate()
 }
