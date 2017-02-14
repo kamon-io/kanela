@@ -30,7 +30,7 @@ class RequestInstrumentation extends KamonInstrumentation {
   val DefaultHttpRequestHandlerConstructor: Junction[MethodDescription] = isConstructor()
     .and(takesArgument(3, classOf[Seq[EssentialFilter]]))
   val RouteRequestMethod: Junction[MethodDescription] = named("routeRequest")
-  val FiltersMethod: Junction[MethodDescription] = named("filters")
+  val FiltersMethod: Junction[MethodDescription] = named("filters").and(takesArguments(1))
   val OnServerOrOnClientErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
 
   forSubtypeOf("play.api.mvc.RequestHeader") { builder =>
@@ -46,7 +46,7 @@ class RequestInstrumentation extends KamonInstrumentation {
       .build()
   }
 
-  forTargetType("play.api.GlobalSettings") { builder =>
+  forTargetType("play.api.GlobalSettings$class") { builder =>
     builder
       .withTransformationFor(FiltersMethod, classOf[GlocalSettingsFiltersInterceptor])
       .build()

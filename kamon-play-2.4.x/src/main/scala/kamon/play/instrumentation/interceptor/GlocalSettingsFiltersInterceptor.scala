@@ -28,7 +28,6 @@ import play.api.mvc.EssentialFilter
 class GlocalSettingsFiltersInterceptor
 object GlocalSettingsFiltersInterceptor {
 
-  // FIXME Test this code
   @RuntimeType
   def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
     KamonHttpFilters(callable.call(), KamonFilter)
