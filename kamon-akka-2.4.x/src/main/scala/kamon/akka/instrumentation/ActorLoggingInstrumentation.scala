@@ -17,9 +17,8 @@
 package akka.kamon.instrumentation
 
 import akka.event.Logging.LogEvent
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit}
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, Enter, OnMethodEnter, OnMethodExit}
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation._
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation

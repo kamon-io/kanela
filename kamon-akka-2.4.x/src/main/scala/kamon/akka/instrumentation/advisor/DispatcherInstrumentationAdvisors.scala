@@ -25,8 +25,7 @@ import akka.kamon.instrumentation.advisor.DispatcherInstrumentationAdvisors._
 import akka.kamon.instrumentation.advisor.LookupDataAware.LookupData
 import kamon.Kamon
 import kamon.agent.libs.net.bytebuddy.asm.Advice
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit, Return}
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation._
+import kamon.agent.libs.net.bytebuddy.asm.Advice._
 import kamon.akka.instrumentation.mixin.{ActorSystemAware, LookupDataAware}
 import kamon.metric.{Entity, MetricsModule}
 import kamon.util.executors.{ForkJoinPoolMetrics, ThreadPoolExecutorMetrics}

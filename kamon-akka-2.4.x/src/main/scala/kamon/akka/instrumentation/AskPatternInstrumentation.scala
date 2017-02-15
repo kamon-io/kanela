@@ -16,17 +16,16 @@
 
 package akka.kamon.instrumentation
 
-import akka.actor.{ ActorRef, InternalActorRef }
+import akka.actor.{ActorRef, InternalActorRef}
 import akka.pattern.AskTimeoutException
 import akka.util.Timeout
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{OnMethodExit, Return}
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation._
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, OnMethodExit, Origin, Return}
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.AkkaExtension
-import kamon.akka.AskPatternTimeoutWarningSettings.{ Heavyweight, Lightweight, Off }
+import kamon.akka.AskPatternTimeoutWarningSettings.{Heavyweight, Lightweight, Off}
 import kamon.trace.Tracer
 import kamon.util.SameThreadExecutionContext
 import kamon.util.logger.LazyLogger
@@ -70,8 +69,8 @@ object AskMethodAdvisor {
   }
 
   @OnMethodExit
-  def onExit(/*@Origin origin: String,
-    */@Return future: Future[AnyRef],
+  def onExit(@Origin origin: String,
+    @Return future: Future[AnyRef],
     @Argument(0) actor: ActorRef,
     @Argument(2) timeout: Timeout) = {
 
@@ -79,11 +78,11 @@ object AskMethodAdvisor {
     actor match {
       case internalActorRef: InternalActorRef ⇒
         if (!internalActorRef.isTerminated && timeout.duration.length > 0 && Tracer.currentContext.nonEmpty) {
-//          AkkaExtension.askPatternTimeoutWarning match {
-//            case Off         ⇒
-//            case Lightweight ⇒ hookLightweightWarning(future, SourceLocation(origin), actor)
-//            case Heavyweight ⇒ hookHeavyweightWarning(future, new StackTraceCaptureException, actor)
-//          }
+          AkkaExtension.askPatternTimeoutWarning match {
+            case Off         ⇒
+            case Lightweight ⇒ hookLightweightWarning(future, SourceLocation(origin), actor)
+            case Heavyweight ⇒ hookHeavyweightWarning(future, new StackTraceCaptureException, actor)
+          }
           hookHeavyweightWarning(future, new StackTraceCaptureException, actor)
         }
       case _ ⇒

@@ -19,8 +19,7 @@ package akka.kamon.instrumentation.advisor
 import akka.actor.{ActorRef, ActorSystem, Cell}
 import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
 import akka.routing.RoutedActorCell
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit, Thrown}
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation._
+import kamon.agent.libs.net.bytebuddy.asm.Advice._
 import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
 import kamon.util.RelativeNanoTimestamp
 
