@@ -71,6 +71,7 @@ class DispatcherInstrumentation extends KamonInstrumentation {
 
   forSubtypeOf("akka.dispatch.ExecutorServiceFactory") { builder ⇒
     builder
+      .withMixin(classOf[LookupDataAwareMixin])
       .withAdvisorFor(Constructor, classOf[ExecutorServiceFactoryConstructorAdvisor])
       .withAdvisorFor(CreateExecutorServiceMethod, classOf[CreateExecutorServiceAdvisor])
       .build()
@@ -111,12 +112,6 @@ class DispatcherInstrumentation extends KamonInstrumentation {
   forTargetType("akka.routing.BalancingPool") { builder ⇒
     builder
       .withAdvisorFor(NewRouteeMethod, classOf[NewRouteeMethodAdvisor])
-      .build()
-  }
-
-  forSubtypeOf("akka.dispatch.ExecutorServiceFactory") { builder ⇒
-    builder
-      .withMixin(classOf[LookupDataAwareMixin])
       .build()
   }
 }
