@@ -27,6 +27,7 @@ class ActorInstrumentation extends KamonInstrumentation {
 
   val Constructor: Junction[MethodDescription] = isConstructor()
   val InvokeMethod: Junction[MethodDescription] = named("invoke")
+  val handleInvokeFailureMethod: Junction[MethodDescription] = named("handleInvokeFailure")
   val SendMessageMethod: Junction[MethodDescription] = named("sendMessage").and(takesArguments(1))
   val StopMethod: Junction[MethodDescription] = named("stop")
   val HandleInvokeFailureMethod: Junction[MethodDescription] = named("handleInvokeFailure")
@@ -50,6 +51,7 @@ class ActorInstrumentation extends KamonInstrumentation {
       .withMixin(classOf[ActorInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[ActorCellConstructorAdvisor])
       .withAdvisorFor(InvokeMethod, classOf[InvokeMethodAdvisor])
+      .withAdvisorFor(handleInvokeFailureMethod, classOf[HandleInvokeFailureMethodAdvisor])
       .withAdvisorFor(SendMessageMethod, classOf[SendMessageMethodAdvisor])
       .withAdvisorFor(StopMethod, classOf[StopMethodAdvisor])
       .build()

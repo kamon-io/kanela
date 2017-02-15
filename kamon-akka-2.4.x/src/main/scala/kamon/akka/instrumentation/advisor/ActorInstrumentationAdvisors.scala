@@ -69,6 +69,20 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
 }
 
 /**
+ * Advisor for akka.actor.ActorCell::handleInvokeFailure
+ */
+class HandleInvokeFailureMethodAdvisor
+object HandleInvokeFailureMethodAdvisor extends ActorInstrumentationSupport {
+
+  @OnMethodEnter
+  def onEnter(@This cell: Cell,
+              @Argument(1) failure: Throwable): Unit = {
+    if (failure != null)
+      actorInstrumentation(cell).processFailure(failure)
+  }
+}
+
+/**
  * Advisor for akka.actor.ActorCell::sendMessage
  * Advisor for akka.actor.UnstartedCell::sendMessage
  */
