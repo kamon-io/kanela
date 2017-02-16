@@ -16,7 +16,7 @@
 
 package akka.kamon.instrumentation
 
-import akka.kamon.instrumentation.advisor.{InvokeAllMethodAdvisor, PointMethodAdvisor}
+import akka.kamon.instrumentation.advisor.PointMethodAdvisor
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
@@ -54,21 +54,6 @@ class ActorSystemMessageInstrumentation extends KamonInstrumentation {
     builder
       .withMixin(classOf[TraceContextMixin])
       .withAdvisorFor(PointMethod, classOf[PointMethodAdvisor])
-      .build()
-  }
-
-  /**
-   * Instrument:
-   *
-   * akka.actor.ActorCell::invokeAll
-   *
-   */
-
-  val InvokeAllMethod: Junction[MethodDescription] = named("invokeAll$1")
-
-  forTargetType("akka.actor.ActorCell") { builder ⇒
-    builder
-      .withAdvisorFor(InvokeAllMethod, classOf[InvokeAllMethodAdvisor])
       .build()
   }
 }

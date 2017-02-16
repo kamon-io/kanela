@@ -27,6 +27,7 @@ class ActorInstrumentation extends KamonInstrumentation {
 
   val Constructor: Junction[MethodDescription] = isConstructor()
   val InvokeMethod: Junction[MethodDescription] = named("invoke")
+  val InvokeAllMethod: Junction[MethodDescription] = named("invokeAll$1")
   val handleInvokeFailureMethod: Junction[MethodDescription] = named("handleInvokeFailure")
   val SendMessageMethod: Junction[MethodDescription] = named("sendMessage").and(takesArguments(1))
   val StopMethod: Junction[MethodDescription] = named("stop")
@@ -38,6 +39,7 @@ class ActorInstrumentation extends KamonInstrumentation {
    *
    * akka.actor.ActorCell::constructor
    * akka.actor.ActorCell::invoke
+   * akka.actor.ActorCell::invokeAll
    * akka.actor.ActorCell::sendMessage
    * akka.actor.ActorCell::stop
    *
@@ -51,6 +53,7 @@ class ActorInstrumentation extends KamonInstrumentation {
       .withMixin(classOf[ActorInstrumentationMixin])
       .withAdvisorFor(Constructor, classOf[ActorCellConstructorAdvisor])
       .withAdvisorFor(InvokeMethod, classOf[InvokeMethodAdvisor])
+      .withAdvisorFor(InvokeAllMethod, classOf[InvokeAllMethodAdvisor])
       .withAdvisorFor(handleInvokeFailureMethod, classOf[HandleInvokeFailureMethodAdvisor])
       .withAdvisorFor(SendMessageMethod, classOf[SendMessageMethodAdvisor])
       .withAdvisorFor(StopMethod, classOf[StopMethodAdvisor])
