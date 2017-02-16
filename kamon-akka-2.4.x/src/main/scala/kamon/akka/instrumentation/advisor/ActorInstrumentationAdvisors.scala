@@ -77,8 +77,7 @@ object HandleInvokeFailureMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodEnter
   def onEnter(@This cell: Cell,
               @Argument(1) failure: Throwable): Unit = {
-    if (failure != null)
-      actorInstrumentation(cell).processFailure(failure)
+    actorInstrumentation(cell).processFailure(failure)
   }
 }
 
