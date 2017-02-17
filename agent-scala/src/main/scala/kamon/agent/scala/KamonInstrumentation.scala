@@ -54,10 +54,6 @@ trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionS
     names.foreach(name => super.forTargetType(name, builder))
   }
 
-  def forType(typeDescription: => ElementMatcher[_ >: TypeDescription])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
-    super.forType(typeDescription, builder)
-  }
-
   implicit class PimpInstrumentationBuilder(instrumentationBuilder: InstrumentationDescription.Builder) {
     def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) = {
       addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
