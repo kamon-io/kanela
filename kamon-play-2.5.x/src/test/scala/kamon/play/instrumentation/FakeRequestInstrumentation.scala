@@ -19,7 +19,7 @@ package kamon.play.instrumentation
 import kamon.agent.scala.KamonInstrumentation
 import kamon.play.instrumentation.mixin.InjectTraceContext
 
-class FakeRequestIntrumentation extends KamonInstrumentation {
+class FakeRequestInstrumentation extends KamonInstrumentation {
 
   forSubtypeOf("play.api.test.FakeRequest") { builder =>
     builder
