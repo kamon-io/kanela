@@ -18,8 +18,6 @@ package kamon.servlet.instrumentation
 
 import javax.servlet.{ ServletRequest, ServletResponse }
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.servlet.instrumentation.advisor.{ ResponseStatusAdvisor, ServiceMethodAdvisor }
@@ -30,7 +28,7 @@ class ServletInstrumentation extends KamonInstrumentation {
   /**
    * javax.servlet.Servlet::service
    */
-  val ServiceMethod: Junction[MethodDescription] = named("service")
+  val ServiceMethod = named("service")
     .and(takesArguments(classOf[ServletRequest], classOf[ServletResponse]))
     .and(not(isAbstract()))
 
@@ -45,7 +43,7 @@ class ServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.http.HttpServletResponse::sendError
    */
   val SetStatusMethod = named("setStatus")
-  val SendErrorMethod: Junction[MethodDescription] = named("sendError").and(takesArguments(classOf[Int]))
+  val SendErrorMethod = named("sendError").and(takesArguments(classOf[Int]))
 
   forSubtypeOf("javax.servlet.http.HttpServletResponse") { builder ⇒
     builder

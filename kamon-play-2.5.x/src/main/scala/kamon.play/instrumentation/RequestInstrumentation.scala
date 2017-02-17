@@ -16,8 +16,6 @@
 
 package kamon.play.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.scala.KamonInstrumentation
 import kamon.play.instrumentation.advisor.{FiltersFieldAdvisor, RouteRequestAdvisor}
 import kamon.play.instrumentation.interceptor.{ErrorInterceptor, GlobalSettingsFiltersInterceptor}
@@ -26,10 +24,10 @@ import play.api.mvc.EssentialFilter
 
 class RequestInstrumentation extends KamonInstrumentation {
 
-  val DefaultHttpRequestHandlerConstructor: Junction[MethodDescription] = isConstructor().and(withArgument(3, classOf[Seq[EssentialFilter]]))
+  val DefaultHttpRequestHandlerConstructor = isConstructor().and(withArgument(3, classOf[Seq[EssentialFilter]]))
   val RouteRequestMethod = named("routeRequest")
   val FiltersMethod = named("filters")
-  val OnServerOrOnClientErrorMethod: Junction[MethodDescription] = named("onClientError").or(named("onServerError"))
+  val OnServerOrOnClientErrorMethod = named("onClientError").or(named("onServerError"))
 
   forSubtypeOf("play.api.mvc.RequestHeader") { builder =>
     builder
