@@ -17,9 +17,6 @@
 import Dependencies._
 import sbt.Tests._
 
-val `akka-2.3` = "2.3.13"
-val `akka-2.4` = "2.4.14"
-
 def akkaDependency(name: String, version: String) = {
   "com.typesafe.akka" %% s"akka-$name" % version
 }
@@ -147,6 +144,26 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
     compileScope(kamonCore, play25, playWS25) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(playTest25))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
+lazy val kamonAkka23 = (project in file("kamon-akka-2.3.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    bintrayPackage := "kamon-akka",
+    moduleName := "kamon-akka-2.3",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8")))
+  .settings(
+    libraryDependencies ++=
+      compileScope(akkaDependency("actor", `akka-2.3`), kamonCore) ++
+        providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+        optionalScope(logbackClassic) ++
+        testScope(scalatest, akkaDependency("testkit", `akka-2.3`), akkaDependency("slf4j", `akka-2.3`), logbackClassic))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
