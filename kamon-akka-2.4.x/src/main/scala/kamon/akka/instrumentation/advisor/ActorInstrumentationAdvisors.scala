@@ -20,7 +20,7 @@ import akka.actor.{ActorRef, ActorSystem, Cell}
 import akka.kamon.instrumentation.{ActorMonitor, RouterMonitor}
 import akka.routing.RoutedActorCell
 import kamon.agent.libs.net.bytebuddy.asm.Advice._
-import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, InstrumentedEnvelope, RouterInstrumentationAware}
+import kamon.akka.instrumentation.mixin.{ActorInstrumentationAware, EnvelopeContext, InstrumentedEnvelope, RouterInstrumentationAware}
 import kamon.util.RelativeNanoTimestamp
 
 trait ActorInstrumentationSupport {
@@ -51,8 +51,11 @@ object InvokeMethodAdvisor extends ActorInstrumentationSupport {
   @OnMethodEnter
   def onEnter(@This cell: Cell,
     @Argument(0) envelope: Object): RelativeNanoTimestamp = {
-
-    actorInstrumentation(cell).processMessageStart(envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext())
+    // FIXME The `envelopeContext orElse Empty` code is a workaround to prevent NullPointer when the
+    // Envelope come from a RoutedActorCell in some cases as in the test
+    // `RouterMetricsSpec."clean up the associated recorder when the pool router is stopped"`
+    val context = Option(envelope.asInstanceOf[InstrumentedEnvelope].envelopeContext()).getOrElse(EnvelopeContext.Empty)
+    actorInstrumentation(cell).processMessageStart(context)
   }
 
   @OnMethodExit(onThrowable = classOf[Throwable])

@@ -162,13 +162,10 @@ lazy val kamonAkka24 = (project in file("kamon-akka-2.4.x"))
 //    scalaVersion := "2.12.1",
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.11.8"/*, "2.12.1"*/)))
-//    fork in Test := true,
-//    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
-//  .settings(aspectJSettings: _*)
   .settings(
     libraryDependencies ++=
       compileScope(akkaDependency("actor", `akka-2.4`), kamonCore) ++
-        providedScope(javaslang, typesafeConfig, slf4jApi, /*aspectJ, */kamonAgent) ++
+        providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
         optionalScope(logbackClassic) ++
         testScope(scalatest, akkaDependency("testkit", `akka-2.4`), akkaDependency("slf4j", `akka-2.4`), logbackClassic))
   .settings(excludeScalaLib: _*)
