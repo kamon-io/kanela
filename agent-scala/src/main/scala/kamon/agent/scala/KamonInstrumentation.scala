@@ -25,7 +25,6 @@ import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
 import kamon.agent.libs.net.bytebuddy.implementation.MethodDelegation
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.{ ElementMatchers => BBMatchers }
 import kamon.agent.libs.net.bytebuddy.utility.JavaModule
