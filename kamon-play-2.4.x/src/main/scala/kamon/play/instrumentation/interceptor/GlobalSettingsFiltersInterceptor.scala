@@ -14,30 +14,26 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation
+package kamon.play.instrumentation.interceptor
 
-import kamon.agent.scala.KamonInstrumentation
-import kamon.play.instrumentation.interceptor.LogInterceptor
+import java.util.concurrent.Callable
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.play.KamonFilter
+import play.api.http.HttpFilters
+import play.api.mvc.EssentialFilter
 
-class LoggerLikeInstrumentation extends KamonInstrumentation {
+/**
+  * Interceptor for play.api.GlobalSettings::filters
+  */
+class GlobalSettingsFiltersInterceptor
+object GlobalSettingsFiltersInterceptor {
 
-  val LogMethod = {
-    named("info")
-      .or(named("debug")
-        .or(named("warn")
-          .or(named("error")
-            .or(named("trace")))))
+  @RuntimeType
+  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+    KamonHttpFilters(callable.call(), KamonFilter)
   }
+}
 
-  forSubtypeOf("play.api.LoggerLike") { builder =>
-    builder
-      .withTransformationFor(LogMethod, classOf[LogInterceptor])
-      .build()
-  }
-
-  forSubtypeOf("play.LoggerLike") { builder =>
-    builder
-      .withTransformationFor(LogMethod, classOf[LogInterceptor])
-      .build()
-  }
+case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
+  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
 }

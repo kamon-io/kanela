@@ -16,9 +16,6 @@
 
 package kamon.scala.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.scala.instrumentation.interceptor.FutureInterceptor
 import kamon.scala.instrumentation.mixin.TraceContextMixin
@@ -38,7 +35,7 @@ class FutureInstrumentation extends KamonInstrumentation {
    *
    */
 
-  val RunMethod: Junction[MethodDescription] = named("run")
+  val RunMethod = named("run")
 
   forTargetType("scala.concurrent.impl.CallbackRunnable") { builder ⇒
     builder

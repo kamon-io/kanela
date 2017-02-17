@@ -16,15 +16,12 @@
 
 package kamon.play.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
 import kamon.agent.scala.KamonInstrumentation
 import kamon.play.instrumentation.interceptor.LogInterceptor
 
 class LoggerLikeInstrumentation extends KamonInstrumentation {
 
-  val LogMethod: Junction[MethodDescription] = {
+  val LogMethod = {
     named("info")
       .or(named("debug")
         .or(named("warn")
@@ -32,13 +29,7 @@ class LoggerLikeInstrumentation extends KamonInstrumentation {
             .or(named("trace")))))
   }
 
-  forSubtypeOf("play.api.LoggerLike") { builder =>
-    builder
-      .withTransformationFor(LogMethod, classOf[LogInterceptor])
-      .build()
-  }
-
-  forSubtypeOf("play.LoggerLike") { builder =>
+  forSubtypeOf("play.api.LoggerLike", "play.LoggerLike") { builder =>
     builder
       .withTransformationFor(LogMethod, classOf[LogInterceptor])
       .build()

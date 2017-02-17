@@ -16,15 +16,12 @@
 
 package kamon.play.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.play.instrumentation.interceptor.WSInterceptor
 
 class WSInstrumentation extends KamonInstrumentation {
 
-  val ExecuteMethod: Junction[MethodDescription] = named("execute").and(takesArguments(0))
+  val ExecuteMethod = named("execute").and(takesArguments(0))
 
   forSubtypeOf("play.api.libs.ws.WSRequest") { builder =>
     builder

@@ -18,10 +18,9 @@ package app.kamon.instrumentation
 
 import app.kamon.instrumentation.advisor.FakeWorkerAdvisor
 import app.kamon.instrumentation.mixin.MonitorMixin
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import kamon.agent.scala.KamonInstrumentation
 
-class MonitorInstrumentation extends scala.KamonInstrumentation {
+class MonitorInstrumentation extends KamonInstrumentation {
 
   forTargetType("app.kamon.FakeWorker") { builder ⇒
     builder

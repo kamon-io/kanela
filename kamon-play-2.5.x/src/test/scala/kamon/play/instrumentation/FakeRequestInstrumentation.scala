@@ -14,27 +14,16 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.interceptor
+package kamon.play.instrumentation
 
-import java.util.concurrent.Callable
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.mixin.InjectTraceContext
 
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.play.KamonFilter
-import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
+class FakeRequestInstrumentation extends KamonInstrumentation {
 
-/**
-  * Interceptor for play.api.GlobalSettings::filters
-  */
-class GlocalSettingsFiltersInterceptor
-object GlocalSettingsFiltersInterceptor {
-
-  @RuntimeType
-  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
-    KamonHttpFilters(callable.call(), KamonFilter)
+  forSubtypeOf("play.api.test.FakeRequest") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
   }
-}
-
-case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
 }

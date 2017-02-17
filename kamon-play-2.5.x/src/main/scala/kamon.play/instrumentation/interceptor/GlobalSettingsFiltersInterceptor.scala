@@ -17,6 +17,7 @@
 package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
+
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
 import kamon.play.KamonFilter
 import play.api.http.HttpFilters
@@ -25,11 +26,11 @@ import play.api.mvc.EssentialFilter
 /**
   * Interceptor for play.api.GlobalSettings::filters
   */
-class GlocalSettingsFiltersInterceptor
-object GlocalSettingsFiltersInterceptor {
+class GlobalSettingsFiltersInterceptor
+object GlobalSettingsFiltersInterceptor {
 
   @RuntimeType
-  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+  def filtersWithKamon(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
     KamonHttpFilters(callable.call(), KamonFilter)
   }
 }

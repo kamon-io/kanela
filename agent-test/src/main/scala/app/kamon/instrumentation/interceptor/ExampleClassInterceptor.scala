@@ -22,7 +22,7 @@ import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{ RuntimeTy
 object ExampleClassInterceptor {
 
   @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[_]): Any = {
+  def aroundCall(@SuperCall callable: Callable[_]): Any = {
     callable.call()
   }
 }
