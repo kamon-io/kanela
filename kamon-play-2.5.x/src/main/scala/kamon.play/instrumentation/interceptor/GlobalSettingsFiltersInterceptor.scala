@@ -30,7 +30,7 @@ class GlobalSettingsFiltersInterceptor
 object GlobalSettingsFiltersInterceptor {
 
   @RuntimeType
-  def prepareStatement(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+  def filtersWithKamon(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
     KamonHttpFilters(callable.call(), KamonFilter)
   }
 }
