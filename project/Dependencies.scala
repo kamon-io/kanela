@@ -25,6 +25,7 @@ object Dependencies {
     "Kamon Snapshots" at "http://snapshots.kamon.io"
   )
 
+  val play25Version     = "2.5.4"
 
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
@@ -46,6 +47,11 @@ object Dependencies {
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-3"
+
+  //play 2.5.x
+  val play25            = "com.typesafe.play"         %%  "play"                  % play25Version
+  val playWS25          = "com.typesafe.play"         %%  "play-ws"               % play25Version
+  val playTest25        = "org.scalatestplus.play"    %%  "scalatestplus-play"    % "1.5.0"
 
   val kamonAgent        = "io.kamon"                  % "agent"                   % "0.0.1" classifier "assembly"
 

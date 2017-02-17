@@ -9,6 +9,7 @@ runTests () {
     && sbt "project agentTest" +test \
     && sbt "project kamonScala" +test \
     && sbt "project kamonServlet" +test \
+    && sbt "project kamonPlay25" +test \
     || exit 1
   echo "[info] $(date) - finished sbt test"
 }

@@ -14,17 +14,27 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package kamon.play.instrumentation.interceptor
 
-import app.kamon.instrumentation.advisor.TestMethodAdvisor
-import kamon.agent.scala.KamonInstrumentation
+import java.util.concurrent.Callable
 
-class StoppableInstrumentation extends KamonInstrumentation {
-  val methodName = named("addValue")
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.play.KamonFilter
+import play.api.http.HttpFilters
+import play.api.mvc.EssentialFilter
 
-  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
-    builder
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .build()
+/**
+  * Interceptor for play.api.GlobalSettings::filters
+  */
+class GlobalSettingsFiltersInterceptor
+object GlobalSettingsFiltersInterceptor {
+
+  @RuntimeType
+  def filtersWithKamon(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
+    KamonHttpFilters(callable.call(), KamonFilter)
   }
+}
+
+case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
+  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
 }

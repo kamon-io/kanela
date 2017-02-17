@@ -15,6 +15,7 @@
  */
 
 import Dependencies._
+import sbt.Tests._
 
 lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
@@ -67,7 +68,6 @@ lazy val agentTest = (project in file("agent-test"))
     compileScope(kamonAutowave, slf4jApi, logbackCore, logbackClassic, javaslang) ++
       testScope(scalatest, mockito) ++
     providedScope(lombok, typesafeConfig, kamonAgent))
-  .settings((javaOptions in Test) ++= Seq("-Xcheck:jni"))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
@@ -96,6 +96,23 @@ lazy val kamonScala = (project in file("kamon-scala"))
     compileScope(kamonCore) ++
     providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(scalatest, akkaTestKit))
+  .settings(excludeScalaLib: _*)
+  .settings(notAggregateInAssembly: _*)
+
+lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    moduleName := "kamon-play-2.5",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8"),
+    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
+  .settings(libraryDependencies ++=
+    compileScope(kamonCore, play25, playWS25) ++
+    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    testScope(playTest25))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
@@ -136,3 +153,10 @@ lazy val agentTestSettings = AgentTest.settings
 
 lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
 
+def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
+  tests map { test =>
+    Group(
+      name = test.name,
+      tests = Seq(test),
+      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
+  }

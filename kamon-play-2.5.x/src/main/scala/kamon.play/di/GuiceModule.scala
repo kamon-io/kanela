@@ -14,17 +14,30 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation
+package kamon.play.di
 
-import app.kamon.instrumentation.advisor.TestMethodAdvisor
-import kamon.agent.scala.KamonInstrumentation
+import javax.inject._
+import kamon.Kamon
+import play.api.inject.{ ApplicationLifecycle, Module }
+import play.api.{ Configuration, Environment, Logger }
+import scala.concurrent.Future
 
-class StoppableInstrumentation extends KamonInstrumentation {
-  val methodName = named("addValue")
+class GuiceModule extends Module {
+  def bindings(environment: Environment, configuration: Configuration) = {
+    Seq(bind[GuiceModule.KamonLoader].toSelf.eagerly())
+  }
+}
 
-  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
-    builder
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .build()
+object GuiceModule {
+
+  @Singleton
+  class KamonLoader @Inject() (lifecycle: ApplicationLifecycle, environment: Environment, configuration: Configuration) {
+    Logger(classOf[KamonLoader]).debug("Starting Kamon.")
+
+    Kamon.start(configuration.underlying)
+
+    lifecycle.addStopHook { () ⇒
+      Future.successful(Kamon.shutdown())
+    }
   }
 }

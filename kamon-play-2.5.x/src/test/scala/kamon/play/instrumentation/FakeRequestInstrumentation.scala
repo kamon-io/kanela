@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,20 +14,16 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.advisor
+package kamon.play.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
-import kamon.trace.{ TraceContextAware, Tracer }
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.mixin.InjectTraceContext
 
-/**
- * Advisor for scala.concurrent.impl.CallbackRunnable::run
- * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
- */
-class RunMethodAdvisor
-object RunMethodAdvisor {
-  @OnMethodEnter
-  def onEnter(@This runnable: TraceContextAware): Unit = Tracer.setCurrentContext(runnable.traceContext)
+class FakeRequestInstrumentation extends KamonInstrumentation {
 
-  @OnMethodExit
-  def onExit(): Unit = Tracer.currentContext.finish()
+  forSubtypeOf("play.api.test.FakeRequest") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
+  }
 }

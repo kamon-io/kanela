@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,18 +14,16 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.mixin
+package kamon.play.action
 
-import kamon.agent.api.instrumentation.Initializer
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import kamon.trace.Tracer
+import play.api.mvc._
+import scala.concurrent.Future
 
-/**
-  * Mixin for scala.concurrent.impl.CallbackRunnable
-  * Mixin for scala.concurrent.impl.Future$PromiseCompletingRunnable
-  */
-class TraceContextMixin extends TraceContextAware {
-  var traceContext: TraceContext = _
-
-  @Initializer
-  def init(): Unit = this.traceContext = Tracer.currentContext
+case class TraceName[A](name: String)(action: Action[A]) extends Action[A] {
+  def apply(request: Request[A]): Future[Result] = {
+    Tracer.currentContext.rename(name)
+    action(request)
+  }
+  lazy val parser = action.parser
 }

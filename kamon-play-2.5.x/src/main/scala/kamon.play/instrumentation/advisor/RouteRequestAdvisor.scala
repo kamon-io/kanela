@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,18 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.mixin
+package kamon.play.instrumentation.advisor
 
-import kamon.agent.api.instrumentation.Initializer
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import kamon.Kamon.tracer
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, OnMethodEnter}
+import kamon.play.PlayExtension
+import kamon.trace.Tracer
+import play.api.mvc.RequestHeader
 
 /**
-  * Mixin for scala.concurrent.impl.CallbackRunnable
-  * Mixin for scala.concurrent.impl.Future$PromiseCompletingRunnable
+  * Advisor for play.api.http.DefaultHttpRequestHandler::routeRequest
   */
-class TraceContextMixin extends TraceContextAware {
-  var traceContext: TraceContext = _
+class RouteRequestAdvisor
+object RouteRequestAdvisor {
 
-  @Initializer
-  def init(): Unit = this.traceContext = Tracer.currentContext
+  @OnMethodEnter
+  def onEnter(@Argument(0) requestHeader: RequestHeader): Unit = {
+    val token = if (PlayExtension.includeTraceToken) {
+      requestHeader.headers.get(PlayExtension.traceTokenHeaderName)
+    } else None
+
+    Tracer.setCurrentContext(tracer.newContext("UnnamedTrace", token))
+  }
+
 }

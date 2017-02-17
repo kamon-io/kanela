@@ -14,18 +14,25 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.mixin
+package kamon.scala.instrumentation.interceptor
 
-import kamon.agent.api.instrumentation.Initializer
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import java.util.concurrent.Callable
+
+import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall, This}
+import kamon.trace.{TraceContextAware, Tracer}
 
 /**
-  * Mixin for scala.concurrent.impl.CallbackRunnable
-  * Mixin for scala.concurrent.impl.Future$PromiseCompletingRunnable
+  * Interceptor for scala.concurrent.impl.CallbackRunnable::run
+  * Interceptor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
   */
-class TraceContextMixin extends TraceContextAware {
-  var traceContext: TraceContext = _
+class FutureInterceptor
+object FutureInterceptor {
 
-  @Initializer
-  def init(): Unit = this.traceContext = Tracer.currentContext
+  @RuntimeType
+  def aroundExecution(@SuperCall callable: Callable[Any], @This runnable: TraceContextAware): Any = {
+    Tracer.withContext(runnable.traceContext) {
+      callable.call()
+    }
+  }
+
 }

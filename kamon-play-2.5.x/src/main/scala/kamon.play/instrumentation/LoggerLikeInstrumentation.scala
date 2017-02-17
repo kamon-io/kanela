@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
@@ -14,18 +14,24 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.mixin
+package kamon.play.instrumentation
 
-import kamon.agent.api.instrumentation.Initializer
-import kamon.trace.{ TraceContext, TraceContextAware, Tracer }
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.interceptor.LogInterceptor
 
-/**
-  * Mixin for scala.concurrent.impl.CallbackRunnable
-  * Mixin for scala.concurrent.impl.Future$PromiseCompletingRunnable
-  */
-class TraceContextMixin extends TraceContextAware {
-  var traceContext: TraceContext = _
+class LoggerLikeInstrumentation extends KamonInstrumentation {
 
-  @Initializer
-  def init(): Unit = this.traceContext = Tracer.currentContext
+  val LogMethod = {
+    named("info")
+      .or(named("debug")
+        .or(named("warn")
+          .or(named("error")
+            .or(named("trace")))))
+  }
+
+  forSubtypeOf("play.api.LoggerLike", "play.LoggerLike") { builder =>
+    builder
+      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .build()
+  }
 }
