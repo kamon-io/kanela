@@ -159,9 +159,8 @@ lazy val kamonAkka24 = (project in file("kamon-akka-2.4.x"))
   .settings(Seq(
     bintrayPackage := "kamon-akka",
     moduleName := "kamon-akka-2.4",
-//    scalaVersion := "2.12.1",
-    scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.11.8"/*, "2.12.1"*/)))
+    scalaVersion := "2.12.1",
+    crossScalaVersions := Seq("2.11.8", "2.12.1")))
   .settings(
     libraryDependencies ++=
       compileScope(akkaDependency("actor", `akka-2.4`), kamonCore) ++
