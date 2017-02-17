@@ -16,9 +16,9 @@
 
 package app.kamon.instrumentation
 
-import kamon.agent.scala
+import kamon.agent.scala.KamonInstrumentation
 
-class MultiMixinsInstrumentation extends scala.KamonInstrumentation {
+class MultiMixinsInstrumentation extends KamonInstrumentation {
   import app.kamon.instrumentation.mixin.MixinOverMixin._
 
   forTargetType("app.kamon.cases.multimixins.WithMultiMixinsClass") { builder ⇒

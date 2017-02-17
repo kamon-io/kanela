@@ -16,9 +16,6 @@
 
 package kamon.servlet.instrumentation
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.servlet.instrumentation.advisor._
 import kamon.servlet.instrumentation.mixin.AsyncContextMixin
@@ -30,8 +27,8 @@ class AsyncServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.AsyncContext::start
    * javax.servlet.AsyncContext::complete
    */
-  val StartMethod: Junction[MethodDescription] = named("start")
-  val CompleteMethod: Junction[MethodDescription] = named("complete")
+  val StartMethod = named("start")
+  val CompleteMethod = named("complete")
 
   forSubtypeOf("javax.servlet.AsyncContext") { builder ⇒
     builder
@@ -45,7 +42,7 @@ class AsyncServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.ServletRequest::startAsync()
    * javax.servlet.ServletRequest::startAsync(request,response)
    */
-  val StartAsyncMethod: Junction[MethodDescription] = named("startAsync")
+  val StartAsyncMethod = named("startAsync")
 
   forSubtypeOf("javax.servlet.ServletRequest") { builder ⇒
     builder

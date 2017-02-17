@@ -31,7 +31,7 @@ class ServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.Servlet::service
    */
   val ServiceMethod: Junction[MethodDescription] = named("service")
-    .and(takesArguments[MethodDescription](classOf[ServletRequest], classOf[ServletResponse]))
+    .and(takesArguments(classOf[ServletRequest], classOf[ServletResponse]))
     .and(not(isAbstract()))
 
   forSubtypeOf("javax.servlet.Servlet") { builder ⇒
@@ -44,7 +44,7 @@ class ServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.http.HttpServletResponse::setStatus
    * javax.servlet.http.HttpServletResponse::sendError
    */
-  val SetStatusMethod: Junction[MethodDescription] = named("setStatus")
+  val SetStatusMethod = named("setStatus")
   val SendErrorMethod: Junction[MethodDescription] = named("sendError").and(takesArguments(classOf[Int]))
 
   forSubtypeOf("javax.servlet.http.HttpServletResponse") { builder ⇒
