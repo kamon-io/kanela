@@ -17,21 +17,15 @@
 package kamon.play.instrumentation
 
 import kamon.agent.scala.KamonInstrumentation
-import kamon.play.instrumentation.interceptor.LogInterceptor
+import kamon.play.instrumentation.interceptor.LogAdvisor
 
 class LoggerLikeInstrumentation extends KamonInstrumentation {
 
-  val LogMethod = {
-    named("info")
-      .or(named("debug")
-        .or(named("warn")
-          .or(named("error")
-            .or(named("trace")))))
-  }
+  val LogMethod = named("info").or(named("debug").or(named("warn").or(named("error").or(named("trace")))))
 
-  forSubtypeOf("play.api.LoggerLike", "play.LoggerLike") { builder =>
+  forSubtypeOf("play.api.LoggerLike" or "play.LoggerLike") { builder =>
     builder
-      .withTransformationFor(LogMethod, classOf[LogInterceptor])
+      .withAdvisorFor(LogMethod, classOf[LogAdvisor])
       .build()
   }
 }

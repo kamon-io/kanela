@@ -25,7 +25,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import static java.text.MessageFormat.format;
-import static utils.AnsiColor.ParseColors;
+import static kamon.agent.util.AnsiColor.ParseColors;
 
 @Value(staticConstructor = "instance")
 @EqualsAndHashCode(callSuper = false)

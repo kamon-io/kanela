@@ -26,7 +26,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 
-public class AgentUtil {
+public class LatencyUtils {
 
     public static long timed(final Runnable thunk) {
         val startMillis = System.nanoTime();
