@@ -16,12 +16,12 @@
 
 package kamon.agent.util.matcher;
 
-import kamon.agent.util.AgentUtil;
+import kamon.agent.util.LatencyUtils;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.matcher.ElementMatcher;
-import utils.AnsiColor;
+import kamon.agent.util.AnsiColor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,7 +54,7 @@ public class TimedMatcher<T> implements ElementMatcher<T> {
 
     @Override
     public boolean matches(T target) {
-        return AgentUtil.withTimeSpent(() -> underlyingMatcher.matches(target), (timeSpentInNanoseconds) -> {
+        return LatencyUtils.withTimeSpent(() -> underlyingMatcher.matches(target), (timeSpentInNanoseconds) -> {
             val key = type + "-" + transformer;
             accumulatedTimeByType.merge(key, new TypeMatcherMetrics(timeSpentInNanoseconds, 1), (acc, current) -> acc.merge(current.getTime()));
         });

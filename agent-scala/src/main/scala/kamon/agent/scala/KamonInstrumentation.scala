@@ -18,16 +18,17 @@ package kamon.agent.scala
 
 import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
 
-import kamon.agent.api.instrumentation.InstrumentationDescription
-import kamon.agent.api.instrumentation.{ KamonInstrumentation => JKamonInstrumentation }
+import kamon.agent.api.instrumentation.{InstrumentationDescription, KamonInstrumentation => JKamonInstrumentation}
 import kamon.agent.libs.javaslang.{Function1 => JFunction1, Function2 => JFunction2, Function4 => JFunction4}
 import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
 import kamon.agent.libs.net.bytebuddy.implementation.MethodDelegation
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.{ ElementMatchers => BBMatchers }
+import kamon.agent.libs.net.bytebuddy.matcher.{ElementMatchers => BBMatchers}
 import kamon.agent.libs.net.bytebuddy.utility.JavaModule
+
+import scala.collection.immutable.Seq
 
 trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionSugar {
 
@@ -45,18 +46,39 @@ trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionS
   implicit def toJavaFunction1[A, B](f: (A) ⇒ B): JFunction1[A, B] =
     new JFunction1[A, B]() { def apply(t1: A): B = f(t1) }
 
-  def forSubtypeOf(names: String*)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
-    names.foreach(name => super.forSubtypeOf(name, builder))
+  def forSubtypeOf(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+    super.forSubtypeOf(name, builder)
   }
 
-  def forTargetType(names: String*)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
-    names.foreach(name => super.forTargetType(name, builder))
+  def forSubtypeOf(names: Seq[String])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+    names.foreach(forSubtypeOf(_, builder))
+  }
+
+  def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+     super.forTargetType(name, builder)
+  }
+
+  def forTargetType(names: Seq[String])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+    names.foreach(forTargetType(_)(builder))
+  }
+
+  implicit class OrSyntax(left: String) {
+    def or(right: String): Seq[String] = Seq(left, right)
+  }
+
+  implicit class MultipleOrSyntax(names: Seq[String]) {
+    def or(name:String): Seq[String] = names ++ Seq(name)
   }
 
   implicit class PimpInstrumentationBuilder(instrumentationBuilder: InstrumentationDescription.Builder) {
     def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) = {
       addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
     }
+
+    def withTransformationFor(method:Junction[MethodDescription], delegate:AnyRef) = {
+      addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
+    }
+
     def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader, JavaModule) ⇒ Builder[_]) = instrumentationBuilder.withTransformation(f)
   }
 }
@@ -66,6 +88,6 @@ trait MethodDescriptionSugar {
   def isAbstract(): Junction[MethodDescription] = BBMatchers.isAbstract()
   def named(name: String): Junction[MethodDescription] = BBMatchers.named(name)
   def takesArguments(quantity: Int): Junction[MethodDescription] = BBMatchers.takesArguments(quantity)
-  def takesArguments(clazzs: Class[_]*): Junction[MethodDescription] = BBMatchers.takesArguments(clazzs: _*)
+  def takesArguments(classes: Class[_]*): Junction[MethodDescription] = BBMatchers.takesArguments(classes: _*)
   def withArgument(index: Int, `type`: Class[_]): Junction[MethodDescription] = BBMatchers.takesArgument(index, `type`)
 }
