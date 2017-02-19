@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,9 +17,6 @@
 package akka.kamon.instrumentation
 
 import akka.kamon.instrumentation.advisor.PointMethodAdvisor
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.instrumentation.mixin.TraceContextMixin
 
@@ -47,13 +44,10 @@ class ActorSystemMessageInstrumentation extends KamonInstrumentation {
    * akka.actor.RepointableActorRef with kamon.trace.TraceContextAware
    *
    */
-
-  val PointMethod: Junction[MethodDescription] = named("point")
-
   forTargetType("akka.actor.RepointableActorRef") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
-      .withAdvisorFor(PointMethod, classOf[PointMethodAdvisor])
+      .withAdvisorFor(named("point"), classOf[PointMethodAdvisor])
       .build()
   }
 }

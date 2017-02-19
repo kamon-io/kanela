@@ -19,7 +19,7 @@ package kamon.agent.util.banner;
 import kamon.agent.BuildInfo;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
-import utils.AnsiColor;
+import kamon.agent.util.AnsiColor;
 
 public class AgentBanner {
 

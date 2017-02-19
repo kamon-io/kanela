@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,9 +17,6 @@
 package akka.kamon.instrumentation
 
 import akka.kamon.instrumentation.advisor._
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.instrumentation.mixin.{ActorSystemAwareMixin, LookupDataAwareMixin}
 
@@ -31,13 +28,10 @@ class DispatcherInstrumentation extends KamonInstrumentation {
    *  akka.dispatch.Dispatchers::lookup
    *
    */
-
-  val LookupMethod: Junction[MethodDescription] = named("lookup")
-
   forTargetType("akka.dispatch.Dispatchers") { builder ⇒
     builder
       .withMixin(classOf[ActorSystemAwareMixin])
-      .withAdvisorFor(LookupMethod, classOf[LookupMethodAdvisor])
+      .withAdvisorFor(named("lookup"), classOf[LookupMethodAdvisor])
       .build()
   }
 
@@ -47,12 +41,9 @@ class DispatcherInstrumentation extends KamonInstrumentation {
    * akka.actor.ActorSystemImpl::start
    *
    */
-
-  val StartMethod: Junction[MethodDescription] = named("start")
-
   forTargetType("akka.actor.ActorSystemImpl") { builder ⇒
     builder
-      .withAdvisorFor(StartMethod, classOf[StartMethodAdvisor])
+      .withAdvisorFor(named("start"), classOf[StartMethodAdvisor])
       .build()
   }
 
@@ -65,15 +56,11 @@ class DispatcherInstrumentation extends KamonInstrumentation {
    *
    *
    */
-
-  val Constructor: Junction[MethodDescription] = isConstructor()
-  val CreateExecutorServiceMethod: Junction[MethodDescription] = named("createExecutorService")
-
   forSubtypeOf("akka.dispatch.ExecutorServiceFactory") { builder ⇒
     builder
       .withMixin(classOf[LookupDataAwareMixin])
-      .withAdvisorFor(Constructor, classOf[ExecutorServiceFactoryConstructorAdvisor])
-      .withAdvisorFor(CreateExecutorServiceMethod, classOf[CreateExecutorServiceAdvisor])
+      .withAdvisorFor(isConstructor(), classOf[ExecutorServiceFactoryConstructorAdvisor])
+      .withAdvisorFor(named("createExecutorService"), classOf[CreateExecutorServiceAdvisor])
       .build()
   }
 
@@ -88,16 +75,12 @@ class DispatcherInstrumentation extends KamonInstrumentation {
    *
    *
    */
-
-  val CopyMethod: Junction[MethodDescription] = named("copy")
-  val ShutdownMethod: Junction[MethodDescription] = named("shutdown")
-
   forSubtypeOf("akka.dispatch.ExecutorServiceDelegate") { builder ⇒
     builder
       .withMixin(classOf[LookupDataAwareMixin])
-      .withAdvisorFor(Constructor, classOf[LazyExecutorServiceDelegateConstructorAdvisor])
-      .withAdvisorFor(CopyMethod, classOf[CopyMethodAdvisor])
-      .withAdvisorFor(ShutdownMethod, classOf[ShutdownMethodAdvisor])
+      .withAdvisorFor(isConstructor(), classOf[LazyExecutorServiceDelegateConstructorAdvisor])
+      .withAdvisorFor(named("copy"), classOf[CopyMethodAdvisor])
+      .withAdvisorFor(named("shutdown"), classOf[ShutdownMethodAdvisor])
       .build()
   }
 
@@ -106,12 +89,9 @@ class DispatcherInstrumentation extends KamonInstrumentation {
    *
    * akka.routing.BalancingPool::newRoutee
    */
-
-  val NewRouteeMethod: Junction[MethodDescription] = named("newRoutee")
-
   forTargetType("akka.routing.BalancingPool") { builder ⇒
     builder
-      .withAdvisorFor(NewRouteeMethod, classOf[NewRouteeMethodAdvisor])
+      .withAdvisorFor(named("newRoutee"), classOf[NewRouteeMethodAdvisor])
       .build()
   }
 }

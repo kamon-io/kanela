@@ -16,19 +16,21 @@
 
 package kamon.agent.scala
 
-import java.util.function.{ BiFunction ⇒ JBifunction, Supplier ⇒ JSupplier }
+import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
 
-import kamon.agent.api.instrumentation.InstrumentationDescription
-import kamon.agent.libs.javaslang.{ Function1 ⇒ JFunction1, Function2 ⇒ JFunction2, Function4 ⇒ JFunction4 }
+import kamon.agent.api.instrumentation.{InstrumentationDescription, KamonInstrumentation => JKamonInstrumentation}
+import kamon.agent.libs.javaslang.{Function1 => JFunction1, Function2 => JFunction2, Function4 => JFunction4}
 import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
 import kamon.agent.libs.net.bytebuddy.implementation.MethodDelegation
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
+import kamon.agent.libs.net.bytebuddy.matcher.{ElementMatchers => BBMatchers}
 import kamon.agent.libs.net.bytebuddy.utility.JavaModule
 
-trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrumentation {
+import scala.collection.immutable.Seq
+
+trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionSugar {
 
   private implicit def toJavaFunction2[A, B, C](f: (A, B) ⇒ C): JFunction2[A, B, C] =
     new JFunction2[A, B, C]() { def apply(t1: A, t2: B): C = f(t1, t2) }
@@ -48,18 +50,44 @@ trait KamonInstrumentation extends kamon.agent.api.instrumentation.KamonInstrume
     super.forSubtypeOf(name, builder)
   }
 
-  def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
-    super.forTargetType(name, builder)
+  def forSubtypeOf(names: Seq[String])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+    names.foreach(forSubtypeOf(_, builder))
   }
 
-  def forType(typeDescription: => ElementMatcher[_ >: TypeDescription])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
-    super.forType(typeDescription, builder)
+  def forTargetType(name: String)(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+     super.forTargetType(name, builder)
+  }
+
+  def forTargetType(names: Seq[String])(builder: InstrumentationDescription.Builder ⇒ InstrumentationDescription): Unit = {
+    names.foreach(forTargetType(_)(builder))
+  }
+
+  implicit class OrSyntax(left: String) {
+    def or(right: String): Seq[String] = Seq(left, right)
+  }
+
+  implicit class MultipleOrSyntax(names: Seq[String]) {
+    def or(name:String): Seq[String] = names ++ Seq(name)
   }
 
   implicit class PimpInstrumentationBuilder(instrumentationBuilder: InstrumentationDescription.Builder) {
     def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) = {
       addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
     }
+
+    def withTransformationFor(method:Junction[MethodDescription], delegate:AnyRef) = {
+      addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
+    }
+
     def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader, JavaModule) ⇒ Builder[_]) = instrumentationBuilder.withTransformation(f)
   }
+}
+
+trait MethodDescriptionSugar {
+  def isConstructor(): Junction[MethodDescription] = BBMatchers.isConstructor()
+  def isAbstract(): Junction[MethodDescription] = BBMatchers.isAbstract()
+  def named(name: String): Junction[MethodDescription] = BBMatchers.named(name)
+  def takesArguments(quantity: Int): Junction[MethodDescription] = BBMatchers.takesArguments(quantity)
+  def takesArguments(classes: Class[_]*): Junction[MethodDescription] = BBMatchers.takesArguments(classes: _*)
+  def withArgument(index: Int, `type`: Class[_]): Junction[MethodDescription] = BBMatchers.takesArgument(index, `type`)
 }

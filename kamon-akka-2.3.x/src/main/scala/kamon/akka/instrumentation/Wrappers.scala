@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -25,7 +25,7 @@ import kamon.trace.Tracer
 
 object Wrappers {
   /**
-   * Wrap a akka.actor.Cell in order to propagate the current TraceContext when calling sendMessage method
+   * Wrap an akka.actor.Cell in order to propagate the current TraceContext when calling sendMessage method
    */
   class TraceContextAwareCell(underlying: Cell) extends Cell {
     def self: ActorRef = underlying.self

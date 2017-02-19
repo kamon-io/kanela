@@ -17,13 +17,10 @@
 package app.kamon.instrumentation
 
 import app.kamon.instrumentation.advisor.TestMethodAdvisor
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import kamon.agent.scala.KamonInstrumentation
 
-class StoppableInstrumentation extends scala.KamonInstrumentation {
-  val methodName: Junction[MethodDescription] = named("addValue")
+class StoppableInstrumentation extends KamonInstrumentation {
+  val methodName = named("addValue")
 
   forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
     builder

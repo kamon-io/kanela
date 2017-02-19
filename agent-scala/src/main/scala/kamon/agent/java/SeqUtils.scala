@@ -14,27 +14,10 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.interceptor
+package kamon.agent.java
 
-import java.util.concurrent.Callable
+import scala.collection.Seq
 
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.play.KamonFilter
-import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
-
-/**
-  * Interceptor for play.api.GlobalSettings::filters
-  */
-class GlocalSettingsFiltersInterceptor
-object GlocalSettingsFiltersInterceptor {
-
-  @RuntimeType
-  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
-    KamonHttpFilters(callable.call(), KamonFilter)
-  }
-}
-
-case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
+object SeqUtils {
+  def append[T](seq: Seq[T], value: T): Seq[T] = seq :+ value
 }

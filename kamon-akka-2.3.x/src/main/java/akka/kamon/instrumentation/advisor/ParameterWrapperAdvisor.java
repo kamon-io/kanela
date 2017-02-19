@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 package akka.kamon.instrumentation.advisor;
 
 import akka.actor.Cell;
+import akka.kamon.instrumentation.Wrappers.TraceContextAwareCell;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.Argument;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
 
@@ -26,7 +27,7 @@ import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter;
 public class ParameterWrapperAdvisor {
     @OnMethodEnter
     public static void onEnter(@Argument(value = 0, readOnly = false) Cell cell) {
-        cell = new akka.kamon.instrumentation.Wrappers.TraceContextAwareCell(cell);
+        cell = new TraceContextAwareCell(cell);
     }
 }
 

@@ -18,8 +18,6 @@ package kamon.servlet.instrumentation
 
 import javax.servlet.{ ServletRequest, ServletResponse }
 
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.servlet.instrumentation.advisor.{ ResponseStatusAdvisor, ServiceMethodAdvisor }
@@ -30,8 +28,8 @@ class ServletInstrumentation extends KamonInstrumentation {
   /**
    * javax.servlet.Servlet::service
    */
-  val ServiceMethod: Junction[MethodDescription] = named("service")
-    .and(takesArguments[MethodDescription](classOf[ServletRequest], classOf[ServletResponse]))
+  val ServiceMethod = named("service")
+    .and(takesArguments(classOf[ServletRequest], classOf[ServletResponse]))
     .and(not(isAbstract()))
 
   forSubtypeOf("javax.servlet.Servlet") { builder ⇒
@@ -44,8 +42,8 @@ class ServletInstrumentation extends KamonInstrumentation {
    * javax.servlet.http.HttpServletResponse::setStatus
    * javax.servlet.http.HttpServletResponse::sendError
    */
-  val SetStatusMethod: Junction[MethodDescription] = named("setStatus")
-  val SendErrorMethod: Junction[MethodDescription] = named("sendError").and(takesArguments(classOf[Int]))
+  val SetStatusMethod = named("setStatus")
+  val SendErrorMethod = named("sendError").and(takesArguments(classOf[Int]))
 
   forSubtypeOf("javax.servlet.http.HttpServletResponse") { builder ⇒
     builder

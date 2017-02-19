@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
 import net.bytebuddy.utility.JavaModule;
-import utils.AnsiColor;
+import kamon.agent.util.AnsiColor;
 
 import static java.text.MessageFormat.format;
 

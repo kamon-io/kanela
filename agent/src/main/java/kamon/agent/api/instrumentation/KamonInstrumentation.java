@@ -73,12 +73,6 @@ public abstract class KamonInstrumentation {
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    public void forType(Supplier<ElementMatcher<? super TypeDescription>> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
-        val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(f.get()));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
-    }
-
     public void annotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(named(f.get()))));

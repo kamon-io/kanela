@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2016 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -18,9 +18,6 @@ package akka.kamon.instrumentation
 
 import akka.event.Logging.LogEvent
 import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, Enter, OnMethodEnter, OnMethodExit}
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers._
 import kamon.agent.scala.KamonInstrumentation
 import kamon.akka.instrumentation.mixin.TraceContextMixin
 import kamon.trace.{TraceContext, TraceContextAware, Tracer}
@@ -46,11 +43,9 @@ class ActorLoggingInstrumentation extends KamonInstrumentation {
    *  akka.event.slf4j.Slf4jLogger::withMdc
    *
    */
-  val WithMdcMethod: Junction[MethodDescription] = named("withMdc")
-
   forTargetType("akka.event.slf4j.Slf4jLogger") { builder ⇒
     builder
-      .withAdvisorFor(WithMdcMethod, classOf[WithMdcMethodAdvisor])
+      .withAdvisorFor(named("withMdc"), classOf[WithMdcMethodAdvisor])
       .build()
   }
 }

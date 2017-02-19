@@ -27,7 +27,7 @@ import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
-import static kamon.agent.util.AgentUtil.withTimeSpent;
+import static kamon.agent.util.LatencyUtils.withTimeSpent;
 
 @Value
 public class AgentEntryPoint {
@@ -46,7 +46,7 @@ public class AgentEntryPoint {
             Reinstrumenter.attach(instrumentation, configuration, transformers);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-        }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup complete in " + timeSpent + " ms"));
+        }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
     public static void premain(String args, Instrumentation instrumentation) {

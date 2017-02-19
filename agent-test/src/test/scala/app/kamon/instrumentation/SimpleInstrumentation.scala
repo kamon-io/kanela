@@ -18,13 +18,10 @@ package app.kamon.instrumentation
 
 import app.kamon.instrumentation.advisor.{ SpyAdvisor, TestMethodAdvisor }
 import app.kamon.instrumentation.mixin.SpyMixin
-import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher.Junction
-import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named
-import kamon.agent.scala
+import kamon.agent.scala.KamonInstrumentation
 
-class SimpleInstrumentation extends scala.KamonInstrumentation {
-  val methodName: Junction[MethodDescription] = named("addValue")
+class SimpleInstrumentation extends KamonInstrumentation {
+  val methodName = named("addValue")
 
   forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
     builder
