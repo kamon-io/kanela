@@ -14,22 +14,22 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.interceptor
+package kamon.play.instrumentation.advisor
 
-import java.util.concurrent.Callable
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
+import kamon.agent.libs.net.bytebuddy.asm.Advice
+import kamon.trace.Tracer
 import kamon.trace.logging.MdcKeysSupport
+import org.slf4j.MDC
 
 /**
-  * Interceptor for play.api.LoggerLike::{ info | debug | warn | error | trace }
-  * Interceptor for play.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.api.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.LoggerLike::{ info | debug | warn | error | trace }
   */
-class LogInterceptor
-object LogInterceptor {
+class LogAdvisor
+object LogAdvisor {
+  @Advice.OnMethodEnter
+  def onEnter(): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
 
-  @RuntimeType
-  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
-    callable.call()
-  }
-
+  @Advice.OnMethodExit
+  def onExit(@Advice.Enter keys: Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
 }

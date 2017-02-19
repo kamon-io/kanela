@@ -14,33 +14,22 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.interceptor
-
-import java.util.concurrent.Callable
+package kamon.play.instrumentation.advisor
 
 import kamon.agent.libs.net.bytebuddy.asm.Advice
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
 import kamon.trace.Tracer
 import kamon.trace.logging.MdcKeysSupport
 import org.slf4j.MDC
 
 /**
-  * Interceptor for play.api.LoggerLike::{ info | debug | warn | error | trace }
-  * Interceptor for play.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.api.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.LoggerLike::{ info | debug | warn | error | trace }
   */
-class LogInterceptor
-object LogInterceptor {
-  @RuntimeType
-  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
-    callable.call()
-  }
-}
-
 class LogAdvisor
 object LogAdvisor {
   @Advice.OnMethodEnter
-  def onEnter(@Advice.Argument(0) argument: () => String): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
+  def onEnter(): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
 
   @Advice.OnMethodExit
-  def onExit(@Advice.Enter keys:Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
+  def onExit(@Advice.Enter keys: Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
 }
