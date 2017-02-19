@@ -14,22 +14,16 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.advisor;
+package kamon.play.instrumentation
 
-import kamon.agent.java.SeqUtils;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
-import kamon.play.KamonFilter;
-import play.api.mvc.EssentialFilter;
-import scala.collection.Seq;
+import kamon.agent.scala.KamonInstrumentation
+import kamon.play.instrumentation.mixin.InjectTraceContext
 
-/**
- * Advisor for play.api.http.DefaultHttpRequestHandler::new
- */
-public class FiltersFieldAdvisor {
+class FakeRequestIntrumentation extends KamonInstrumentation {
 
-  @OnMethodExit
-  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
+  forSubtypeOf("play.api.test.FakeRequest") { builder =>
+    builder
+      .withMixin(classOf[InjectTraceContext])
+      .build()
   }
 }

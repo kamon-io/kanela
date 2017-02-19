@@ -14,22 +14,27 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.advisor;
+package kamon.play.instrumentation.advisor
 
-import kamon.agent.java.SeqUtils;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
-import kamon.play.KamonFilter;
-import play.api.mvc.EssentialFilter;
-import scala.collection.Seq;
+import kamon.Kamon.tracer
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Argument, OnMethodEnter}
+import kamon.play.PlayExtension
+import kamon.trace.Tracer
+import play.api.mvc.RequestHeader
 
 /**
- * Advisor for play.api.http.DefaultHttpRequestHandler::new
- */
-public class FiltersFieldAdvisor {
+  * Advisor for play.api.http.DefaultHttpRequestHandler::routeRequest
+  */
+class RouteRequestAdvisor
+object RouteRequestAdvisor {
 
-  @OnMethodExit
-  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
+  @OnMethodEnter
+  def onEnter(@Argument(0) requestHeader: RequestHeader): Unit = {
+    val token = if (PlayExtension.includeTraceToken) {
+      requestHeader.headers.get(PlayExtension.traceTokenHeaderName)
+    } else None
+
+    Tracer.setCurrentContext(tracer.newContext("UnnamedTrace", token))
   }
+
 }

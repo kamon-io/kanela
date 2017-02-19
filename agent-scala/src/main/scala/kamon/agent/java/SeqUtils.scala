@@ -14,22 +14,10 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.advisor;
+package kamon.agent.java
 
-import kamon.agent.java.SeqUtils;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
-import kamon.play.KamonFilter;
-import play.api.mvc.EssentialFilter;
-import scala.collection.Seq;
+import scala.collection.Seq
 
-/**
- * Advisor for play.api.http.DefaultHttpRequestHandler::new
- */
-public class FiltersFieldAdvisor {
-
-  @OnMethodExit
-  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
-  }
+object SeqUtils {
+  def append[T](seq: Seq[T], value: T): Seq[T] = seq :+ value
 }

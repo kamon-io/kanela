@@ -18,29 +18,33 @@ package kamon.play.instrumentation.interceptor
 
 import java.util.concurrent.Callable
 
-import kamon.agent.libs.net.bytebuddy.asm.Advice
 import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.trace.Tracer
-import kamon.trace.logging.MdcKeysSupport
-import org.slf4j.MDC
+import kamon.play.PlayExtension
+import kamon.trace.TraceContextAware
+import play.api.mvc.RequestHeader
+import play.api.mvc.Results.InternalServerError
 
 /**
-  * Interceptor for play.api.LoggerLike::{ info | debug | warn | error | trace }
-  * Interceptor for play.LoggerLike::{ info | debug | warn | error | trace }
+  * Interceptor for play.api.http.HttpErrorHandler::onClientError
+  * Interceptor for play.api.http.HttpErrorHandler::onServerError
   */
-class LogInterceptor
-object LogInterceptor {
+class ErrorInterceptor
+object ErrorInterceptor {
+
   @RuntimeType
-  def aroundLog(@SuperCall callable: Callable[Any]): Any = MdcKeysSupport.withMdc {
-    callable.call()
+  def onServerError(requestHeader: RequestHeader, ex: Throwable, @SuperCall r: Callable[Any]): Any = {
+    requestHeader.asInstanceOf[TraceContextAware].traceContext.collect { ctx ⇒
+      PlayExtension.httpServerMetrics.recordResponse(ctx.name, InternalServerError.header.status.toString)
+    }
+    r.call()
   }
-}
 
-class LogAdvisor
-object LogAdvisor {
-  @Advice.OnMethodEnter
-  def onEnter(@Advice.Argument(0) argument: () => String): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
+  @RuntimeType
+  def onClientError(requestHeader: RequestHeader, statusCode: Int,  message: String, @SuperCall r: Callable[Any]): Any= {
+    requestHeader.asInstanceOf[TraceContextAware].traceContext.collect { ctx ⇒
+      PlayExtension.httpServerMetrics.recordResponse(ctx.name, statusCode.toString)
+    }
+    r.call()
+  }
 
-  @Advice.OnMethodExit
-  def onExit(@Advice.Enter keys:Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
 }

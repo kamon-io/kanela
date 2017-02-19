@@ -14,22 +14,14 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.advisor;
+package kamon.play.instrumentation.mixin
 
-import kamon.agent.java.SeqUtils;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
-import kamon.play.KamonFilter;
-import play.api.mvc.EssentialFilter;
-import scala.collection.Seq;
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
 /**
- * Advisor for play.api.http.DefaultHttpRequestHandler::new
- */
-public class FiltersFieldAdvisor {
-
-  @OnMethodExit
-  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
-  }
+  * Mixin for play.api.mvc.RequestHeader
+  */
+class InjectTraceContext extends TraceContextAware {
+  // This has be a lazy val
+  @transient lazy val traceContext: TraceContext = Tracer.currentContext
 }

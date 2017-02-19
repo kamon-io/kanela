@@ -26,6 +26,7 @@ object Dependencies {
   )
 
   val play25Version     = "2.5.4"
+  val play24Version     = "2.4.8"
 
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
@@ -47,6 +48,11 @@ object Dependencies {
   val jettyServlet      = "org.eclipse.jetty"         % "jetty-servlet"           % "9.3.8.v20160314"
   val httpClient        = "org.apache.httpcomponents" % "httpclient"              % "4.5.2"
   val tinylog           = "org.tinylog"               % "tinylog"                 % "1.2-rc-3"
+
+  //play 2.4.x
+  val play24            = "com.typesafe.play"         %%  "play"                  % play24Version
+  val playWS24          = "com.typesafe.play"         %%  "play-ws"               % play24Version
+  val playTest24        = "org.scalatestplus"         %%  "play"                  % "1.4.0-M2"
 
   //play 2.5.x
   val play25            = "com.typesafe.play"         %%  "play"                  % play25Version

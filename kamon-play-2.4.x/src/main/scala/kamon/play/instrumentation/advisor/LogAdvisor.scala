@@ -14,22 +14,22 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.advisor;
+package kamon.play.instrumentation.advisor
 
-import kamon.agent.java.SeqUtils;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
-import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
-import kamon.play.KamonFilter;
-import play.api.mvc.EssentialFilter;
-import scala.collection.Seq;
+import kamon.agent.libs.net.bytebuddy.asm.Advice
+import kamon.trace.Tracer
+import kamon.trace.logging.MdcKeysSupport
+import org.slf4j.MDC
 
 /**
- * Advisor for play.api.http.DefaultHttpRequestHandler::new
- */
-public class FiltersFieldAdvisor {
+  * Advisor for play.api.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.LoggerLike::{ info | debug | warn | error | trace }
+  */
+class LogAdvisor
+object LogAdvisor {
+  @Advice.OnMethodEnter
+  def onEnter(): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
 
-  @OnMethodExit
-  public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
-  }
+  @Advice.OnMethodExit
+  def onExit(@Advice.Enter keys: Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
 }

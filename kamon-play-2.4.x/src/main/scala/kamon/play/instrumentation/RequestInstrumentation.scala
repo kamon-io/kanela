@@ -26,7 +26,7 @@ class RequestInstrumentation extends KamonInstrumentation {
 
   val DefaultHttpRequestHandlerConstructor = isConstructor().and(withArgument(3, classOf[Seq[EssentialFilter]]))
   val RouteRequestMethod = named("routeRequest")
-  val FiltersMethod = named("filters")
+  val FiltersMethod = named("filters").and(takesArguments(1))
   val OnServerOrOnClientErrorMethod = named("onClientError").or(named("onServerError"))
 
   forSubtypeOf("play.api.mvc.RequestHeader") { builder =>

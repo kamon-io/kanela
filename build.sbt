@@ -17,6 +17,14 @@
 import Dependencies._
 import sbt.Tests._
 
+def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
+  tests map { test =>
+    Group(
+      name = test.name,
+      tests = Seq(test),
+      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
+  }
+
 lazy val root = (project in file("."))
   .settings(moduleName := "kamon-agent")
   .settings(noPublishing: _*)
@@ -99,6 +107,24 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(excludeScalaLib: _*)
   .settings(notAggregateInAssembly: _*)
 
+lazy val kamonPlay24 = (project in file("kamon-play-2.4.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    moduleName := "kamon-play-2.4",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8"),
+    testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
+  .settings(libraryDependencies ++=
+    compileScope(kamonCore, play24, playWS24) ++
+      providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+      testScope(playTest24))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
 lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
   .dependsOn(agentScala, kamonScala)
   .enablePlugins(JavaAgent)
@@ -111,8 +137,8 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
     testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
   .settings(libraryDependencies ++=
     compileScope(kamonCore, play25, playWS25) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
-    testScope(playTest25))
+      providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+      testScope(playTest25))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
@@ -152,11 +178,3 @@ lazy val excludeScalaLib = Assembly.excludeScalaLib
 lazy val agentTestSettings = AgentTest.settings
 
 lazy val agentSettings = Seq(javaAgents += "io.kamon" % "agent" % (version in ThisBuild).value % "runtime;test" classifier "assembly")
-
-def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
-  tests map { test =>
-    Group(
-      name = test.name,
-      tests = Seq(test),
-      runPolicy = SubProcess(ForkOptions(runJVMOptions = jvmSettings)))
-  }
