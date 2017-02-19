@@ -37,14 +37,7 @@ class FutureInstrumentation extends KamonInstrumentation {
 
   val RunMethod = named("run")
 
-  forTargetType("scala.concurrent.impl.CallbackRunnable") { builder ⇒
-    builder
-      .withMixin(classOf[TraceContextMixin])
-      .withTransformationFor(RunMethod, classOf[FutureInterceptor])
-      .build()
-  }
-
-  forTargetType("scala.concurrent.impl.Future$PromiseCompletingRunnable") { builder ⇒
+  forTargetType("scala.concurrent.impl.CallbackRunnable" or "scala.concurrent.impl.Future$PromiseCompletingRunnable") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
       .withTransformationFor(RunMethod, classOf[FutureInterceptor])

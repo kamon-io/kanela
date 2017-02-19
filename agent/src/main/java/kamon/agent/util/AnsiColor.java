@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package utils;
+package kamon.agent.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

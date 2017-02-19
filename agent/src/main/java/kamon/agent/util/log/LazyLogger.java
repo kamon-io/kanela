@@ -23,7 +23,7 @@ import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
-import utils.AnsiColor;
+import kamon.agent.util.AnsiColor;
 
 import java.util.Locale;
 import java.util.function.Supplier;
