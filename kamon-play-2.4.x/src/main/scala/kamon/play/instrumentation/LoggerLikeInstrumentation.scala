@@ -21,21 +21,9 @@ import kamon.play.instrumentation.interceptor.LogInterceptor
 
 class LoggerLikeInstrumentation extends KamonInstrumentation {
 
-  val LogMethod = {
-    named("info")
-      .or(named("debug")
-        .or(named("warn")
-          .or(named("error")
-            .or(named("trace")))))
-  }
+  val LogMethod = named("info").or(named("debug").or(named("warn").or(named("error").or(named("trace")))))
 
-  forSubtypeOf("play.api.LoggerLike") { builder =>
-    builder
-      .withTransformationFor(LogMethod, classOf[LogInterceptor])
-      .build()
-  }
-
-  forSubtypeOf("play.LoggerLike") { builder =>
+  forSubtypeOf("play.api.LoggerLike" or "play.LoggerLike") { builder =>
     builder
       .withTransformationFor(LogMethod, classOf[LogInterceptor])
       .build()

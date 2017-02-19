@@ -14,7 +14,9 @@
  * =========================================================================================
  */
 
-package kamon.play.utils
+package kamon.agent.java
+
+import scala.collection.Seq
 
 object SeqUtils {
   def append[T](seq: Seq[T], value: T): Seq[T] = seq :+ value

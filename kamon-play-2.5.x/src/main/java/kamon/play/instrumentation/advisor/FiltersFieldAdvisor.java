@@ -16,10 +16,10 @@
 
 package kamon.play.instrumentation.advisor;
 
+import kamon.agent.java.SeqUtils;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.FieldValue;
 import kamon.agent.libs.net.bytebuddy.asm.Advice.OnMethodExit;
 import kamon.play.KamonFilter;
-import kamon.play.utils.SeqUtils;
 import play.api.mvc.EssentialFilter;
 import scala.collection.Seq;
 
@@ -30,6 +30,6 @@ public class FiltersFieldAdvisor {
 
   @OnMethodExit
   public static void onExit(@FieldValue(value = "filters", readOnly = false) Seq<EssentialFilter> filters) {
-    filters = SeqUtils.append(filters, KamonFilter.asJava());
+    filters = SeqUtils.<EssentialFilter>append(filters, KamonFilter.asJava());
   }
 }
