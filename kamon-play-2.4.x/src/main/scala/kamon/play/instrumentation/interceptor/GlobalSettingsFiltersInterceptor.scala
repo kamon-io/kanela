@@ -34,6 +34,6 @@ object GlobalSettingsFiltersInterceptor {
   }
 }
 
-case class KamonHttpFilters(underlyne: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlyne.filters :+ additionalFilter
+case class KamonHttpFilters(underlying: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
+  override def filters: Seq[EssentialFilter] = underlying.filters :+ additionalFilter
 }
