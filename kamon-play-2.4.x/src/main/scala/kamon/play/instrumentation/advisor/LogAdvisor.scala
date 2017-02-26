@@ -14,26 +14,22 @@
  * =========================================================================================
  */
 
-package kamon.play.instrumentation.interceptor
+package kamon.play.instrumentation.advisor
 
-import java.util.concurrent.Callable
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall}
-import kamon.play.KamonFilter
-import play.api.http.HttpFilters
-import play.api.mvc.EssentialFilter
+import kamon.agent.libs.net.bytebuddy.asm.Advice
+import kamon.trace.Tracer
+import kamon.trace.logging.MdcKeysSupport
+import org.slf4j.MDC
 
 /**
-  * Interceptor for play.api.GlobalSettings::filters
+  * Advisor for play.api.LoggerLike::{ info | debug | warn | error | trace }
+  * Advisor for play.LoggerLike::{ info | debug | warn | error | trace }
   */
-class GlobalSettingsFiltersInterceptor
-object GlobalSettingsFiltersInterceptor {
+class LogAdvisor
+object LogAdvisor {
+  @Advice.OnMethodEnter
+  def onEnter(): Iterable[String] =  MdcKeysSupport.copyToMdc(Tracer.currentContext)
 
-  @RuntimeType
-  def introduceKamonFilter(@SuperCall callable: Callable[HttpFilters]): HttpFilters = {
-    KamonHttpFilters(callable.call(), KamonFilter)
-  }
-}
-
-case class KamonHttpFilters(underlying: HttpFilters, additionalFilter: EssentialFilter) extends HttpFilters {
-  override def filters: Seq[EssentialFilter] = underlying.filters :+ additionalFilter
+  @Advice.OnMethodExit
+  def onExit(@Advice.Enter keys: Iterable[String]): Unit = keys.foreach(key ⇒ MDC.remove(key))
 }

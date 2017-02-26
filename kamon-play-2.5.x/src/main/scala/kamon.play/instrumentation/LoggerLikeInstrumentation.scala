@@ -17,7 +17,7 @@
 package kamon.play.instrumentation
 
 import kamon.agent.scala.KamonInstrumentation
-import kamon.play.instrumentation.interceptor.LogAdvisor
+import kamon.play.instrumentation.advisor.LogAdvisor
 
 class LoggerLikeInstrumentation extends KamonInstrumentation {
 
