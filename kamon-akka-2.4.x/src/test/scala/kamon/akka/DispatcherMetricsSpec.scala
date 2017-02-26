@@ -61,7 +61,7 @@ class DispatcherMetricsSpec extends BaseKamonSpec("dispatcher-metrics-spec") {
       snapshot.gauge("pool-size").get.max should be <= 21L
       snapshot.gauge("max-pool-size").get.max should be(21)
       snapshot.gauge("core-pool-size").get.max should be(21)
-      snapshot.gauge("processed-tasks").get.max should be(102L +- 5L)
+      snapshot.gauge("processed-tasks").get.max should be(102L +- 20L)
 
       // The processed tasks should be reset to 0 if no more tasks are submitted.
       val secondSnapshot = collectDispatcherMetrics(tpeDispatcher, "thread-pool-executor")

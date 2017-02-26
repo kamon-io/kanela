@@ -79,7 +79,7 @@ class RouterMetricsSpec extends BaseKamonSpec("router-metrics-spec") {
 
       routerSnapshot.histogram("processing-time").get.numberOfMeasurements should be(1L)
       routerSnapshot.histogram("processing-time").get.recordsIterator.next().count should be(1L)
-      routerSnapshot.histogram("processing-time").get.recordsIterator.next().level should be(timings.approximateProcessingTime +- 10.millis.toNanos)
+      routerSnapshot.histogram("processing-time").get.recordsIterator.next().level should be(timings.approximateProcessingTime +- 15.millis.toNanos)
     }
 
     /*
