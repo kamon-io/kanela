@@ -16,8 +16,8 @@
 
 package kamon.agent.api.instrumentation;
 
-import javaslang.Function4;
-import javaslang.control.Option;
+import io.vavr.Function4;
+import io.vavr.control.Option;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;

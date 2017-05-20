@@ -22,7 +22,7 @@ import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
-import javaslang.collection.{List ⇒ JList}
+import io.vavr.collection.{List ⇒ JList}
 
 import org.mockito.ArgumentMatchers._
 

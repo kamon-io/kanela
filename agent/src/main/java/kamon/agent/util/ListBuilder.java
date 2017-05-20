@@ -16,7 +16,7 @@
 
 package kamon.agent.util;
 
-import javaslang.collection.List;
+import io.vavr.collection.List;
 
 import java.util.ArrayList;
 

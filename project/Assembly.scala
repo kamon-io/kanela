@@ -43,7 +43,7 @@ object Assembly {
     },
     assemblyShadeRules in assembly := Seq(
         ShadeRule.rename("net.bytebuddy.**" -> "kamon.agent.libs.@0").inAll,
-        ShadeRule.rename("javaslang.**" -> "kamon.agent.libs.@0").inAll,
+        ShadeRule.rename("io.vavr.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("com.typesafe.config.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("org.pmw.tinylog.**" -> "kamon.agent.libs.@0").inAll,
         ShadeRule.rename("net.jodah.**" -> "kamon.agent.libs.@0").inAll

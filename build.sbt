@@ -40,7 +40,7 @@ lazy val agent = (project in file("agent"))
   .settings(javaCommonSettings: _*)
   .settings(assemblySettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(tinylog, javaslang, typesafeConfig, expirinMap) ++
+    compileScope(tinylog, vavr, typesafeConfig, expirinMap) ++
     testScope(scalatest, mockito) ++
     providedScope(lombok))
   .settings(scalaDependency)
@@ -51,7 +51,7 @@ lazy val agentApi = (project in file("agent-api"))
   .settings(moduleName := "agent-api")
   .settings(javaCommonSettings: _*)
   .settings(libraryDependencies ++=
-    providedScope(javaslang, typesafeConfig, slf4jApi))
+    providedScope(vavr, typesafeConfig, slf4jApi))
   .settings(unmanagedJarSettings)
   .settings(excludeScalaLib: _*)
   .settings(notAggregateInAssembly: _*)
@@ -73,7 +73,7 @@ lazy val agentTest = (project in file("agent-test"))
   .settings(agentSettings)
   .settings(agentTestSettings: _*)
   .settings(libraryDependencies ++=
-    compileScope(kamonAutowave, slf4jApi, logbackCore, logbackClassic, javaslang) ++
+    compileScope(kamonAutowave, slf4jApi, logbackCore, logbackClassic, vavr) ++
       testScope(scalatest, mockito) ++
     providedScope(lombok, typesafeConfig, kamonAgent))
   .settings(excludeScalaLib: _*)
@@ -88,7 +88,7 @@ lazy val kamonServlet = (project in file("kamon-servlet"))
   .settings(agentSettings)
   .settings(libraryDependencies ++=
     compileScope(kamonCore, servletApi) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    providedScope(vavr, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(scalatest, mockito, springTest, springWeb, jetty, jettyServlet, httpClient))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
@@ -102,7 +102,7 @@ lazy val kamonScala = (project in file("kamon-scala"))
   .settings(basicSettings: _*)
   .settings(libraryDependencies ++=
     compileScope(kamonCore) ++
-    providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+    providedScope(vavr, typesafeConfig, slf4jApi, kamonAgent) ++
     testScope(scalatest, akkaTestKit))
   .settings(excludeScalaLib: _*)
   .settings(notAggregateInAssembly: _*)
@@ -119,7 +119,7 @@ lazy val kamonPlay24 = (project in file("kamon-play-2.4.x"))
     testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
   .settings(libraryDependencies ++=
     compileScope(kamonCore, play24, playWS24) ++
-      providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+      providedScope(vavr, typesafeConfig, slf4jApi, kamonAgent) ++
       testScope(playTest24))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
@@ -137,7 +137,7 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
     testGrouping in Test := singleTestPerJvm((definedTests in Test).value, (javaOptions in Test).value)))
   .settings(libraryDependencies ++=
     compileScope(kamonCore, play25, playWS25) ++
-      providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+      providedScope(vavr, typesafeConfig, slf4jApi, kamonAgent) ++
       testScope(playTest25))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)

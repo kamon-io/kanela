@@ -16,8 +16,8 @@
 
 package kamon.agent.api.instrumentation;
 
-import javaslang.Function0;
-import javaslang.Function1;
+import io.vavr.Function0;
+import io.vavr.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import kamon.agent.util.ListBuilder;

@@ -17,8 +17,8 @@
 
 package kamon.agent.reinstrument;
 
-import javaslang.collection.List;
-import javaslang.control.Try;
+import io.vavr.collection.List;
+import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.builder.KamonAgentFileTransformer;

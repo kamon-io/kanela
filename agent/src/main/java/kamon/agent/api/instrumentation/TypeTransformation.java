@@ -16,8 +16,8 @@
 
 package kamon.agent.api.instrumentation;
 
-import javaslang.collection.HashSet;
-import javaslang.control.Option;
+import io.vavr.collection.HashSet;
+import io.vavr.control.Option;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 public class TypeTransformation {
 
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
-    javaslang.collection.Set<AgentBuilder.Transformer> mixins;
-    javaslang.collection.Set<AgentBuilder.Transformer> transformations;
+    io.vavr.collection.Set<AgentBuilder.Transformer> mixins;
+    io.vavr.collection.Set<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
     static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher, Set<AgentBuilder.Transformer> mixins, Set<AgentBuilder.Transformer>... transformers) {

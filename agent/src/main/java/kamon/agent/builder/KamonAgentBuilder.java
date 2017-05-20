@@ -16,7 +16,7 @@
 
 package kamon.agent.builder;
 
-import javaslang.Function1;
+import io.vavr.Function1;
 import kamon.agent.api.instrumentation.TypeTransformation;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.util.ListBuilder;

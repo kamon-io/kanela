@@ -16,7 +16,7 @@
 
 package kamon.agent.builder;
 
-import javaslang.Function0;
+import io.vavr.Function0;
 import kamon.agent.util.NamedThreadFactory;
 import kamon.agent.util.ShutdownHook;
 import kamon.agent.util.log.LazyLogger;

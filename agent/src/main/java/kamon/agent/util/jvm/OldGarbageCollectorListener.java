@@ -17,9 +17,9 @@
 package kamon.agent.util.jvm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
-import javaslang.collection.List;
-import javaslang.control.Option;
-import javaslang.control.Try;
+import io.vavr.collection.List;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;

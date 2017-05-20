@@ -16,7 +16,7 @@
 
 package kamon.agent.circuitbreaker;
 
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.reinstrument.Reinstrumenter;

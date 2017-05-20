@@ -16,8 +16,8 @@
 
 package kamon.agent;
 
-import javaslang.collection.List;
-import javaslang.control.Try;
+import io.vavr.collection.List;
+import io.vavr.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
 import kamon.agent.builder.Agents;
 import kamon.agent.builder.KamonAgentFileTransformer;

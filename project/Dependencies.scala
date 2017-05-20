@@ -30,7 +30,7 @@ object Dependencies {
 
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
-  val javaslang         = "io.javaslang"              % "javaslang"               % "2.0.5"
+  val vavr              = "io.vavr"                   % "vavr"                    % "0.9.0"
   val mockito           = "org.mockito"               % "mockito-core"            % "2.4.2"
   val lombok            = "org.projectlombok"         % "lombok"                  % "1.16.12"
   val expirinMap        = "net.jodah"                 % "expiringmap"             % "0.5.7"
