@@ -17,7 +17,7 @@
 package kamon.scala.instrumentation
 
 import kamon.agent.scala.KamonInstrumentation
-import kamon.scala.instrumentation.interceptor.FutureInterceptor
+import kamon.scala.instrumentation.advisor.RunMethodAdvisor
 import kamon.scala.instrumentation.mixin.TraceContextMixin
 
 class FutureInstrumentation extends KamonInstrumentation {
@@ -40,7 +40,7 @@ class FutureInstrumentation extends KamonInstrumentation {
   forTargetType("scala.concurrent.impl.CallbackRunnable" or "scala.concurrent.impl.Future$PromiseCompletingRunnable") { builder ⇒
     builder
       .withMixin(classOf[TraceContextMixin])
-      .withTransformationFor(RunMethod, classOf[FutureInterceptor])
+      .withAdvisorFor(RunMethod, classOf[RunMethodAdvisor])
       .build()
   }
 }

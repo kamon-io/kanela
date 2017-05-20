@@ -14,25 +14,25 @@
  * =========================================================================================
  */
 
-package kamon.scala.instrumentation.interceptor
+package kamon.scala.instrumentation.advisor
 
-import java.util.concurrent.Callable
+import kamon.agent.libs.net.bytebuddy.asm.Advice.{Enter, OnMethodEnter, OnMethodExit, This => AThis}
+import kamon.trace.{TraceContext, TraceContextAware, Tracer}
 
-import kamon.agent.libs.net.bytebuddy.implementation.bind.annotation.{RuntimeType, SuperCall, This}
-import kamon.trace.{TraceContextAware, Tracer}
 
 /**
-  * Interceptor for scala.concurrent.impl.CallbackRunnable::run
-  * Interceptor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
+  * Advisor for scala.concurrent.impl.CallbackRunnable::run
+  * Advisor for scala.concurrent.impl.Future$PromiseCompletingRunnable::run
   */
-class FutureInterceptor
-object FutureInterceptor {
-
-  @RuntimeType
-  def aroundExecution(@SuperCall callable: Callable[Any], @This runnable: TraceContextAware): Any = {
-    Tracer.withContext(runnable.traceContext) {
-      callable.call()
-    }
+class RunMethodAdvisor
+object RunMethodAdvisor {
+  @OnMethodEnter
+  def onEnter(@AThis runnable: TraceContextAware): TraceContext = {
+    val oldContext = Tracer.currentContext
+    Tracer.setCurrentContext(runnable.traceContext)
+    oldContext
   }
 
+  @OnMethodExit(onThrowable = classOf[Throwable])
+  def onExit(@Enter oldContext:TraceContext): Unit =  Tracer.setCurrentContext(oldContext)
 }

@@ -27,7 +27,7 @@ object FakeWorkerAdvisor {
     System.nanoTime() // Return current time, entering as parameter in the onMethodExist
   }
 
-  @OnMethodExit
+  @OnMethodExit(onThrowable = classOf[Throwable])
   def onMethodExit(@This instance: MonitorAware, @Enter start: Long, @Origin origin: String): Unit = {
     val timing = System.nanoTime() - start
     instance.addExecTimings(origin, timing)
