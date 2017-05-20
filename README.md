@@ -33,7 +33,7 @@ case class Worker() {
 #### Java
 ```java
 public class Worker {
-  final Random random = new java.util.Random().nextLong();
+  private final Random random = new java.util.Random();
   
   public void performTask() {
       Thread.sleep((long)(random.nextFloat() * 500));
