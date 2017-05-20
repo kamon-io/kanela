@@ -16,8 +16,8 @@
 
 package app.kamon.java.instrumentation.mixin;
 
-import javaslang.collection.List;
-import javaslang.control.Option;
+import io.vavr.collection.List;
+import io.vavr.control.Option;
 import kamon.agent.api.instrumentation.Initializer;
 
 import java.util.Map;
