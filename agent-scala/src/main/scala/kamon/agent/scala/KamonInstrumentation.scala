@@ -19,7 +19,7 @@ package kamon.agent.scala
 import java.util.function.{BiFunction => JBifunction, Supplier => JSupplier}
 
 import kamon.agent.api.instrumentation.{InstrumentationDescription, KamonInstrumentation => JKamonInstrumentation}
-import kamon.agent.libs.javaslang.{Function1 => JFunction1, Function2 => JFunction2, Function4 => JFunction4}
+import kamon.agent.libs.io.vavr.{Function1 => JFunction1, Function2 => JFunction2, Function4 => JFunction4}
 import kamon.agent.libs.net.bytebuddy.description.`type`.TypeDescription
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.dynamic.DynamicType.Builder
