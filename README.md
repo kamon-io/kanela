@@ -1,5 +1,4 @@
-# Kamon Agent
-<img align="right" src="https://rawgit.com/kamon-io/Kamon/master/kamon-logo.svg" height="150px" style="padding-left: 20px"/>
+# Kamon Agent <img align="right" src="https://rawgit.com/kamon-io/Kamon/master/kamon-logo.svg" height="150px" style="padding-left: 20px"/>
 [![Build Status](https://travis-ci.org/kamon-io/kamon-agent.svg?branch=master)](https://travis-ci.org/kamon-io/kamon-agent)
 
 The `kamon-agent` is developed in order to provide a simple way to instrument an application running on the JVM and
