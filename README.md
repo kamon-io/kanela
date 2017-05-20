@@ -22,6 +22,7 @@ in the following example.
 
 Suppose you have a simple worker that perform a simple operation:
 
+#### Scala
 ```scala
 import scala.util.Random
 
@@ -29,7 +30,7 @@ case class Worker() {
   def performTask(): Unit = Thread.sleep((Random.nextFloat() * 500) toLong)
 }
 ```
-
+#### Java
 ```java
 public class Worker {
   final Random random = new java.util.Random().nextLong();
@@ -41,14 +42,14 @@ public class Worker {
 ```
 
 You might want to mixin it with a type that provide a way to accumulate metrics, such as the following:
-
+#### Scala
 ```scala
 trait MonitorAware {
   def execTimings: Map[String, Vector[Long]]
   def addExecTimings(methodName: String, time: Long): Vector[Long]
 }
 ```
-
+#### Java
 ```java
 public interface MonitorAware {
     Map<String, List<Long>> execTimings();
@@ -59,6 +60,7 @@ public interface MonitorAware {
 
 And introduce some transformations in order to modify the bytecode and hook into the internal app.
 
+#### Scala
 ```scala
 
 import kamon.agent.scala.KamonInstrumentation
@@ -76,7 +78,7 @@ class MonitorInstrumentation extends KamonInstrumentation {
 }
 
 ```
-
+#### Java
 ```java
 import kamon.agent.api.instrumentation.KamonInstrumentation;
 
@@ -84,17 +86,16 @@ import kamon.agent.api.instrumentation.KamonInstrumentation;
 
 public class MonitorInstrumentation extends KamonInstrumentation {
     public MonitorInstrumentation() {
-        forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
+        forTargetType(() -> "app.kamon.java.Worker", builder ->
             builder.withMixin(() -> MonitorMixin.class)
-                   .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
-                   .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
+                   .withAdvisorFor(named("performTask"), () -> WorkerAdvisor.class)
                    .build()
         );
     }
 
 }
 ```
-
+#### Scala
 ```scala
 class MonitorMixin extends MonitorAware {
 
@@ -114,7 +115,7 @@ class MonitorMixin extends MonitorAware {
   def init(): Unit = this._execTimings = TrieMap[String, CopyOnWriteArrayList[Long]]()
 }
 ```
-
+#### Java
 ```java
 public class MonitorMixin implements MonitorAware {
 
@@ -142,7 +143,7 @@ public class MonitorMixin implements MonitorAware {
 }
 
 ```
-
+#### Scala
 ```scala
 
 object WorkerAdvisor {
@@ -161,7 +162,7 @@ object WorkerAdvisor {
 }
 
 ```
-
+#### Java
 ```java
 import lombok.val;
 
