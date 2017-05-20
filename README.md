@@ -26,7 +26,17 @@ Suppose you have a simple worker that perform a simple operation:
 import scala.util.Random
 
 case class Worker() {
-  def performTask(): Unit = Thread.sleep((Random.self.nextFloat() * 500) toLong)
+  def performTask(): Unit = Thread.sleep((Random.nextFloat() * 500) toLong)
+}
+```
+
+```java
+public class Worker {
+  final Random random = new java.util.Random().nextLong();
+  
+  public void performTask() {
+      Thread.sleep((long)(random.nextFloat() * 500));
+  }   
 }
 ```
 
@@ -37,6 +47,14 @@ trait MonitorAware {
   def execTimings: Map[String, Vector[Long]]
   def addExecTimings(methodName: String, time: Long): Vector[Long]
 }
+```
+
+```java
+public interface MonitorAware {
+    Map<String, List<Long>> execTimings();
+    List<Long> addExecTimings(String methodName, long time);
+}
+
 ```
 
 And introduce some transformations in order to modify the bytecode and hook into the internal app.
@@ -57,7 +75,27 @@ class MonitorInstrumentation extends KamonInstrumentation {
   }
 }
 
+```
 
+```java
+import kamon.agent.api.instrumentation.KamonInstrumentation;
+
+// And other imports !
+
+public class MonitorInstrumentation extends KamonInstrumentation {
+    public MonitorInstrumentation() {
+        forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
+            builder.withMixin(() -> MonitorMixin.class)
+                   .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
+                   .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
+                   .build()
+        );
+    }
+
+}
+```
+
+```scala
 class MonitorMixin extends MonitorAware {
 
   private var _execTimings: TrieMap[String, CopyOnWriteArrayList[Long]] = _
@@ -75,7 +113,37 @@ class MonitorMixin extends MonitorAware {
   @Initializer
   def init(): Unit = this._execTimings = TrieMap[String, CopyOnWriteArrayList[Long]]()
 }
+```
 
+```java
+public class MonitorMixin implements MonitorAware {
+
+    private Map<String, List<Long>> _execTimings;
+
+    @Override
+    public List<Long> execTimings(String methodName) {
+        return _execTimings.getOrDefault(methodName, List.empty());
+    }
+
+    @Override
+    public Map<String, List<Long>> execTimings() {
+        return _execTimings;
+    }
+
+    @Override
+    public List<Long> addExecTimings(String methodName, long time) {
+        return this._execTimings.compute(methodName, (key, oldValues) -> Option.of(oldValues).map(vs -> vs.append(time)).getOrElse(List.of(time)));
+    }
+
+    @Initializer
+    public void init() {
+        this._execTimings = new ConcurrentHashMap<>();
+    }
+}
+
+```
+
+```scala
 
 object WorkerAdvisor {
 
@@ -91,6 +159,27 @@ object WorkerAdvisor {
     println(s"Method $origin was executed in $timing ns.")
   }
 }
+
+```
+
+```java
+import lombok.val;
+
+public class WorkerAdvisor {
+
+    @OnMethodEnter
+    public static long onMethodEnter() {
+        return System.nanoTime(); // Return current time, entering as parameter in the onMethodExist
+    }
+
+    @OnMethodExit
+    public static void onMethodExit(@This MonitorAware instance, @Enter long start, @Origin String origin) {
+        val timing = System.nanoTime() - start;
+        instance.addExecTimings(origin, timing);
+        System.out.println(String.format("Method %s was executed in %10.2f ns.", origin, (float) timing));
+    }
+}
+
 
 ```
 
