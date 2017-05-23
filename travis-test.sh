@@ -11,6 +11,8 @@ runTests () {
     && sbt "project kamonServlet" +test \
     && sbt "project kamonPlay24" +test \
     && sbt "project kamonPlay25" +test \
+    && sbt "project kamonAkka23" +test \
+    && sbt "project kamonAkka24" +test \
     || exit 1
   echo "[info] $(date) - finished sbt test"
 }

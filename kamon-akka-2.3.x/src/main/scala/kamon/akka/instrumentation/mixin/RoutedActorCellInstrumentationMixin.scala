@@ -1,6 +1,5 @@
-package project
-
-/* =========================================================================================
+/*
+ * =========================================================================================
  * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -15,13 +14,21 @@ package project
  * =========================================================================================
  */
 
-import sbt._
+package kamon.akka.instrumentation.mixin
+
+import akka.kamon.instrumentation.RouterMonitor
 
 /**
-  * A temporary workaround until sbt/sbt-assembly introduce PR #233 that fix #200 (Thank to @damdev)
-  */
-object PluginDef extends Build {
-  override lazy val projects = Seq(root)
-  lazy val root = Project("plugins", file(".")) dependsOn( assemblyPlugin )
-  lazy val assemblyPlugin = uri("git://github.com/damdev/sbt-assembly.git")
+ * Mixin for akka.routing.RoutedActorCell
+ */
+class RoutedActorCellInstrumentationMixin extends RouterInstrumentationAware {
+  @volatile private var _ri: RouterMonitor = _
+
+  def setRouterInstrumentation(ai: RouterMonitor): Unit = _ri = ai
+  def routerInstrumentation: RouterMonitor = _ri
+}
+
+trait RouterInstrumentationAware {
+  def routerInstrumentation: RouterMonitor
+  def setRouterInstrumentation(ai: RouterMonitor): Unit
 }

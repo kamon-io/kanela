@@ -28,6 +28,9 @@ object Dependencies {
   val play25Version     = "2.5.4"
   val play24Version     = "2.4.8"
 
+  val `akka-2.3` = "2.3.13"
+  val `akka-2.4` = "2.4.16"
+
   val logbackCore       = "ch.qos.logback"            % "logback-core"            % "1.0.13"
   val typesafeConfig    = "com.typesafe"              % "config"                  % "1.3.0"
   val vavr              = "io.vavr"                   % "vavr"                    % "0.9.0"

@@ -41,6 +41,9 @@ abstract class BaseKamonSpec(actorSystemName: String) extends TestKitBase with W
   def newContext(name: String, token: String): TraceContext =
     Kamon.tracer.newContext(name, Option(token))
 
+  def newContext(name: String, token: String, tags: Map[String, String]): TraceContext =
+    Kamon.tracer.newContext(name, Option(token), tags)
+
   def takeSnapshotOf(name: String, category: String): EntitySnapshot = {
     val recorder = Kamon.metrics.find(name, category).get
     recorder.collect(collectionContext)
@@ -59,8 +62,7 @@ abstract class BaseKamonSpec(actorSystemName: String) extends TestKitBase with W
     subscriptions.tell(SubscriptionsDispatcher.Tick)
   }
 
-  override protected def beforeAll(): Unit = {
+  override protected def beforeAll(): Unit = { }
 
-  }
   override protected def afterAll(): Unit = system.terminate()
 }

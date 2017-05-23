@@ -17,6 +17,10 @@
 import Dependencies._
 import sbt.Tests._
 
+def akkaDependency(name: String, version: String) = {
+  "com.typesafe.akka" %% s"akka-$name" % version
+}
+
 def singleTestPerJvm(tests: Seq[TestDefinition], jvmSettings: Seq[String]): Seq[Group] =
   tests map { test =>
     Group(
@@ -139,6 +143,46 @@ lazy val kamonPlay25 = (project in file("kamon-play-2.5.x"))
     compileScope(kamonCore, play25, playWS25) ++
       providedScope(vavr, typesafeConfig, slf4jApi, kamonAgent) ++
       testScope(playTest25))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
+lazy val kamonAkka23 = (project in file("kamon-akka-2.3.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    bintrayPackage := "kamon-akka",
+    moduleName := "kamon-akka-2.3",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.11.8")))
+  .settings(
+    libraryDependencies ++=
+      compileScope(akkaDependency("actor", `akka-2.3`), kamonCore) ++
+        providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+        optionalScope(logbackClassic) ++
+        testScope(scalatest, akkaDependency("testkit", `akka-2.3`), akkaDependency("slf4j", `akka-2.3`), logbackClassic))
+  .settings(excludeScalaLib: _*)
+  .settings(noPublishing: _*)
+  .settings(notAggregateInAssembly: _*)
+
+lazy val kamonAkka24 = (project in file("kamon-akka-2.4.x"))
+  .dependsOn(agentScala, kamonScala)
+  .enablePlugins(JavaAgent)
+  .settings(agentSettings)
+  .settings(basicSettings: _*)
+  .settings(Seq(
+    bintrayPackage := "kamon-akka",
+    moduleName := "kamon-akka-2.4",
+    scalaVersion := "2.12.1",
+    crossScalaVersions := Seq("2.11.8", "2.12.1")))
+  .settings(
+    libraryDependencies ++=
+      compileScope(akkaDependency("actor", `akka-2.4`), kamonCore) ++
+        providedScope(javaslang, typesafeConfig, slf4jApi, kamonAgent) ++
+        optionalScope(logbackClassic) ++
+        testScope(scalatest, akkaDependency("testkit", `akka-2.4`), akkaDependency("slf4j", `akka-2.4`), logbackClassic))
   .settings(excludeScalaLib: _*)
   .settings(noPublishing: _*)
   .settings(notAggregateInAssembly: _*)
