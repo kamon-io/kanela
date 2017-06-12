@@ -34,6 +34,7 @@ dependencies {
 
 shadowJar {
     baseName = 'kamon-agent'
+    classifier = null
     exclude 'META-INF/services/*'
     exclude 'META-INF/maven/**'
     exclude 'META-INF/*.DSA'
@@ -64,19 +65,19 @@ jar {
 }
 
 bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    publications = ['MavenPublication']
+    user = property('user')
+    key = property('key')
+    publications = ['shadowPublication']
 
     pkg {
-        repo = 'generic'
-        name = 'gradle-project'
+        repo = 'snapshots'
+        name = 'kamon-agent'
         userOrg = 'kamon-io'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/kamon-io/kamon-agent'
 
         version {
-            name = "0.0.1-experimental"
+            name = "${version}"
             desc = 'Kamon Agent(experimental)'
             released  = new Date()
         }
@@ -85,8 +86,10 @@ bintray {
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
+        shadowPublication(MavenPublication) { publication ->
             project.shadow.component(publication)
+            groupId 'io.kamon'
+            artifactId 'kamon-agent'
         }
     }
 }

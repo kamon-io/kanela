@@ -35,6 +35,7 @@ bin/
 .gradle
 /build/
 gradle/
+/agent/build/
 # Ignore Gradle GUI config
 gradle-app.setting
 
