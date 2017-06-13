@@ -27,7 +27,6 @@ lazy val agentScala = (project in file("."))
 
 
 lazy val basicSettings = Seq(
-  isSnapshot := true,
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   resolvers += Resolver.bintrayRepo("kamon-io", "releases"),
