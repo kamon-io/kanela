@@ -28,7 +28,6 @@ public class KamonAgent {
      *
      * @param args Agent argument list
      * @param instrumentation {@link Instrumentation}
-     * @throws Exception
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
         AgentEntryPoint.premain(args, instrumentation);
@@ -42,7 +41,6 @@ public class KamonAgent {
      *
      * @param args Agent argument list
      * @param instrumentation {@link Instrumentation}
-     * @throws Exception
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
         AgentEntryPoint.agentmain(args, instrumentation);

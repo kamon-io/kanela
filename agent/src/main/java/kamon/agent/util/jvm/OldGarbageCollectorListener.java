@@ -66,7 +66,6 @@ public class OldGarbageCollectorListener {
     /**
      * Attach and start the listener.
      *
-     * @param configuration @see {{@link AgentConfiguration.OldGarbageCollectorConfig}}
      */
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
