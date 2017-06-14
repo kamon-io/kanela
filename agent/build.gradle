@@ -127,6 +127,8 @@ publishing {
             version "${version}"
             pom.withXml {
                 def root = asNode()
+                root.appendNode('description', 'The Open Source java agent for Kamon')
+                root.appendNode('name', 'Kamon Agent')
                 root.appendNode('url', 'http://kamon.io')
                 root.children().last() + pomConfig
             }
