@@ -65,8 +65,8 @@ jar {
 }
 
 bintray {
-    user = property('user')
-    key = property('key')
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
     publications = ['shadowPublication']
 
     pkg {
@@ -80,24 +80,6 @@ bintray {
             name = "${version}"
             desc = 'Kamon Agent(experimental)'
             released  = new Date()
-        }
-    }
-}
-
-
-publishing {
-    publications {
-        shadowPublication(MavenPublication) { publication ->
-            project.shadow.component(publication)
-            artifact sourcesJar
-            groupId 'io.kamon'
-            artifactId 'kamon-agent'
-            version "${version}"
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('url', 'http://kamon.io')
-                root.children().last() + pomConfig
-            }
         }
     }
 }
@@ -132,4 +114,28 @@ def pomConfig = {
     scm {
        url "https://github.com/kamon-io/kamon-agent"
     }
+}
+
+publishing {
+    publications {
+        shadowPublication(MavenPublication) { publication ->
+            project.shadow.component(publication)
+            artifact sourcesJar
+            groupId 'io.kamon'
+            artifactId 'kamon-agent'
+            version "${version}"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('url', 'http://kamon.io')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }

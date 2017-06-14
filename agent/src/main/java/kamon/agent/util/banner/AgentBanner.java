@@ -45,7 +45,7 @@ public class AgentBanner {
                 System.out.println(line);
             }
 
-            String version = "0.0.1";//BuildInfo.version();
+            String version = "experimental";//BuildInfo.version();
             version =  (version == null ? "" : " (v" + version + ")");
             String padding = "";
 
@@ -58,5 +58,3 @@ public class AgentBanner {
         }
     }
 }
-
-
