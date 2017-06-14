@@ -84,12 +84,52 @@ bintray {
     }
 }
 
+
 publishing {
     publications {
         shadowPublication(MavenPublication) { publication ->
             project.shadow.component(publication)
+            artifact sourcesJar
             groupId 'io.kamon'
             artifactId 'kamon-agent'
+            version "${version}"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('url', 'http://kamon.io')
+                root.children().last() + pomConfig
+            }
         }
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    }
+    developers {
+        developer {
+            id "dpsoft"
+            name "Diego Parra"
+            url "https://twitter.com/diegolparra"
+        }
+
+        developer {
+            id "ivantopo"
+            name "Ivan Topolnjak"
+            url "https://twitter.com/ivantopo"
+        }
+
+        developer {
+            id "cristianspinetta"
+            name "Cristian Spinetta"
+            url "https://twitter.com/c_spinetta"
+        }
+    }
+
+    scm {
+       url "https://github.com/kamon-io/kamon-agent"
     }
 }
