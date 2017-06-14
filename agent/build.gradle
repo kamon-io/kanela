@@ -121,6 +121,7 @@ publishing {
         shadowPublication(MavenPublication) { publication ->
             project.shadow.component(publication)
             artifact sourcesJar
+            artifact javadocJar
             groupId 'io.kamon'
             artifactId 'kamon-agent'
             version "${version}"
@@ -138,4 +139,9 @@ publishing {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
