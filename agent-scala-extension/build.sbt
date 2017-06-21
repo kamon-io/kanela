@@ -16,7 +16,7 @@
 
 import sbt._
 
-val kamonAgent = "io.kamon" % "kamon-agent" % "0.0.3-experimental"
+val kamonAgent = "io.kamon" % "kamon-agent" % "0.0.4-experimental"
 
 crossScalaVersions := Seq("2.12.2", "2.11.8", "2.10.6")
 
