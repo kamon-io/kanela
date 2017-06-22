@@ -36,8 +36,7 @@ class CircuitBreakerSpec extends Matchers with WordSpecLike with BeforeAndAfterA
 
       val circuitBreaker = SystemThroughputCircuitBreaker.attach(circuitBreakerConfig, jvmTools)
       EventBroker.instance().publish(GcEvent.from(null, 10.0, 100))
-
-      //      verify(circuitBreaker, times(1)).onGCEvent(argumentCaptor.capture())
+//      verify(circuitBreaker, times(1)).onGCEvent(argumentCaptor.capture())
     }
   }
 }

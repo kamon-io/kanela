@@ -8,10 +8,12 @@ buildscript {
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '2.0.0'
     id 'java'
+    id 'scala'
     id 'maven-publish'
-    id "com.jfrog.bintray" version "1.7.3"
+    id 'com.jfrog.bintray' version '1.7.3'
+    id 'com.github.maiflai.scalatest' version '0.16'
+    id 'com.github.johnrengelman.shadow' version '2.0.0'
 }
 
 repositories {
@@ -29,6 +31,8 @@ dependencies {
     compile files('../libs/byte-buddy-1.6.8.jar')
 
     testCompile 'org.mockito:mockito-core:2.4.2'
+    testCompile 'org.scalatest:scalatest_2.12:3.0.1'
+    testRuntime 'org.pegdown:pegdown:1.4.2'
 }
 
 shadowJar {
