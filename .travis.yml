@@ -1,13 +1,8 @@
-language: scala
+language: java
 script:
-  - ./travis-test.sh
-scala:
-   - 2.11.8
+  - cd agent && gradle test
 jdk:
    - oraclejdk8
-before_script:
-  - mkdir $TRAVIS_BUILD_DIR/tmp
-  - export SBT_OPTS="-Djava.io.tmpdir=$TRAVIS_BUILD_DIR/tmp"
 after_failure:
   - cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log
 sudo: true

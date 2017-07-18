@@ -1,0 +1,151 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.0'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'scala'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.7.3'
+    id 'com.github.maiflai.scalatest' version '0.16'
+    id 'com.github.johnrengelman.shadow' version '2.0.0'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile 'com.typesafe:config:1.3.1'
+    compile 'io.vavr:vavr:0.9.0'
+    compile 'org.projectlombok:lombok:1.16.12'
+    compile 'net.jodah:expiringmap:0.5.8'
+    compile 'org.tinylog:tinylog:1.2'
+    compile files('../libs/byte-buddy-1.6.8.jar')
+
+    testCompile 'org.mockito:mockito-core:2.4.2'
+    testCompile 'org.scalatest:scalatest_2.12:3.0.1'
+    testRuntime 'org.pegdown:pegdown:1.4.2'
+}
+
+shadowJar {
+    baseName = 'kamon-agent'
+    classifier = null
+    exclude 'META-INF/services/*'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    relocate 'net.bytebuddy', 'kamon.agent.libs.net.bytebuddy'
+    relocate 'io.vavr', 'kamon.agent.libs.io.vavr'
+    relocate 'com.typesafe.config', 'kamon.agent.libs.com.typesafe.config'
+    relocate 'org.pmw.tinylog', 'kamon.agent.libs.org.pmw.tinylog'
+    relocate 'net.jodah', 'kamon.agent.libs.net.jodah'
+
+    dependencies {
+        exclude(dependency('org.projectlombok:lombok:1.16.12'))
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Built-By': System.getProperty("user.name")
+        attributes 'Build-Jdk': System.getProperty("java.version")
+        attributes 'Premain-Class': "kamon.agent.KamonAgent"
+        attributes 'Agent-Class': "kamon.agent.KamonAgent"
+        attributes 'Can-Redefine-Classes': "true"
+        attributes 'Can-Set-Native-Method-Prefix': "true"
+        attributes 'Can-Retransform-Classes': "true"
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['shadowPublication']
+
+    pkg {
+        repo = 'releases'
+        name = 'kamon-agent'
+        userOrg = 'kamon-io'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/kamon-io/kamon-agent'
+
+        version {
+            name = "${version}"
+            desc = 'Kamon Agent(experimental)'
+            released  = new Date()
+        }
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    }
+    developers {
+        developer {
+            id "dpsoft"
+            name "Diego Parra"
+            url "https://twitter.com/diegolparra"
+        }
+
+        developer {
+            id "ivantopo"
+            name "Ivan Topolnjak"
+            url "https://twitter.com/ivantopo"
+        }
+
+        developer {
+            id "cristianspinetta"
+            name "Cristian Spinetta"
+            url "https://twitter.com/c_spinetta"
+        }
+    }
+
+    scm {
+       url "https://github.com/kamon-io/kamon-agent"
+    }
+}
+
+publishing {
+    publications {
+        shadowPublication(MavenPublication) { publication ->
+            project.shadow.component(publication)
+            artifact sourcesJar
+            artifact javadocJar
+            groupId 'io.kamon'
+            artifactId 'kamon-agent'
+            version "${version}"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'The Open Source java agent for Kamon')
+                root.appendNode('name', 'Kamon Agent')
+                root.appendNode('url', 'http://kamon.io')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
