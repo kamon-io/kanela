@@ -5,4 +5,4 @@ jdk:
    - oraclejdk8
 after_failure:
   - cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log
-sudo: true
+sudo: false

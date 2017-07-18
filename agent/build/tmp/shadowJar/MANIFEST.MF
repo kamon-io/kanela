@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Premain-Class: kamon.agent.KamonAgent
-Built-By: diego
-Agent-Class: kamon.agent.KamonAgent
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-Can-Set-Native-Method-Prefix: true
-Build-Jdk: 1.8.0_121
-
