@@ -1,6 +1,6 @@
 language: java
 script:
-  - cd agent && gradle test
+  - gradle -p agent test
 jdk:
    - oraclejdk8
 after_failure:
