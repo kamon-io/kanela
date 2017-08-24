@@ -16,10 +16,10 @@
 
 package kamon.agent.util.banner;
 
-//import kamon.agent.BuildInfo;
+import kamon.agent.util.AnsiColor;
+import kamon.agent.util.BuildInfo;
 import kamon.agent.util.conf.AgentConfiguration;
 import lombok.val;
-import kamon.agent.util.AnsiColor;
 
 public class AgentBanner {
 
@@ -45,7 +45,8 @@ public class AgentBanner {
                 System.out.println(line);
             }
 
-            String version = "experimental";//BuildInfo.version();
+            String version = BuildInfo.version();
+
             version =  (version == null ? "" : " (v" + version + ")");
             String padding = "";
 

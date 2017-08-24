@@ -54,6 +54,7 @@ shadowJar {
     }
 }
 
+
 jar {
     manifest {
         attributes 'Built-By': System.getProperty("user.name")
@@ -139,6 +140,17 @@ publishing {
 }
 
 
+task createBuildInfoFile(dependsOn: processResources) {
+    def file = new File("$buildDir/build-info.properties")
+    Properties props = new Properties()
+    props.setProperty('version', project.version.toString())
+    props.setProperty('timestamp', new Date().toString())
+    props.store(file.newWriter(), null)
+}
+
+classes {
+    dependsOn createBuildInfoFile
+}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
