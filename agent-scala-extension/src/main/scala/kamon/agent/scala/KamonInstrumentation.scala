@@ -71,16 +71,22 @@ trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionS
   }
 
   implicit class PimpInstrumentationBuilder(instrumentationBuilder: InstrumentationDescription.Builder) {
-    def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) = {
+    @deprecated("Use withInterceptorFor", "0.0.4" )
+    def withTransformationFor(method: Junction[MethodDescription], delegate: Class[_]) =
       addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
-    }
 
-    def withTransformationFor(method:Junction[MethodDescription], delegate:AnyRef) = {
+    @deprecated("Use withInterceptorFor", "0.0.4" )
+    def withTransformationFor(method:Junction[MethodDescription], delegate:AnyRef) =
       addTransformation((builder, _, _, _) ⇒ builder.method(method).intercept(MethodDelegation.to(delegate)))
-    }
 
-    def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader, JavaModule) ⇒ Builder[_]) = instrumentationBuilder.withTransformation(f)
-  }
+    def addTransformation(f: ⇒ (Builder[_], TypeDescription, ClassLoader, JavaModule) ⇒ Builder[_]) =
+      instrumentationBuilder.withTransformation(f)
+
+    def withInterceptorFor(method: Junction[MethodDescription], delegate: Class[_]) =
+      withTransformationFor(method, delegate)
+
+    def withInterceptorFor(method:Junction[MethodDescription], delegate:AnyRef) =
+      withTransformationFor(method, delegate)
 }
 
 trait MethodDescriptionSugar {
