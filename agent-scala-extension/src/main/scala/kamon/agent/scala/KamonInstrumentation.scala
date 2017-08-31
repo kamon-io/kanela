@@ -101,12 +101,26 @@ trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionS
 }
 
 trait MethodDescriptionSugar {
-  def isConstructor(): Junction[MethodDescription] = BBMatchers.isConstructor()
-  def isAbstract(): Junction[MethodDescription] = BBMatchers.isAbstract()
-  def method(name: String): Junction[MethodDescription] = BBMatchers.named(name)
-  def takesArguments(quantity: Int): Junction[MethodDescription] = BBMatchers.takesArguments(quantity)
-  def takesArguments(classes: Class[_]*): Junction[MethodDescription] = BBMatchers.takesArguments(classes: _*)
-  def withArgument(index: Int, `type`: Class[_]): Junction[MethodDescription] = BBMatchers.takesArgument(index, `type`)
+  def isConstructor(): Junction[MethodDescription] =
+    BBMatchers.isConstructor()
+
+  def isAbstract(): Junction[MethodDescription] =
+    BBMatchers.isAbstract()
+
+  def method(name: String): Junction[MethodDescription] =
+    BBMatchers.named(name)
+
+  def takesArguments(quantity: Int): Junction[MethodDescription] =
+    BBMatchers.takesArguments(quantity)
+
+  def takesArguments(classes: Class[_]*): Junction[MethodDescription] =
+    BBMatchers.takesArguments(classes: _*)
+
+  def withArgument(index: Int, `type`: Class[_]): Junction[MethodDescription] =
+    BBMatchers.takesArgument(index, `type`)
+
+  def anyMethod(names: String*): Junction[MethodDescription] =
+    names.map(method).reduce((a, b) => a.or[MethodDescription](b): Junction[MethodDescription])
 
   @deprecated("Use method", "0.0.4" )
   def named(name: String): Junction[MethodDescription] = method(name)

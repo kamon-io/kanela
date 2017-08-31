@@ -25,10 +25,10 @@ repositories {
 dependencies {
     compile 'com.typesafe:config:1.3.1'
     compile 'io.vavr:vavr:0.9.0'
-    compile 'org.projectlombok:lombok:1.16.12'
+    compile 'org.projectlombok:lombok:1.16.18'
     compile 'net.jodah:expiringmap:0.5.8'
     compile 'org.tinylog:tinylog:1.2'
-    compile files('../libs/byte-buddy-1.6.8.jar')
+    compile files('libs/byte-buddy-1.7.4.jar')
 
     testCompile 'org.mockito:mockito-core:2.4.2'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
@@ -50,7 +50,7 @@ shadowJar {
     relocate 'net.jodah', 'kamon.agent.libs.net.jodah'
 
     dependencies {
-        exclude(dependency('org.projectlombok:lombok:1.16.12'))
+        exclude(dependency('org.projectlombok:lombok:1.16.18'))
     }
 }
 
@@ -139,13 +139,12 @@ publishing {
     }
 }
 
-
-task createBuildInfoFile(dependsOn: processResources) {
-    def file = new File("$buildDir/build-info.properties")
+task createBuildInfoFile(dependsOn: processResources) << {
+    def file = new File("$buildDir/resources/main/build-info.properties")
     Properties props = new Properties()
     props.setProperty('version', project.version.toString())
     props.setProperty('timestamp', new Date().toString())
-    props.store(file.newWriter(), null)
+    props.store file.newWriter(), null
 }
 
 classes {

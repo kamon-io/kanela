@@ -23,6 +23,7 @@ crossScalaVersions := Seq("2.12.2", "2.11.8", "2.10.6")
 lazy val agentScala = (project in file("."))
   .settings(moduleName := "agent-scala-extension")
   .settings(basicSettings: _*)
+  .settings(resolvers += Resolver.mavenLocal)
   .settings(libraryDependencies ++= providedScope(kamonAgent))
 
 
