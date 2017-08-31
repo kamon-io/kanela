@@ -16,7 +16,7 @@
 
 import sbt._
 
-val kamonAgent = "io.kamon" % "kamon-agent" % "0.0.4-experimental"
+val kamonAgent = "io.kamon" % "kamon-agent" % "0.0.5-experimental"
 
 lazy val agentScala = (project in file("."))
   .settings(moduleName := "agent-scala-extension")
