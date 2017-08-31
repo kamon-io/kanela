@@ -18,8 +18,6 @@ import sbt._
 
 val kamonAgent = "io.kamon" % "kamon-agent" % "0.0.4-experimental"
 
-crossScalaVersions := Seq("2.12.2", "2.11.8", "2.10.6")
-
 lazy val agentScala = (project in file("."))
   .settings(moduleName := "agent-scala-extension")
   .settings(basicSettings: _*)
@@ -28,8 +26,8 @@ lazy val agentScala = (project in file("."))
 
 
 lazy val basicSettings = Seq(
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  scalaVersion := "2.12.3",
+  crossScalaVersions := Seq("2.12.3", "2.11.8", "2.10.6"),
   resolvers += Resolver.bintrayRepo("kamon-io", "releases"),
   javacOptions := Seq(
     "-Xlint:none",
