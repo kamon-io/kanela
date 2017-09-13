@@ -28,7 +28,7 @@ dependencies {
     compile 'org.projectlombok:lombok:1.16.18'
     compile 'net.jodah:expiringmap:0.5.8'
     compile 'org.tinylog:tinylog:1.2'
-    compile files('libs/byte-buddy-1.7.4.jar')
+    compile files('libs/byte-buddy-1.6.8.jar')
 
     testCompile 'org.mockito:mockito-core:2.4.2'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
