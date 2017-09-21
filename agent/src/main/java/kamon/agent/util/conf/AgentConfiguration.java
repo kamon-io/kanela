@@ -87,7 +87,7 @@ public class AgentConfiguration {
         List<String> instrumentations;
         String withinPackage;
         Boolean order;
-        Boolean stoppable;
+        boolean stoppable;
     }
 
     @Value
