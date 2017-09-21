@@ -63,27 +63,31 @@ public class AgentConfiguration {
     public List<AgentModuleDescription> getAgentModules() {
         val config = getConfig().getConfig("modules");
         return List.ofAll(config.entrySet())
-                   .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
-                   .toSet()
-                   .map(moduleName -> {
-                       val moduleConfig = config.getConfig(moduleName);
-                       val name = moduleConfig.getString("name");
-                       val stoppable = moduleConfig.getBoolean("stoppable");
-                       val instrumentations = getInstrumentations(moduleConfig);
-                       val within = getWithinConfiguration(moduleConfig);
-                       return AgentModuleDescription.from(name, stoppable, instrumentations, within);
-                   })
-                   .filter(agentModule -> agentModule.getInstrumentations().nonEmpty())
-                   .toList();
+                .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
+                .toSet()
+                .map(moduleName -> {
+                    val moduleConfig = config.getConfig(moduleName);
+                    val name = moduleConfig.getString("name");
+                    val instrumentations = getInstrumentations(moduleConfig);
+                    val within = getWithinConfiguration(moduleConfig);
+                    val order = Try.of(() -> moduleConfig.getBoolean("order")).getOrElse(false);
+                    val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
+
+                    return AgentModuleDescription.from(name, instrumentations, within, order, stoppable);
+                    })
+                .filter(module -> module.getInstrumentations().nonEmpty())
+                .toList()
+                .sortBy(AgentModuleDescription::getOrder);
     }
 
     @Value(staticConstructor = "from")
     @NonFinal
     public static class AgentModuleDescription {
         String name;
-        boolean stoppable;
         List<String> instrumentations;
         String withinPackage;
+        Boolean order;
+        Boolean stoppable;
     }
 
     @Value

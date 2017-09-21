@@ -42,6 +42,7 @@ public class InstrumentationLoader {
             LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
             return moduleDescription.getInstrumentations()
                                     .map(instrumentationClassName -> loadInstrumentation(instrumentationClassName, configuration))
+                                    .filter(KamonInstrumentation::isActive)
                                     .sortBy(KamonInstrumentation::order)
                                     .flatMap(KamonInstrumentation::collectTransformations)
                                     .foldLeft(Agents.from(configuration, moduleDescription, instrumentation), Agents::addTypeTransformation)
