@@ -70,7 +70,7 @@ public class AgentConfiguration {
                     val name = moduleConfig.getString("name");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
-                    val order = Try.of(() -> moduleConfig.getBoolean("order")).getOrElse(false);
+                    val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
 
                     return AgentModuleDescription.from(name, instrumentations, within, order, stoppable);
@@ -86,7 +86,7 @@ public class AgentConfiguration {
         String name;
         List<String> instrumentations;
         String withinPackage;
-        Boolean order;
+        int order;
         boolean stoppable;
     }
 
