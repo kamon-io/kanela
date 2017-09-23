@@ -19,6 +19,7 @@ package kamon.agent.api.instrumentation;
 import io.vavr.Function0;
 import io.vavr.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
+import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import kamon.agent.util.ListBuilder;
 import lombok.val;
@@ -49,10 +50,11 @@ public abstract class KamonInstrumentation {
     }
 
     private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription) {
+        val bridges = collect(instrumentationDescription.bridges(), BridgeDescription::makeTransformer);
         val mixins = collect(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
         val advisors = collect(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
         val transformers = collect(instrumentationDescription.transformers(), Function.identity());
-        return TypeTransformation.of(instrumentationDescription.elementMatcher(), mixins, advisors, transformers);
+        return TypeTransformation.of(instrumentationDescription.elementMatcher(), bridges, mixins, advisors, transformers);
     }
 
     private <T> Set<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {

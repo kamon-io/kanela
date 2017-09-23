@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.agent.api.instrumentation.mixin;
+package kamon.agent.api.instrumentation.bridge;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -30,9 +30,9 @@ import net.bytebuddy.pool.TypePool;
 
 @Value(staticConstructor = "of")
 @EqualsAndHashCode(callSuper = false)
-public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
+public class BridgeClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
-    MixinDescription mixin;
+    BridgeDescription bridge;
 
     @Override
     public int mergeReader(int flags) {
@@ -49,6 +49,7 @@ public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
                              int writerFlags,
                              int readerFlags) {
 
-        return  MixinClassVisitor.from(mixin, instrumentedType.getInternalName(), classVisitor);
+        return  BridgeClassVisitor.from(bridge, instrumentedType.getInternalName(), classVisitor);
     }
 }
+

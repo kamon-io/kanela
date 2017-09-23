@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.agent.api.instrumentation;
+package kamon.agent.api.instrumentation.mixin;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

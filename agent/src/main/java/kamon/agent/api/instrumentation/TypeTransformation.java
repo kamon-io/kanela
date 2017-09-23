@@ -33,13 +33,21 @@ import java.util.stream.Collectors;
 public class TypeTransformation {
 
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
+    io.vavr.collection.Set<AgentBuilder.Transformer> bridges;
     io.vavr.collection.Set<AgentBuilder.Transformer> mixins;
     io.vavr.collection.Set<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
-    static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher, Set<AgentBuilder.Transformer> mixins, Set<AgentBuilder.Transformer>... transformers) {
-        val transformations = Arrays.stream(transformers).flatMap(Collection::stream).collect(Collectors.toSet());
-        return new TypeTransformation(elementMatcher, HashSet.ofAll(mixins),HashSet.ofAll(transformations));
+    static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher,
+                                 Set<AgentBuilder.Transformer> bridges,
+                                 Set<AgentBuilder.Transformer> mixins,
+                                 Set<AgentBuilder.Transformer>... transformers) {
+
+        val transformations = Arrays.stream(transformers)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        return new TypeTransformation(elementMatcher, HashSet.ofAll(bridges), HashSet.ofAll(mixins),HashSet.ofAll(transformations));
     }
 
     public Boolean isActive() {

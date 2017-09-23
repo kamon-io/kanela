@@ -19,6 +19,7 @@ package kamon.agent.api.instrumentation;
 import io.vavr.Function4;
 import io.vavr.control.Option;
 import kamon.agent.api.advisor.AdvisorDescription;
+import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
@@ -37,12 +38,14 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class InstrumentationDescription {
     private final Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     private final List<MixinDescription> mixins;
+    private final List<BridgeDescription> bridges;
     private final List<AdvisorDescription> interceptors;
     private final List<AgentBuilder.Transformer> transformers;
 
     private InstrumentationDescription(Builder builder) {
         this.elementMatcher  = builder.elementMatcher;
         this.mixins = builder.mixins;
+        this.bridges = builder.bridges;
         this.interceptors = builder.interceptors;
         this.transformers = builder.transformers;
     }
@@ -53,6 +56,10 @@ public class InstrumentationDescription {
 
     List<MixinDescription> mixins() {
         return mixins;
+    }
+
+    List<BridgeDescription> bridges() {
+        return bridges;
     }
 
     List<AdvisorDescription> interceptors() {
@@ -66,6 +73,7 @@ public class InstrumentationDescription {
     public static class Builder {
         private Option<ElementMatcher<? super TypeDescription>> elementMatcher;
         private List<MixinDescription> mixins =  new ArrayList<>();
+        private List<BridgeDescription> bridges =  new ArrayList<>();
         private List<AdvisorDescription> interceptors = new ArrayList<>();
         private List<AgentBuilder.Transformer> transformers = new ArrayList<>();
 
@@ -76,7 +84,12 @@ public class InstrumentationDescription {
         }
 
         public Builder withMixin(Supplier<Class<?>> clazz) {
-            mixins.add(MixinDescription.of(elementMatcher.get(),clazz.get()));
+            mixins.add(MixinDescription.of(clazz.get()));
+            return this;
+        }
+
+        public Builder withBridge(Supplier<Class<?>> clazz) {
+            bridges.add(BridgeDescription.of(clazz.get()));
             return this;
         }
 

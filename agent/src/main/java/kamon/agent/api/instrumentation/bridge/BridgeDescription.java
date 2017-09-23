@@ -14,11 +14,8 @@
  * =========================================================================================
  */
 
+package kamon.agent.api.instrumentation.bridge;
 
-package kamon.agent.api.instrumentation.mixin;
-
-import io.vavr.collection.List;
-import io.vavr.control.Option;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -27,28 +24,24 @@ import net.bytebuddy.description.type.TypeDescription;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Value
-public class MixinDescription {
+public class BridgeDescription {
+    Class<?> iface;
+    Set<Method> methods;
 
-    Set<Class<?>> interfaces;
-    String mixinClass;
-    Option<String> mixinInit;
+    public static BridgeDescription of(Class<?> clazz) {
+        val methods =  Arrays.stream(clazz.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(Bridge.class))
+                .collect(Collectors.toSet());
 
-    public static MixinDescription of(Class<?> clazz) {
-        val interfaces = List.ofAll(Arrays.asList(clazz.getInterfaces())).toJavaSet();
-        val mixinInit = Option.ofOptional(Arrays.stream(clazz.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(Initializer.class))
-                .findFirst()
-                .map(Method::getName));
-
-        return new MixinDescription(interfaces, clazz.getName(), mixinInit);
+        return new BridgeDescription(clazz, methods);
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        val interfaces = List.ofAll(this.interfaces).map(TypeDescription.ForLoadedType::new).toJavaList();
         return (builder, typeDescription, classLoader, module) ->
-                builder.implement(interfaces)
-                       .visit(MixinClassVisitorWrapper.of(this));
+                builder.implement(new TypeDescription.ForLoadedType(iface))
+                        .visit(BridgeClassVisitorWrapper.of(this));
     }
 }
