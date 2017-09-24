@@ -61,7 +61,6 @@ public class BridgeClassVisitor extends ClassVisitor {
            mv.visitMaxs(0, 0);
            mv.visitEnd();
        });
-
        cv.visitEnd();
     }
 }

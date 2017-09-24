@@ -22,8 +22,18 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 
+/**
+ * Annotation to mark a method that will be used as a bridge to call a target method specified in the annotation value, based on [1].
+ *
+ * [1] https://github.com/glowroot/glowroot/blob/master/agent/plugin-api/src/main/java/org/glowroot/agent/plugin/api/weaving/Shim.java
+ */
 @Target(METHOD)
 @Retention(RUNTIME)
 public @interface Bridge {
+    /**
+     * Java method declaration, without argument names, of the form "returnType name (argumentType1, ... argumentTypeN)",
+     * where the types are in plain Java (e.g. "int", "float", "java.util.List", ...).
+     * Classes of the java.lang package can be specified by their unqualified name; all other classes names must be fully qualified.
+     */
     String value();
 }

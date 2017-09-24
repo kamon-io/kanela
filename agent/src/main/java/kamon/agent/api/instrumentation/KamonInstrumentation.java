@@ -40,8 +40,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class KamonInstrumentation {
     private final ListBuilder<InstrumentationDescription> instrumentationDescriptions = ListBuilder.builder();
 
-    protected final ElementMatcher.Junction<ByteCodeElement> NotDeclaredByObject = not(isDeclaredBy(Object.class));
-    protected final ElementMatcher.Junction<MethodDescription> TakesArguments = not(takesArguments(0));
+    protected final ElementMatcher.Junction<ByteCodeElement> notDeclaredByObject = not(isDeclaredBy(Object.class));
+    protected final ElementMatcher.Junction<MethodDescription> notTakesArguments = not(takesArguments(0));
 
     private static Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
 
