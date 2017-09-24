@@ -47,7 +47,7 @@ public class TypeTransformation {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        return new TypeTransformation(elementMatcher, HashSet.ofAll(bridges), HashSet.ofAll(mixins),HashSet.ofAll(transformations));
+        return new TypeTransformation(elementMatcher, HashSet.ofAll(bridges), HashSet.ofAll(mixins), HashSet.ofAll(transformations));
     }
 
     public Boolean isActive() {

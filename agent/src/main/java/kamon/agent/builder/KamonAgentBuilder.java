@@ -70,6 +70,7 @@ abstract class KamonAgentBuilder {
     AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription) {
             return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription), (agent, typeTransformation) -> {
                 val transformers = new ArrayList<AgentBuilder.Transformer>();
+                transformers.addAll(typeTransformation.getBridges().toJavaList());
                 transformers.addAll(typeTransformation.getMixins().toJavaList());
                 transformers.addAll(typeTransformation.getTransformations().toJavaList());
                 return agent.type(typeTransformation.getElementMatcher().get())

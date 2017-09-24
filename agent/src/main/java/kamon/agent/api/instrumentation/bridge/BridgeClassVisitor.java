@@ -43,7 +43,7 @@ public class BridgeClassVisitor extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-       bridge.getMethods().forEach( reflectMethod -> {
+       bridge.getMethods().forEach(reflectMethod -> {
            val method = Method.getMethod(reflectMethod);
            val bridge = reflectMethod.getAnnotation(Bridge.class);
            val targetMethod = Method.getMethod(bridge.value());
@@ -57,7 +57,7 @@ public class BridgeClassVisitor extends ClassVisitor {
            }
 
            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, type.getInternalName(), targetMethod.getName(), targetMethod.getDescriptor(), false);
-           mv.visitInsn(method.getReturnType().getOpcode(Opcodes.RETURN));
+           mv.visitInsn(method.getReturnType().getOpcode(Opcodes.IRETURN));
            mv.visitMaxs(0, 0);
            mv.visitEnd();
        });

@@ -26,6 +26,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassVisitor;
+import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.pool.TypePool;
 
 @Value(staticConstructor = "of")
@@ -33,6 +34,11 @@ import net.bytebuddy.pool.TypePool;
 public class BridgeClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
     BridgeDescription bridge;
+
+    @Override
+    public int mergeWriter(int flags) {
+        return flags | ClassWriter.COMPUTE_FRAMES;
+    }
 
     @Override
     public int mergeReader(int flags) {
