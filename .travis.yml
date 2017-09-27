@@ -1,6 +1,5 @@
 language: java
-script:
-  - gradle test
+
 jdk:
    - oraclejdk8
 
