@@ -22,9 +22,14 @@ import kamon.agent.api.instrumentation.KamonInstrumentation;
 import kamon.agent.builder.Agents;
 import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription;
 import kamon.agent.util.log.LazyLogger;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.dynamic.loading.ClassInjector;
 
 import java.lang.instrument.Instrumentation;
+import java.util.Collections;
 
 import static java.text.MessageFormat.format;
 
@@ -42,6 +47,7 @@ public class InstrumentationLoader {
             LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
             return moduleDescription.getInstrumentations()
                                     .map(instrumentationClassName -> loadInstrumentation(instrumentationClassName, configuration))
+                                    .map(kamonInstrumentation -> injectInBootstrapClassloader(kamonInstrumentation , moduleDescription, instrumentation))
                                     .filter(KamonInstrumentation::isActive)
                                     .sortBy(KamonInstrumentation::order)
                                     .flatMap(KamonInstrumentation::collectTransformations)
@@ -51,9 +57,19 @@ public class InstrumentationLoader {
     }
 
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName, AgentConfiguration configuration) {
-        if(configuration.isDebugMode()) LazyLogger.infoColor(() -> format(" ==> Loading {0} ", instrumentationClassName));
+        LazyLogger.infoColor(() -> format(" ==> Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
+    }
+
+
+    private static KamonInstrumentation injectInBootstrapClassloader(KamonInstrumentation kamonInstrumentation, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+        if (moduleDescription.shouldInjectInBootstrap()) {
+            ClassInjector.UsingInstrumentation.of(moduleDescription.getTempDir(), ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation).inject(Collections.singletonMap(
+                    new TypeDescription.ForLoadedType(kamonInstrumentation.getClass()),
+                    ClassFileLocator.ForClassLoader.read(kamonInstrumentation.getClass()).resolve()));
+        }
+        return kamonInstrumentation;
     }
 
     private static ClassLoader getClassLoader(Class<?> clazz) {

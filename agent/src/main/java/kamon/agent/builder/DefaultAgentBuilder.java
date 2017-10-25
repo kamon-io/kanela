@@ -26,6 +26,7 @@ import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
 @Value(staticConstructor = "instance")
@@ -34,8 +35,8 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     String name;
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription) {
-        return from(config, moduleDescription)
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+        return from(config, moduleDescription, instrumentation)
                 .with(DefaultInstrumentationListener.instance())
                 .with(additionalListeners(config));
     }

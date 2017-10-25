@@ -23,6 +23,7 @@ import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription;
 import kamon.agent.util.log.LazyLogger;
+import lombok.SneakyThrows;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -31,11 +32,13 @@ import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
 import static kamon.agent.util.matcher.ClassLoaderMatcher.isReflectionClassLoader;
 import static kamon.agent.util.matcher.TimedMatcher.withTimeSpent;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+
 
 abstract class KamonAgentBuilder {
 
@@ -43,10 +46,11 @@ abstract class KamonAgentBuilder {
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
-    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentModuleDescription moduleDescription);
+    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation);
     protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
 
-    AgentBuilder from(AgentConfiguration config, AgentModuleDescription moduleDescription) {
+    @SneakyThrows
+    AgentBuilder from(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
         val byteBuddy = new ByteBuddy().with(TypeValidation.of(config.isDebugMode()))
                                        .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
@@ -60,6 +64,12 @@ abstract class KamonAgentBuilder {
                                        .withResubmission(PeriodicResubmitter.instance());
         }
 
+
+        if(moduleDescription.shouldInjectInBootstrap()){
+            LazyLogger.infoColor(() -> "Injecting Instrumentations in Bootstrap Classloader.");
+            agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
+        }
+
         return agentBuilder
                         .ignore(configuredMatcherList.apply(moduleDescription))
                         .or(any(), withTimeSpent(agentName(),"classloader", "bootstrap", isBootstrapClassLoader()))
@@ -67,8 +77,8 @@ abstract class KamonAgentBuilder {
                         .or(any(), withTimeSpent(agentName(),"classloader", "reflection", isReflectionClassLoader()));
     }
 
-    AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription) {
-            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription), (agent, typeTransformation) -> {
+    AgentBuilder build(AgentConfiguration config, AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription, instrumentation), (agent, typeTransformation) -> {
                 val transformers = new ArrayList<AgentBuilder.Transformer>();
                 transformers.addAll(typeTransformation.getBridges().toJavaList());
                 transformers.addAll(typeTransformation.getMixins().toJavaList());

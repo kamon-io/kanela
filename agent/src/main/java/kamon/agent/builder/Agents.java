@@ -42,7 +42,7 @@ public class Agents {
     }
 
     public KamonAgentFileTransformer install() {
-        val agentBuilder = builder.build(config, moduleDescription);
+        val agentBuilder = builder.build(config, moduleDescription, instrumentation);
         val classFileTransformer = agentBuilder.installOn(instrumentation);
         return KamonAgentFileTransformer.from(agentBuilder, classFileTransformer, moduleDescription.isStoppable());
     }
