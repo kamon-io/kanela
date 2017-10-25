@@ -43,7 +43,7 @@ public class Jvm {
 
     public double getGcCpuTimePercent(GcEvent event) {
         final long totalGcDuration = event.getInfo().getGcInfo().getDuration();
-        final long percent = (event.getInfo().getGcInfo().getEndTime() - totalGcDuration) * 1000L / event.getInfo().getGcInfo().getEndTime();
+        final long percent = totalGcDuration * 1000L / event.getInfo().getGcInfo().getEndTime();
         return Double.parseDouble((percent/10) +"."+ (percent%10));
     }
 
