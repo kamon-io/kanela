@@ -21,13 +21,9 @@ import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import lombok.val;
-import sun.management.counter.LongCounter;
-import sun.management.counter.perf.PerfInstrumentation;
-import sun.misc.Perf;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
-import java.util.concurrent.TimeUnit;
 
 @Value
 @NonFinal
@@ -35,47 +31,24 @@ public class Jvm {
 
     private static final Jvm instance = new Jvm();
 
-    PerfInstrumentation perfInstrumentation;
-
     @SneakyThrows
     private Jvm() {
         val jvm = ManagementFactory.getRuntimeMXBean().getName();
         val pid = Integer.parseInt(jvm.substring(0, jvm.indexOf('@')));
-        val buffer = Perf.getPerf().attach(pid, "r");
-        this.perfInstrumentation = new PerfInstrumentation(buffer);
     }
 
     public static Jvm instance() {
         return instance;
     }
 
-    /**
-     *  WARNING:
-     *
-     *  The counters have structured names such as sun.gc.generation.1.name, java.threads.live, java.cls.loadedClasses.
-     *  The names of these counters and the data structures used to represent them are considered private, uncommitted interfaces to the HotSpot JVM.
-     *  Users should not become dependent on any counter names, particularly those that start with prefixes other than "java.".
-     *
-     *  @return the time spent in show the GC in the current process.
-     */
-    public long getProcessCPUCollectionTime() {
-        val frequency = getPerformanceCounterValue("sun.os.hrt.frequency");
-        val fullGCTime = getPerformanceCounterValue("sun.gc.collector.1.time");
-        val tick = ((double) TimeUnit.SECONDS.toNanos(1)) / frequency;
-        return (long) tick * fullGCTime;
+    public double getGcCpuTimePercent(GcEvent event) {
+        final long totalGcDuration = event.getInfo().getGcInfo().getDuration();
+        final long percent = (event.getInfo().getGcInfo().getEndTime() - totalGcDuration) * 1000L / event.getInfo().getGcInfo().getEndTime();
+        return Double.parseDouble((percent/10) +"."+ (percent%10));
     }
 
     public long getProcessCPUTime( ) {
         return ( (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean() ).getProcessCpuTime();
-    }
-
-    public double getGcProcessCpuTimePercent() {
-        return 100.0 * ((double) getProcessCPUCollectionTime() / getProcessCPUTime());
-    }
-
-
-    private long getPerformanceCounterValue(String name) {
-        return ((LongCounter) perfInstrumentation.findByPattern(name).get(0)).longValue();
     }
 
     static boolean isOldGenPool(MemoryPoolMXBean bean) {
