@@ -31,7 +31,6 @@ import static kamon.agent.util.LatencyUtils.withTimeSpent;
 
 @Value
 public class AgentEntryPoint {
-
     /**
      * Kamon Agent entry point.
      *
@@ -43,9 +42,13 @@ public class AgentEntryPoint {
             val configuration = AgentConfiguration.instance();
             AgentBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
-//            Reinstrumenter.attach(instrumentation, configuration, transformers);
-//            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-//            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+            //run the other stuff in an async way ;)
+            new Thread(() -> {
+                Reinstrumenter.attach(instrumentation, configuration, transformers);
+                OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+                SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+            }).start();
+
         }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup completed in " + timeSpent + " ms"));
     }
 

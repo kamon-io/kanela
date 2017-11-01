@@ -20,7 +20,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import java.util.concurrent.ForkJoinPool;
 
 public class KamonAgent {
 
@@ -34,7 +33,6 @@ public class KamonAgent {
      * @param instrumentation {@link Instrumentation}
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-//        instrumentation.addTransformer(new SimpleTransformer());
         AgentEntryPoint.premain(args, instrumentation);
     }
 
@@ -48,7 +46,6 @@ public class KamonAgent {
      * @param instrumentation {@link Instrumentation}
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-//        instrumentation.addTransformer(new SimpleTransformer());
         AgentEntryPoint.agentmain(args, instrumentation);
     }
 

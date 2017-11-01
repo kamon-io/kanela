@@ -62,7 +62,7 @@ abstract class KamonAgentBuilder {
         }
 
         if(moduleDescription.shouldInjectInBootstrap()){
-            LazyLogger.infoColor(() -> "Injecting Instrumentations in Bootstrap Classloader.");
+            LazyLogger.infoColor(() -> "Bootstrap Injection was activated.");
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
 
