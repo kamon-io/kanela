@@ -16,7 +16,11 @@
 
 package kamon.agent;
 
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
+import java.util.concurrent.ForkJoinPool;
 
 public class KamonAgent {
 
@@ -30,6 +34,7 @@ public class KamonAgent {
      * @param instrumentation {@link Instrumentation}
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
+//        instrumentation.addTransformer(new SimpleTransformer());
         AgentEntryPoint.premain(args, instrumentation);
     }
 
@@ -43,6 +48,47 @@ public class KamonAgent {
      * @param instrumentation {@link Instrumentation}
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
+//        instrumentation.addTransformer(new SimpleTransformer());
         AgentEntryPoint.agentmain(args, instrumentation);
+    }
+
+
+    public static Instrumentation getInstrumentation() {
+        Instrumentation instrumentation = doGetInstrumentation();
+        if (instrumentation == null) {
+            throw new IllegalStateException("The Byte Buddy agent is not initialized");
+        }
+        return instrumentation;
+    }
+
+
+    private static Instrumentation doGetInstrumentation() {
+        try {
+            return (Instrumentation) ClassLoader.getSystemClassLoader()
+                    .loadClass(Installer.class.getName())
+                    .getMethod("getInstrumentation")
+                    .invoke(null);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    static class SimpleTransformer implements ClassFileTransformer {
+
+        @Override
+        public byte[] transform(ClassLoader loader,
+                                String className,
+                                Class<?> classBeingRedefined,
+                                ProtectionDomain protectionDomain,
+                                byte[] classfileBuffer) throws IllegalClassFormatException {
+
+
+            System.out.println("Loading class => " + className.replace("/", ".") + " " + "classloader: " + loader);
+            if (className.equals("java/util/concurrent/ForkJoinPool")) {
+                System.out.println("Aca cargue el ForkJoinPool ----->>>>>>>>>>>>>>>>>>>>>> " + loader);
+            }
+
+            return classfileBuffer;
+        }
     }
 }

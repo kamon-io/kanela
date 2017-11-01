@@ -35,7 +35,7 @@ class DefaultAgentBuilder extends KamonAgentBuilder {
 
     String name;
 
-    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.AgentModuleDescription moduleDescription, Instrumentation instrumentation) {
+    public AgentBuilder newAgentBuilder(AgentConfiguration config, AgentConfiguration.ModuleConfiguration moduleDescription, Instrumentation instrumentation) {
         return from(config, moduleDescription, instrumentation)
                 .with(DefaultInstrumentationListener.instance())
                 .with(additionalListeners(config));

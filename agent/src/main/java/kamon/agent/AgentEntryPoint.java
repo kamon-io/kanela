@@ -43,9 +43,9 @@ public class AgentEntryPoint {
             val configuration = AgentConfiguration.instance();
             AgentBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
-            Reinstrumenter.attach(instrumentation, configuration, transformers);
-            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+//            Reinstrumenter.attach(instrumentation, configuration, transformers);
+//            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+//            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
         }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup completed in " + timeSpent + " ms"));
     }
 

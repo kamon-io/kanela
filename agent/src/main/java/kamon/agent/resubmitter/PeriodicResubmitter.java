@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.agent.builder;
+package kamon.agent.resubmitter;
 
 import io.vavr.Function0;
 import kamon.agent.util.NamedThreadFactory;

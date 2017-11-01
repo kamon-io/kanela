@@ -18,12 +18,11 @@ package kamon.agent
 
 import java.lang.instrument.{ClassFileTransformer, Instrumentation}
 
-import kamon.agent.util.conf.AgentConfiguration.AgentModuleDescription
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
-import io.vavr.collection.{List ⇒ JList}
-
+import io.vavr.collection.{List => JList}
+import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration
 import org.mockito.ArgumentMatchers._
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
@@ -34,7 +33,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     val agentConfiguration = spy(AgentConfiguration.instance())
     val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
 
-    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
 
     when(agentConfiguration.getAgentModules).thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
@@ -51,7 +50,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
   "with an unknown instrumentation" should "blow up" in {
     val instrumentationMock = mock(classOf[Instrumentation])
-    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
     when(agentModuleDescriptionMock.getInstrumentations)
       .thenReturn(JList.of[String]("UnknownInstrumentation"))
     when(agentModuleDescriptionMock.getName)
@@ -74,7 +73,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     val agentConfiguration = spy(AgentConfiguration.instance())
     val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
 
-    val agentModuleDescriptionMock = mock(classOf[AgentModuleDescription])
+    val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
 
     when(agentConfiguration.getAgentModules).thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 

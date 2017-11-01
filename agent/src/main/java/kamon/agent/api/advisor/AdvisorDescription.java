@@ -18,8 +18,6 @@ package kamon.agent.api.advisor;
 
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
@@ -29,6 +27,6 @@ public class AdvisorDescription {
     Class<?> interceptorClass;
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) -> builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(this.getMethodMatcher(), Advice.to(this.getInterceptorClass())));
+        return new AgentBuilder.Transformer.ForAdvice().advice(this.methodMatcher, interceptorClass.getName());
     }
 }

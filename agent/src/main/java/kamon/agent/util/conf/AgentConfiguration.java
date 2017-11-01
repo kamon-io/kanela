@@ -68,7 +68,7 @@ public class AgentConfiguration {
     }
 
     @SneakyThrows
-    public List<AgentModuleDescription> getAgentModules() {
+    public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
@@ -83,16 +83,16 @@ public class AgentConfiguration {
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
 
-                    return AgentModuleDescription.from(name, instrumentations, within, order, stoppable, injectInBootstrap, createTempDirectory(tempDirPrefix));
+                    return ModuleConfiguration.from(name, instrumentations, within, order, stoppable, injectInBootstrap, createTempDirectory(tempDirPrefix));
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .toList()
-                .sortBy(AgentModuleDescription::getOrder);
+                .sortBy(ModuleConfiguration::getOrder);
     }
 
     @Value(staticConstructor = "from")
     @NonFinal
-    public static class AgentModuleDescription {
+    public static class ModuleConfiguration {
         String name;
         List<String> instrumentations;
         String withinPackage;
