@@ -25,11 +25,16 @@ import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kamon.agent.util.log.LazyLogger;
-import lombok.Value;
+import lombok.*;
 import lombok.experimental.NonFinal;
-import lombok.val;
+import org.pmw.tinylog.Level;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
+
+import static io.vavr.API.*;
+import static java.text.MessageFormat.format;
 
 
 @Value
@@ -41,6 +46,7 @@ public class AgentConfiguration {
     OldGarbageCollectorConfig oldGarbageCollectorConfig;
     Boolean showBanner;
     HashMap extraParams;
+    Level logLevel;
 
     private static class Holder {
         private static final AgentConfiguration Instance = new AgentConfiguration();
@@ -58,9 +64,11 @@ public class AgentConfiguration {
         this.dump = new DumpConfig(config);
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
+        this.logLevel = getLoggerLevel(config);
     }
 
-    public List<AgentModuleDescription> getAgentModules() {
+    @SneakyThrows
+    public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
@@ -72,22 +80,31 @@ public class AgentConfiguration {
                     val within = getWithinConfiguration(moduleConfig);
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
+                    val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
+                    val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
 
-                    return AgentModuleDescription.from(name, instrumentations, within, order, stoppable);
+                    return ModuleConfiguration.from(name, instrumentations, within, order, stoppable, injectInBootstrap, createTempDirectory(tempDirPrefix));
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .toList()
-                .sortBy(AgentModuleDescription::getOrder);
+                .sortBy(ModuleConfiguration::getOrder);
     }
 
     @Value(staticConstructor = "from")
     @NonFinal
-    public static class AgentModuleDescription {
+    public static class ModuleConfiguration {
         String name;
         List<String> instrumentations;
         String withinPackage;
         int order;
         boolean stoppable;
+        @Getter(AccessLevel.NONE)
+        boolean injectInBootstrap;
+        File tempDir;
+
+        public boolean shouldInjectInBootstrap() {
+            return injectInBootstrap;
+        }
     }
 
     @Value
@@ -142,6 +159,7 @@ public class AgentConfiguration {
         }
     }
 
+
     public boolean isDebugMode() {
         return this.debugMode;
     }
@@ -194,6 +212,24 @@ public class AgentConfiguration {
         return ConfigFactory
                 .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
+    }
+
+    private static File createTempDirectory(String tempDirPrefix) {
+        return Try
+                .of(() -> Files.createTempDirectory(tempDirPrefix).toFile())
+                .getOrElseThrow(() -> new RuntimeException(format("Cannot create the temporary directory: {0}", tempDirPrefix)));
+    }
+
+
+    private Level getLoggerLevel(Config config) {
+        val level = Try.of(() -> config.getString("log-level")).getOrElse("INFO");
+        return Match(level).of(
+                Case($("INFO"), Level.INFO),
+                Case($("DEBUG"), Level.DEBUG),
+                Case($("ERROR"), Level.ERROR),
+                Case($("WARNING"), Level.WARNING),
+                Case($("OFF"), Level.OFF)
+            );
     }
 
     private static class DefaultConfiguration {

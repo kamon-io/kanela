@@ -19,7 +19,7 @@ package kamon.agent;
 import io.vavr.collection.List;
 import io.vavr.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
-import kamon.agent.builder.Agents;
+import kamon.agent.builder.Agent;
 import kamon.agent.builder.KamonAgentFileTransformer;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
@@ -38,23 +38,24 @@ public class InstrumentationLoader {
      * @return a list of {@link KamonAgentFileTransformer}
      */
     public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration configuration) {
-        return configuration.getAgentModules().map((moduleDescription) -> {
-            LazyLogger.infoColor(() -> format("Loading {0} ",  moduleDescription.getName()));
-            return moduleDescription.getInstrumentations()
-                                    .map(instrumentationClassName -> loadInstrumentation(instrumentationClassName, configuration))
+        return configuration.getAgentModules().map((moduleConfiguration) -> {
+            LazyLogger.infoColor(() -> format("Loading {0} ",  moduleConfiguration.getName()));
+            return moduleConfiguration.getInstrumentations()
+                                    .map(InstrumentationLoader::loadInstrumentation)
                                     .filter(KamonInstrumentation::isActive)
                                     .sortBy(KamonInstrumentation::order)
-                                    .flatMap(KamonInstrumentation::collectTransformations)
-                                    .foldLeft(Agents.from(configuration, moduleDescription, instrumentation), Agents::addTypeTransformation)
+                                    .flatMap(kamonInstrumentation -> kamonInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
+                                    .foldLeft(Agent.from(configuration, moduleConfiguration, instrumentation), Agent::addTypeTransformation)
                                     .install();
         });
     }
 
-    private static KamonInstrumentation loadInstrumentation(String instrumentationClassName, AgentConfiguration configuration) {
-        if(configuration.isDebugMode()) LazyLogger.infoColor(() -> format(" ==> Loading {0} ", instrumentationClassName));
+    private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {
+        LazyLogger.infoColor(() -> format(" ==> Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
     }
+
 
     private static ClassLoader getClassLoader(Class<?> clazz) {
       return clazz.getClassLoader() == null ? ClassLoader.getSystemClassLoader() : clazz.getClassLoader();

@@ -56,13 +56,13 @@ public class SystemThroughputCircuitBreaker {
 
     @Subscribe
     public void onGCEvent(GcEvent event) {
-        if((jvm.getGcProcessCpuTimePercent() >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-            LazyLogger.warnColor(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent()));
+        if((jvm.getGcCpuTimePercent(event) >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
+            LazyLogger.warnColor(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
             EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.StopModules.instance());
             trip();
         } else {
             if (isTripped()) {
-                LazyLogger.infoColor(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcProcessCpuTimePercent()));
+                LazyLogger.infoColor(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
                 reset();
                 EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.RestartModules.instance());
             }

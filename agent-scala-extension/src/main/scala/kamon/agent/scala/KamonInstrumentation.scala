@@ -101,6 +101,9 @@ trait KamonInstrumentation extends JKamonInstrumentation with MethodDescriptionS
 }
 
 trait MethodDescriptionSugar {
+
+  val Constructor = isConstructor()
+
   def isConstructor(): Junction[MethodDescription] =
     BBMatchers.isConstructor()
 

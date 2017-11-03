@@ -21,7 +21,9 @@ import io.vavr.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
+import kamon.agent.bootstrap.BootstrapInjector;
 import kamon.agent.util.ListBuilder;
+import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
@@ -29,6 +31,8 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -43,18 +47,43 @@ public abstract class KamonInstrumentation {
     protected final ElementMatcher.Junction<ByteCodeElement> notDeclaredByObject = not(isDeclaredBy(Object.class));
     protected final ElementMatcher.Junction<MethodDescription> notTakesArguments = not(takesArguments(0));
 
-    private static Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher = Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
+    private static Function0<ElementMatcher.Junction<TypeDescription>> defaultTypeMatcher =
+            Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
 
-    public List<TypeTransformation> collectTransformations() {
-        return instrumentationDescriptions.build().map(this::buildTransformations).toJavaList();
+    public List<TypeTransformation> collectTransformations(ModuleConfiguration moduleConfiguration, Instrumentation instrumentation) {
+        return instrumentationDescriptions
+                .build()
+                .map(instrumentationDescription -> buildTransformations(instrumentationDescription, moduleConfiguration, instrumentation))
+                .toJavaList();
     }
 
-    private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription) {
-        val bridges = collect(instrumentationDescription.bridges(), BridgeDescription::makeTransformer);
-        val mixins = collect(instrumentationDescription.mixins(), MixinDescription::makeTransformer);
-        val advisors = collect(instrumentationDescription.interceptors(), AdvisorDescription::makeTransformer);
-        val transformers = collect(instrumentationDescription.transformers(), Function.identity());
-        return TypeTransformation.of(instrumentationDescription.elementMatcher(), bridges, mixins, advisors, transformers);
+    private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription, ModuleConfiguration moduleConfiguration, Instrumentation instrumentation) {
+
+        val bridges = instrumentationDescription.bridges();
+        val mixins = instrumentationDescription.mixins();
+        val advisors = instrumentationDescription.interceptors();
+        val transformers  = instrumentationDescription.transformers();
+
+
+        if(moduleConfiguration.shouldInjectInBootstrap()) {
+            val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
+            val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
+            val interceptorClasses = advisors.stream().map(AdvisorDescription::getInterceptorClass).collect(Collectors.toList());
+
+            val allClasses = new ArrayList<Class<?>>();
+            allClasses.addAll(bridgeClasses);
+            allClasses.addAll(mixinClasses);
+            allClasses.addAll(interceptorClasses);
+
+            BootstrapInjector.inject(moduleConfiguration, instrumentation, allClasses);
+        }
+
+        return TypeTransformation.of(
+                instrumentationDescription.elementMatcher(),
+                collect(bridges, BridgeDescription::makeTransformer),
+                collect(mixins, MixinDescription::makeTransformer),
+                collect(advisors, AdvisorDescription::makeTransformer),
+                collect(transformers, Function.identity()));
     }
 
     private <T> Set<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
@@ -65,7 +94,7 @@ public abstract class KamonInstrumentation {
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(named(f.get())));
+        builder.addElementMatcher(() -> named(f.get()));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 

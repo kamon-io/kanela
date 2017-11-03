@@ -16,6 +16,8 @@
 
 package kamon.agent.util.log;
 
+import kamon.agent.util.AnsiColor;
+import kamon.agent.util.conf.AgentConfiguration;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.labelers.TimestampLabeler;
@@ -23,7 +25,6 @@ import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;
 import org.pmw.tinylog.writers.ConsoleWriter;
 import org.pmw.tinylog.writers.RollingFileWriter;
-import kamon.agent.util.AnsiColor;
 
 import java.util.Locale;
 import java.util.function.Supplier;
@@ -41,6 +42,7 @@ public class LazyLogger {
                 .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")
                 .writer(new ConsoleWriter())
                 .addWriter(new RollingFileWriter("kamon-agent.log", 10, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
+                .level(AgentConfiguration.instance().getLogLevel())
                 .activate();
     }
 

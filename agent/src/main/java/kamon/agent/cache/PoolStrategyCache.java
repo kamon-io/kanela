@@ -59,7 +59,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
     private ExpirationListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value) ->   LazyLogger.infoColor(() -> format("Expiring key: " + key + "with value" + value));
+        return (key, value) ->   LazyLogger.debug(() -> format("Expiring key: " + key + "with value" + value));
     }
 
     public static PoolStrategyCache instance() {

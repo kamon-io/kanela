@@ -19,7 +19,8 @@ package kamon.agent.circuitbraker
 import kamon.agent.broker.EventBroker
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker
 import kamon.agent.util.conf.AgentConfiguration
-import kamon.agent.util.jvm.{ GcEvent, Jvm }
+import kamon.agent.util.jvm.{GcEvent, Jvm}
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
@@ -31,7 +32,7 @@ class CircuitBreakerSpec extends Matchers with WordSpecLike with BeforeAndAfterA
       when(circuitBreakerConfig.getGcProcessCPUThreshold).thenReturn(20.0)
 
       val jvmTools = mock(classOf[Jvm])
-      when(jvmTools.getProcessCPUCollectionTime).thenReturn(30)
+      when(jvmTools.getGcCpuTimePercent(ArgumentMatchers.any(classOf[GcEvent]))).thenReturn(30)
       when(jvmTools.getProcessCPUTime).thenReturn(30)
 
       val circuitBreaker = SystemThroughputCircuitBreaker.attach(circuitBreakerConfig, jvmTools)
