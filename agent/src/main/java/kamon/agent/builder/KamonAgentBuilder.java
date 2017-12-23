@@ -24,6 +24,7 @@ import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
 import kamon.agent.util.log.LazyLogger;
+import lombok.experimental.var;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -52,17 +53,18 @@ abstract class KamonAgentBuilder {
         val byteBuddy = new ByteBuddy().with(TypeValidation.of(config.isDebugMode()))
                                        .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
-        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
+        var agentBuilder = new AgentBuilder.Default(byteBuddy)
                                                     .with(poolStrategyCache);
 
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
-            LazyLogger.infoColor(() -> "Retransformation Strategy was activated.");
-            agentBuilder = agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+            LazyLogger.infoColor(() -> "Retransformation Strategy activated.");
+            agentBuilder = agentBuilder.disableClassFormatChanges()
+                                       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                                        .withResubmission(PeriodicResubmitter.instance());
         }
 
         if(moduleDescription.shouldInjectInBootstrap()){
-            LazyLogger.infoColor(() -> "Bootstrap Injection was activated.");
+            LazyLogger.infoColor(() -> "Bootstrap Injection activated.");
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
 

@@ -21,8 +21,8 @@ import io.vavr.Function1;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
-import kamon.agent.bootstrap.BootstrapInjector;
 import kamon.agent.util.ListBuilder;
+import kamon.agent.util.BootstrapInjector;
 import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -59,27 +59,27 @@ public abstract class KamonInstrumentation {
 
     private TypeTransformation buildTransformations(InstrumentationDescription instrumentationDescription, ModuleConfiguration moduleConfiguration, Instrumentation instrumentation) {
 
-        val bridges = instrumentationDescription.bridges();
-        val mixins = instrumentationDescription.mixins();
-        val advisors = instrumentationDescription.interceptors();
-        val transformers  = instrumentationDescription.transformers();
+        val bridges = instrumentationDescription.getBridges();
+        val mixins = instrumentationDescription.getMixins();
+        val advisors = instrumentationDescription.getInterceptors();
+        val transformers  = instrumentationDescription.getTransformers();
 
 
         if(moduleConfiguration.shouldInjectInBootstrap()) {
             val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
             val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
-            val interceptorClasses = advisors.stream().map(AdvisorDescription::getInterceptorClass).collect(Collectors.toList());
+            val advisorClasses = advisors.stream().map(AdvisorDescription::getInterceptorClass).collect(Collectors.toList());
 
             val allClasses = new ArrayList<Class<?>>();
             allClasses.addAll(bridgeClasses);
             allClasses.addAll(mixinClasses);
-            allClasses.addAll(interceptorClasses);
+            allClasses.addAll(advisorClasses);
 
-            BootstrapInjector.inject(moduleConfiguration, instrumentation, allClasses);
+            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, allClasses);
         }
 
         return TypeTransformation.of(
-                instrumentationDescription.elementMatcher(),
+                instrumentationDescription.getElementMatcher(),
                 collect(bridges, BridgeDescription::makeTransformer),
                 collect(mixins, MixinDescription::makeTransformer),
                 collect(advisors, AdvisorDescription::makeTransformer),

@@ -34,6 +34,9 @@ public @interface Bridge {
      * Java method declaration, without argument names, of the form "returnType name (argumentType1, ... argumentTypeN)",
      * where the types are in plain Java (e.g. "int", "float", "java.util.List", ...).
      * Classes of the java.lang package can be specified by their unqualified name; all other classes names must be fully qualified.
+     *
+     * @return the method declaration
+     *
      */
     String value();
 }

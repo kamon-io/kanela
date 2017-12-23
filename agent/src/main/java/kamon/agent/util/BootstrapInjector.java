@@ -14,29 +14,41 @@
  * =========================================================================================
  */
 
-package kamon.agent.bootstrap;
+package kamon.agent.util;
 
-import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
+import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 
+import java.io.File;
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Value
 public class BootstrapInjector {
-    public static void inject(ModuleConfiguration moduleConfiguration, Instrumentation instrumentation, ArrayList<Class<?>> allClasses) {
-        val classesToInject = allClasses
+
+    public static void injectJar(Instrumentation instrumentation, String jarName) {
+        val jarFile = Jar.getEmbeddedJar(jarName)
+                .onFailure(error -> LazyLogger.error(error::getMessage, error))
+                .get();
+
+        instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
+    }
+
+    public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
+        ClassInjector.UsingInstrumentation
+                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
+                .inject(getCollect(allClasses));
+    }
+
+    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
+        return allClasses
                 .stream()
                 .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> ClassFileLocator.ForClassLoader.read(value).resolve()));
-
-        ClassInjector
-                .UsingInstrumentation
-                .of(moduleConfiguration.getTempDir(), ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-                .inject(classesToInject);
     }
 }

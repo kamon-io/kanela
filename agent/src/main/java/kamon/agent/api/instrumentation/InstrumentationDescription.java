@@ -21,6 +21,7 @@ import io.vavr.control.Option;
 import kamon.agent.api.advisor.AdvisorDescription;
 import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
+import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -35,12 +36,13 @@ import java.util.function.Supplier;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 
+@Value
 public class InstrumentationDescription {
-    private final Option<ElementMatcher<? super TypeDescription>> elementMatcher;
-    private final List<MixinDescription> mixins;
-    private final List<BridgeDescription> bridges;
-    private final List<AdvisorDescription> interceptors;
-    private final List<AgentBuilder.Transformer> transformers;
+    Option<ElementMatcher<? super TypeDescription>> elementMatcher;
+    List<MixinDescription> mixins;
+    List<BridgeDescription> bridges;
+    List<AdvisorDescription> interceptors;
+    List<AgentBuilder.Transformer> transformers;
 
     private InstrumentationDescription(Builder builder) {
         this.elementMatcher  = builder.elementMatcher;
@@ -50,33 +52,12 @@ public class InstrumentationDescription {
         this.transformers = builder.transformers;
     }
 
-    Option<ElementMatcher<? super TypeDescription>> elementMatcher() {
-        return elementMatcher;
-    }
-
-    List<MixinDescription> mixins() {
-        return mixins;
-    }
-
-    List<BridgeDescription> bridges() {
-        return bridges;
-    }
-
-    List<AdvisorDescription> interceptors() {
-        return interceptors;
-    }
-
-    List<AgentBuilder.Transformer> transformers() {
-        return transformers;
-    }
-
     public static class Builder {
         private Option<ElementMatcher<? super TypeDescription>> elementMatcher;
-        private List<MixinDescription> mixins =  new ArrayList<>();
-        private List<BridgeDescription> bridges =  new ArrayList<>();
-        private List<AdvisorDescription> interceptors = new ArrayList<>();
-        private List<AgentBuilder.Transformer> transformers = new ArrayList<>();
-
+        private final List<MixinDescription> mixins =  new ArrayList<>();
+        private final List<BridgeDescription> bridges =  new ArrayList<>();
+        private final List<AdvisorDescription> interceptors = new ArrayList<>();
+        private final List<AgentBuilder.Transformer> transformers = new ArrayList<>();
 
         Builder addElementMatcher(Supplier<ElementMatcher<? super TypeDescription>> f) {
             elementMatcher = Option.of(f.get());

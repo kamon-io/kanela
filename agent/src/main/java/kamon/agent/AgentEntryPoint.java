@@ -18,6 +18,7 @@ package kamon.agent;
 
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.reinstrument.Reinstrumenter;
+import kamon.agent.util.BootstrapInjector;
 import kamon.agent.util.banner.AgentBanner;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.OldGarbageCollectorListener;
@@ -39,9 +40,12 @@ public class AgentEntryPoint {
      */
     private static void start(String args, Instrumentation instrumentation) {
         withTimeSpent(() -> {
+            BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
             val configuration = AgentConfiguration.instance();
             AgentBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
+
             //run the other stuff in an async way ;)
             new Thread(() -> {
                 Reinstrumenter.attach(instrumentation, configuration, transformers);
