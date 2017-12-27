@@ -20,6 +20,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigResolveOptions;
+import io.vavr.Function0;
 import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
@@ -57,7 +58,7 @@ public class AgentConfiguration {
     }
 
     private AgentConfiguration() {
-        Config config = getConfig();
+        Config config = getConfig.apply();
         this.debugMode = getDebugMode(config);
         this.showBanner = getShowBanner(config);
         this.extraParams = new HashMap();
@@ -69,7 +70,7 @@ public class AgentConfiguration {
 
     @SneakyThrows
     public List<ModuleConfiguration> getAgentModules() {
-        val config = getConfig().getConfig("modules");
+        val config = getConfig.apply().getConfig("modules");
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
@@ -181,11 +182,11 @@ public class AgentConfiguration {
         this.addExtraParameter("attached-in-runtime", true);
     }
 
-    private Config getConfig() {
-        return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
-                .onFailure(missing -> LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
-                .get();
-    }
+    private Function0<Config> getConfig = Function0.of(() ->
+      Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
+          .onFailure(missing -> LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
+          .get()
+    ).memoized();
 
     private List<String> getInstrumentations(Config config) {
         return Try.of(() -> List.ofAll(config.getStringList("instrumentations")))
