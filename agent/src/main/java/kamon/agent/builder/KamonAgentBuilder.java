@@ -16,14 +16,16 @@
 
 package kamon.agent.builder;
 
-import io.vavr.Function1;
 import kamon.agent.api.instrumentation.TypeTransformation;
+import kamon.agent.api.instrumentation.listener.DebugInstrumentationListener;
+import kamon.agent.api.instrumentation.listener.DefaultInstrumentationListener;
+import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.resubmitter.PeriodicResubmitter;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
 import kamon.agent.util.log.LazyLogger;
+import lombok.Value;
 import lombok.experimental.var;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
@@ -39,54 +41,76 @@ import java.util.ArrayList;
 import static net.bytebuddy.matcher.ElementMatchers.nameMatches;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
+@Value(staticConstructor = "from")
+class KamonAgentBuilder {
 
-abstract class KamonAgentBuilder {
+    AgentConfiguration config;
+    AgentConfiguration.ModuleConfiguration moduleDescription;
+    Instrumentation instrumentation;
 
-    private static final Function1<ModuleConfiguration, ElementMatcher.Junction<NamedElement>> configuredMatcherList = ignoredMatcherList().memoized();
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
-    protected abstract AgentBuilder newAgentBuilder(AgentConfiguration config, ModuleConfiguration moduleDescription, Instrumentation instrumentation);
-    protected abstract void addTypeTransformation(TypeTransformation typeTransformation);
+    public void addTypeTransformation(TypeTransformation typeTransformation) {
+        if (typeTransformation.isActive()) {
+            typeTransformations.add(typeTransformation);
+        }
+    }
 
-    AgentBuilder from(AgentConfiguration config, ModuleConfiguration moduleDescription, Instrumentation instrumentation) {
-        val byteBuddy = new ByteBuddy().with(TypeValidation.of(config.isDebugMode()))
-                                       .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
+    AgentBuilder build() {
+        return typeTransformations.build().foldLeft(newAgentBuilder(), (agent, typeTransformation) -> {
+            val transformers = new ArrayList<AgentBuilder.Transformer>();
+            transformers.addAll(typeTransformation.getBridges().toJavaList());
+            transformers.addAll(typeTransformation.getMixins().toJavaList());
+            transformers.addAll(typeTransformation.getTransformations().toJavaList());
+            return agent.type(typeTransformation.getElementMatcher().get())
+                    .transform(new AgentBuilder.Transformer.Compound(transformers));
+        });
+    }
+
+    private AgentBuilder newAgentBuilder() {
+        val byteBuddy = new ByteBuddy()
+            .with(TypeValidation.of(config.isDebugMode()))
+            .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
         var agentBuilder = new AgentBuilder.Default(byteBuddy)
-                                                    .with(poolStrategyCache);
+            .with(poolStrategyCache);
 
+        agentBuilder = withRetransformationForRuntime(agentBuilder);
+        agentBuilder = withBootstrapAttaching(agentBuilder);
+
+        return agentBuilder
+                .ignore(ignoreMatches())
+                .with(DefaultInstrumentationListener.instance())
+                .with(additionalListeners());
+    }
+
+    private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
             LazyLogger.infoColor(() -> "Retransformation Strategy activated.");
             agentBuilder = agentBuilder.disableClassFormatChanges()
-                                       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                                       .withResubmission(PeriodicResubmitter.instance());
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .withResubmission(PeriodicResubmitter.instance());
         }
+        return agentBuilder;
+    }
 
+    private AgentBuilder withBootstrapAttaching(AgentBuilder agentBuilder) {
         if(moduleDescription.shouldInjectInBootstrap()){
             LazyLogger.infoColor(() -> "Bootstrap Injection activated.");
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
-
-        return agentBuilder.ignore(configuredMatcherList.apply(moduleDescription));
+        return agentBuilder;
     }
 
-    AgentBuilder build(AgentConfiguration config, ModuleConfiguration moduleDescription, Instrumentation instrumentation) {
-            return typeTransformations.build().foldLeft(newAgentBuilder(config, moduleDescription, instrumentation), (agent, typeTransformation) -> {
-                val transformers = new ArrayList<AgentBuilder.Transformer>();
-                transformers.addAll(typeTransformation.getBridges().toJavaList());
-                transformers.addAll(typeTransformation.getMixins().toJavaList());
-                transformers.addAll(typeTransformation.getTransformations().toJavaList());
-                return agent.type(typeTransformation.getElementMatcher().get())
-                            .transform(new AgentBuilder.Transformer.Compound(transformers));
-            });
+    private AgentBuilder.Listener additionalListeners() {
+        val listeners = new ArrayList<AgentBuilder.Listener>();
+        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
+        if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
+        return new AgentBuilder.Listener.Compound(listeners);
     }
 
-    private static Function1<ModuleConfiguration,ElementMatcher.Junction<NamedElement>> ignoredMatcherList() {
-        return (moduleDescription) -> not(nameMatches(moduleDescription.getWithinPackage()));
-    }
-
-    protected String agentName() {
-        return getClass().getSimpleName();
+    private ElementMatcher.Junction<NamedElement> ignoreMatches() {
+        return not(nameMatches(moduleDescription.getWithinPackage()));
     }
 }
