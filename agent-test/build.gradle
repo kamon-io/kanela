@@ -17,12 +17,14 @@
 
 plugins {
     id 'java'
+    id 'application'
     id 'scala'
     id 'com.github.maiflai.scalatest' version '0.18'
 }
 
 configurations {
     provided
+    agent
 }
 
 sourceSets {
@@ -43,4 +45,14 @@ dependencies {
     provided 'io.kamon:kamon-agent:0.0.75-experimental'
 
     testRuntime 'org.pegdown:pegdown:1.4.2'
+
+    agent 'io.kamon:kamon-agent:0.0.75-experimental'
+}
+
+run.doFirst {
+    jvmArgs "-javaagent:${configurations.agent.singleFile}"
+}
+
+test.doFirst {
+    jvmArgs "-javaagent:${configurations.agent.singleFile}"
 }

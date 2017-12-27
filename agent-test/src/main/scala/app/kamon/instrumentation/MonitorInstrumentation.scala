@@ -25,8 +25,8 @@ class MonitorInstrumentation extends KamonInstrumentation {
   forTargetType("app.kamon.FakeWorker") { builder ⇒
     builder
       .withMixin(classOf[MonitorMixin])
-      .withAdvisorFor(named("heavyTask"), classOf[FakeWorkerAdvisor])
-      .withAdvisorFor(named("lightTask"), classOf[FakeWorkerAdvisor])
+      .withAdvisorFor(method("heavyTask"), classOf[FakeWorkerAdvisor])
+      .withAdvisorFor(method("lightTask"), classOf[FakeWorkerAdvisor])
       .build()
   }
 }
