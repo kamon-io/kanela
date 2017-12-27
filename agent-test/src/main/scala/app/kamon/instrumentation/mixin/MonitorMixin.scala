@@ -19,7 +19,7 @@ package app.kamon.instrumentation.mixin
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.{List => JList}
 
-import kamon.agent.api.instrumentation.Initializer
+import kamon.agent.api.instrumentation.mixin.Initializer
 
 import scala.collection.concurrent.TrieMap
 

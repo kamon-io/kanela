@@ -14,21 +14,33 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.mixin
 
-import app.kamon.cases.simple.SpyAware
-import kamon.agent.api.instrumentation.mixin.Initializer
+plugins {
+    id 'java'
+    id 'scala'
+    id 'com.github.maiflai.scalatest' version '0.18'
+}
 
-import scala.collection.mutable.ListBuffer
+configurations {
+    provided
+}
 
-class SpyMixin extends SpyAware {
-  private var _tracks: ListBuffer[String] = _
-  def tracks: ListBuffer[String] = _tracks
-  def addTracks(v: String): Unit = { this._tracks += v }
+sourceSets {
+    main.compileClasspath += configurations.provided
+    test.compileClasspath += configurations.provided
+    test.runtimeClasspath += configurations.provided
+}
 
-  @Initializer
-  def _initializer(): Unit = {
-    this._tracks = ListBuffer.empty
-    this.addTracks("init")
-  }
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.4'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'ch.qos.logback:logback-core:1.2.3'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+
+    compile 'io.kamon:kamon-autoweave_2.10:0.6.5'
+
+    provided 'io.kamon:agent-scala-extension_2.10:0.0.8-experimental'
+    provided 'io.kamon:kamon-agent:0.0.75-experimental'
+
+    testRuntime 'org.pegdown:pegdown:1.4.2'
 }

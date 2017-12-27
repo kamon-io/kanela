@@ -14,21 +14,8 @@
  * =========================================================================================
  */
 
-package app.kamon.instrumentation.mixin
 
-import app.kamon.cases.simple.SpyAware
-import kamon.agent.api.instrumentation.mixin.Initializer
+rootProject.name = 'kamon-agent'
 
-import scala.collection.mutable.ListBuffer
-
-class SpyMixin extends SpyAware {
-  private var _tracks: ListBuffer[String] = _
-  def tracks: ListBuffer[String] = _tracks
-  def addTracks(v: String): Unit = { this._tracks += v }
-
-  @Initializer
-  def _initializer(): Unit = {
-    this._tracks = ListBuffer.empty
-    this.addTracks("init")
-  }
-}
+include 'agent'
+include 'agent-test'
