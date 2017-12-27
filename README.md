@@ -9,3 +9,6 @@ Scala-Friendly API to define the custom instrumentation in a declarative manner.
 
 - Continue to the new :sparkles: [Microsite](http://kamon-io.github.io/kamon-agent/) :sparkles:
 - Read the [**Changelog**](CHANGELOG.md) for more info.
+
+[ByteBuddy]:http://bytebuddy.net/#/
+[ASM]:http://asm.ow2.org/
