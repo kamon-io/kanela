@@ -61,13 +61,16 @@ def singleTests = [
          jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation']],
         [taskName: 'TaskAttachInRuntimeSpec', clazz: 'app.kamon.specs.AttachInRuntimeSpec', attachKamonAgent: false,
          jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation', '-Dkamon.agent.show-banner=false']],
+        [taskName: 'TaskStoppableInstrumentationSpec', clazz: 'app.kamon.specs.StoppableInstrumentationSpec', attachKamonAgent: false,
+         jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation',
+                   '-Dkamon.agent.modules.test-module.stoppable=true', '-Dkamon.agent.show-banner=false']],
 ]
 
 test.doFirst {
     if (KamonAgentTestRunning) {
-//        include KamonAgentTestRunning.clazz
         test.filter.includeTestsMatching KamonAgentTestRunning.clazz
-        if (KamonAgentTestRunning?.attachKamonAgent ?: true) {
+        def shouldAttachAgent = (KamonAgentTestRunning?.attachKamonAgent != null) ? KamonAgentTestRunning?.attachKamonAgent : true
+        if (shouldAttachAgent) {
             jvmArgs "-javaagent:${configurations.agent.singleFile}"
         }
         jvmArgs KamonAgentTestRunning?.jvmArgs ?: []
