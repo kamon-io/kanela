@@ -4,11 +4,11 @@
 
 #    && gradle :agent-test:stoppable-instrumentation-spec \
 runTests () {
-  gradle :agent:test \
-    && gradle :agent-test:test \
-    && gradle :agent-test:multi-mixins-spec \
-    && gradle :agent-test:simple-instrumentation-spec \
-    && gradle :agent-test:attach-in-runtime-spec \
+  ./gradlew :agent:test \
+    && ./gradlew :agent-test:test \
+    && ./gradlew :agent-test:multi-mixins-spec \
+    && ./gradlew :agent-test:simple-instrumentation-spec \
+    && ./gradlew :agent-test:attach-in-runtime-spec \
     || exit 1
   echo "[info] $(date) - finished gradle test"
 }
