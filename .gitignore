@@ -34,7 +34,6 @@ bin/
 ### Gradle ###
 .gradle
 /build/
-gradle/
 agent/build/
 agent/.gradle
 agent/build
@@ -54,8 +53,8 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
-# gradle/wrapper/gradle-wrapper.properties
+# Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+gradle/wrapper/gradle-wrapper.properties
 
 # End of https://www.gitignore.io/api/gradle
 
