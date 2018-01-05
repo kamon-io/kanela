@@ -3,7 +3,8 @@ language: java
 script:
   - ./travis-test.sh
 
-before_script:
+install:
+  ./gradlew assemble
   ./gradlew :agent:publishToMavenLocal
 
 jdk:
