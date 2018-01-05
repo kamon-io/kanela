@@ -1,8 +1,8 @@
 language: java
 
 install:
-  ./gradlew :agent:publishToMavenLocal
-  ./gradlew assemble
+  - ./gradlew :agent:publishToMavenLocal
+  - ./gradlew assemble
 
 script:
   - ./travis-test.sh
