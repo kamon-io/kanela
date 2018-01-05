@@ -148,7 +148,7 @@ def pomConfig = {
         }
 
         developer {
-            id "cristianspinetta"
+            id "cspinetta"
             name "Cristian Spinetta"
             url "https://twitter.com/c_spinetta"
         }

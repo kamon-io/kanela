@@ -3,6 +3,9 @@ language: java
 script:
   - ./travis-test.sh
 
+before_script:
+  ./gradlew :agent:publishToMavenLocal
+
 jdk:
    - oraclejdk8
 
