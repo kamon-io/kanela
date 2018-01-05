@@ -47,6 +47,8 @@ public class AgentConfiguration {
     Boolean showBanner;
     HashMap extraParams;
     Level logLevel;
+    @Getter(AccessLevel.PRIVATE)
+    Config config;
 
     private static class Holder {
         private static final AgentConfiguration Instance = new AgentConfiguration();
@@ -57,7 +59,7 @@ public class AgentConfiguration {
     }
 
     private AgentConfiguration() {
-        Config config = getConfig();
+        this.config = loadConfig();
         this.debugMode = getDebugMode(config);
         this.showBanner = getShowBanner(config);
         this.extraParams = new HashMap();
@@ -181,7 +183,7 @@ public class AgentConfiguration {
         this.addExtraParameter("attached-in-runtime", true);
     }
 
-    private Config getConfig() {
+    private Config loadConfig() {
         return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
                 .onFailure(missing -> LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
                 .get();

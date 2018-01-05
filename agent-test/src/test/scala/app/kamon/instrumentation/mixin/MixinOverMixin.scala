@@ -17,7 +17,7 @@
 package app.kamon.instrumentation.mixin
 
 import app.kamon.cases.multimixins.MixinAware.{ MixinAware1, MixinAware2, MixinAware3 }
-import kamon.agent.api.instrumentation.Initializer
+import kamon.agent.api.instrumentation.mixin.Initializer
 
 object MixinOverMixin {
 

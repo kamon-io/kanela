@@ -1,12 +1,13 @@
 language: java
 
+install:
+  - ./gradlew :agent:publishToMavenLocal
+  - ./gradlew assemble
+
+script:
+  - ./travis-test.sh
+
 jdk:
    - oraclejdk8
-
-before_script:
-  cd agent
-
-after_failure:
-  - cat /home/travis/build/kamon-io/kamon-agent/hs_err_pid*.log
 
 sudo: false

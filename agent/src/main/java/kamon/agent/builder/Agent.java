@@ -24,16 +24,15 @@ import lombok.val;
 import java.lang.instrument.Instrumentation;
 
 @Value
+// FIXME: Rename. AgentInstaller/AgentSetup/AgentAgentWiring? other idea?
 public class Agent {
-    AgentConfiguration config;
-    KamonAgentBuilder builder;
+    KamonAgentBuilder agentBuilder;
     AgentConfiguration.ModuleConfiguration moduleDescription;
     Instrumentation instrumentation;
 
     private Agent(AgentConfiguration config, AgentConfiguration.ModuleConfiguration moduleDescription, Instrumentation instrumentation) {
-        this.config = config;
         this.moduleDescription = moduleDescription;
-        this.builder = DefaultAgentBuilder.instance(moduleDescription.getName());
+        this.agentBuilder = KamonAgentBuilder.from(config, moduleDescription, instrumentation);
         this.instrumentation = instrumentation;
     }
 
@@ -42,13 +41,13 @@ public class Agent {
     }
 
     public KamonAgentFileTransformer install() {
-        val agentBuilder = builder.build(config, moduleDescription, instrumentation);
+        val agentBuilder = this.agentBuilder.build();
         val classFileTransformer = agentBuilder.installOn(instrumentation);
         return KamonAgentFileTransformer.from(agentBuilder, classFileTransformer, moduleDescription.isStoppable());
     }
 
     public Agent addTypeTransformation(TypeTransformation typeTransformation) {
-        builder.addTypeTransformation(typeTransformation);
+        agentBuilder.addTypeTransformation(typeTransformation);
         return this;
     }
 }
