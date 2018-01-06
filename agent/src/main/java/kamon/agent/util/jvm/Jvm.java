@@ -19,14 +19,12 @@ package kamon.agent.util.jvm;
 
 import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import lombok.val;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 
 @Value
-@NonFinal
 public class Jvm {
 
     private static final Jvm instance = new Jvm();

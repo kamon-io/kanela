@@ -17,7 +17,6 @@
 package kamon.agent
 
 import java.lang.instrument.{ClassFileTransformer, Instrumentation}
-
 import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
@@ -56,11 +55,11 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     when(agentModuleDescriptionMock.getName)
       .thenReturn("x-module")
 
-    val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
-    when(agentConfiguration.getAgentModules)
-      .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
-
     intercept[RuntimeException] {
+      val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
+      when(agentConfiguration.getAgentModules)
+        .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
+
       InstrumentationLoader.load(instrumentationMock, agentConfiguration)
     }
 

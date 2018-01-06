@@ -26,7 +26,6 @@ import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import lombok.val;
 
 import javax.management.Notification;
@@ -41,7 +40,6 @@ import static java.text.MessageFormat.format;
 
 
 @Value
-@NonFinal
 @Experimental
 public class OldGarbageCollectorListener {
     Jvm tools;
