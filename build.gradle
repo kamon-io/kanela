@@ -14,6 +14,15 @@
  * =========================================================================================
  */
 
+buildscript {
+    ext.kotlin_version = '1.1.50'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
 
 allprojects {
     apply plugin: 'java'
@@ -47,5 +56,9 @@ allprojects {
 //        testCompile 'junit:junit:4.12'
 //        testCompile 'org.mockito:mockito-core:2.4.2'
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "4.1"
 }
 

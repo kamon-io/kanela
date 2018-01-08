@@ -19,3 +19,4 @@ rootProject.name = 'kamon-agent'
 
 include 'agent'
 include 'agent-test'
+include 'agent-kotlin-extension'
