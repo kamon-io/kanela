@@ -16,13 +16,13 @@
 
 package kamon.agent.kotlin
 
-import io.vavr.Function1
+import kamon.agent.libs.io.vavr.Function1
 import kamon.agent.api.instrumentation.InstrumentationDescription
-import net.bytebuddy.description.method.MethodDescription
-import net.bytebuddy.matcher.ElementMatcher
+import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher
 import java.util.function.Supplier
 import kamon.agent.api.instrumentation.KamonInstrumentation as JKamonInstrumentation
-import net.bytebuddy.matcher.ElementMatchers as BBMatchers
+import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers as BBMatchers
 
 class KamonInstrumentation: JKamonInstrumentation(), ElementMatcherSugar {
 

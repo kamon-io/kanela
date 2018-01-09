@@ -31,9 +31,10 @@ repositories {
 }
 
 dependencies {
-    compile project(":agent")
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "io.vavr:vavr-kotlin:0.9.2"
+
+    provided(kamon_agent_dep)
 
     testCompile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     testCompile ('org.jetbrains.spek:spek-api:1.1.5')  {

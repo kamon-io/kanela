@@ -25,19 +25,8 @@ plugins {
 //mainClassName = 'app.kamon.ScalaMainWithAgent'
 mainClassName = 'app.kamon.JavaMainWithAgent'
 
-configurations {
-    provided
-    agent
-}
-
-sourceSets {
-    main.compileClasspath += configurations.provided
-    test.compileClasspath += configurations.provided
-    test.runtimeClasspath += configurations.provided
-}
-
 dependencies {
-    compile 'org.scala-lang:scala-library:2.12.4'
+    compile "org.scala-lang:scala-library:${scala_version}"
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'ch.qos.logback:logback-core:1.2.3'
     compile 'ch.qos.logback:logback-classic:1.2.3'
@@ -45,12 +34,11 @@ dependencies {
     compile 'io.kamon:kamon-autoweave_2.12:0.6.5'
     compile 'io.kamon:agent-scala-extension_2.12:0.0.8-experimental'
 
-    provided 'io.kamon:kamon-agent:0.0.75-experimental'
+    provided(kamon_agent_dep)
 
+    testCompile 'org.mockito:mockito-core:2.4.2'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
     testRuntime 'org.pegdown:pegdown:1.4.2'
-
-    agent 'io.kamon:kamon-agent:0.0.75-experimental'
 }
 
 def KamonAgentTestRunning = null
