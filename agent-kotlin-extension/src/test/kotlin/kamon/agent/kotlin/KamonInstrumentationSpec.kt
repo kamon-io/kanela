@@ -31,13 +31,14 @@ object KamonInstrumentationSpec : Spek({
 
     describe("a KamonInstrumentation form agent-kotlin-extension") {
 
-        val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
-            on { shouldInjectInBootstrap() } doReturn false
-        }
-
-        val instrumentationMock = mock<Instrumentation> {}
-
         on("instrumenting with a single mixin") {
+
+            val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
+                on { shouldInjectInBootstrap() } doReturn false
+            }
+
+            val instrumentationMock = mock<Instrumentation> {}
+
             val ki = kamonInstrumentation {
                 forSubtypeOf("laala") {
                     it
@@ -57,8 +58,41 @@ object KamonInstrumentationSpec : Spek({
                 assertEquals(transformation.elementMatcher.isDefined, true)
             }
         }
+
+        on("instrumenting with a mixin and an advisor") {
+
+            val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
+                on { shouldInjectInBootstrap() } doReturn false
+            }
+
+            val instrumentationMock = mock<Instrumentation> {}
+
+            val ki = kamonInstrumentation {
+                forSubtypeOf("laala") { builder ->
+                    builder
+                            .withMixin(ExampleMixin::class.java.supplied())
+                            .withAdvisorFor(
+                                    method("executeMethod")
+                                            .and(takesArguments(String::class.java, Int::class.java)),
+                                    ExampleAdvisor::class.java.supplied())
+                            .build()
+                }
+            }
+
+            it("should return two transformation") {
+                val transformations = ki.collectTransformations(agentConfigMock, instrumentationMock)
+                assertEquals(transformations.size, 1)
+                val transformation = transformations[0]
+                assertEquals(transformation.mixins.size(), 1)
+                assertEquals(transformation.bridges.size(), 0)
+                assertEquals(transformation.transformations.size(), 1)
+                assertEquals(transformation.isActive, true)
+                assertEquals(transformation.elementMatcher.isDefined, true)
+            }
+        }
     }
 
 })
 
 class ExampleMixin
+class ExampleAdvisor

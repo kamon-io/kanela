@@ -18,10 +18,13 @@ package kamon.agent.kotlin
 
 import io.vavr.Function1
 import kamon.agent.api.instrumentation.InstrumentationDescription
+import net.bytebuddy.description.method.MethodDescription
+import net.bytebuddy.matcher.ElementMatcher
 import java.util.function.Supplier
 import kamon.agent.api.instrumentation.KamonInstrumentation as JKamonInstrumentation
+import net.bytebuddy.matcher.ElementMatchers as BBMatchers
 
-class KamonInstrumentation: JKamonInstrumentation() {
+class KamonInstrumentation: JKamonInstrumentation(), ElementMatcherSugar {
 
     fun forSubtypeOf(name: String, instrumentationFun: (InstrumentationDescription.Builder) -> InstrumentationDescription) {
         super.forSubtypeOf(name.supplied(), instrumentationFun.toVavrFunc())
@@ -38,6 +41,29 @@ class KamonInstrumentation: JKamonInstrumentation() {
     fun forTargetType(names: List<String>, instrumentationFun: (InstrumentationDescription.Builder) -> InstrumentationDescription) {
         names.forEach { forTargetType(it, instrumentationFun) }
     }
+}
+
+interface ElementMatcherSugar {
+
+    fun isConstructor(): ElementMatcher.Junction<MethodDescription> = BBMatchers.isConstructor()
+
+    fun isAbstract(): ElementMatcher.Junction<MethodDescription> =
+    BBMatchers.isAbstract()
+
+    fun method(name: String): ElementMatcher.Junction<MethodDescription> =
+    BBMatchers.named(name)
+
+    fun takesArguments(quantity: Int): ElementMatcher.Junction<MethodDescription> =
+    BBMatchers.takesArguments(quantity)
+
+    fun takesArguments(vararg classes: Class<*>): ElementMatcher.Junction<MethodDescription> =
+        BBMatchers.takesArguments(*classes)
+
+    fun withArgument(index: Int, `type`: Class<*>): ElementMatcher.Junction<MethodDescription> =
+    BBMatchers.takesArgument(index, `type`)
+
+    fun anyMethod(vararg names: String): ElementMatcher.Junction<MethodDescription> =
+        names.map { method(it) }.reduce { a, b -> a.or(b) }
 }
 
 fun String.supplied(): Supplier<String> = Supplier { this }
