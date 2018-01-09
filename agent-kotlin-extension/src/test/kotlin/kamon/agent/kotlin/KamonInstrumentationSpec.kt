@@ -16,8 +16,7 @@
 
 package kamon.agent.kotlin
 
-import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.*
 import kamon.agent.util.conf.AgentConfiguration
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -56,15 +55,51 @@ object KamonInstrumentationSpec : Spek({
                 assertEquals(transformation.transformations.size(), 0)
                 assertEquals(transformation.isActive, true)
                 assertEquals(transformation.elementMatcher.isDefined, true)
+
+                verify(agentConfigMock).shouldInjectInBootstrap()
+                verifyNoMoreInteractions(agentConfigMock)
+                verifyNoMoreInteractions(instrumentationMock)
             }
         }
 
-        on("instrumenting with a mixin and an advisor") {
+        on("instrumenting with a single mixin and for bootstrap injection") {
+
+            val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
+                on { shouldInjectInBootstrap() } doReturn true
+            }
+            val instrumentationMock = mock<Instrumentation> {}
+
+            val ki = kamonInstrumentation {
+                forSubtypeOf("laala") {
+                    it
+                            .withMixin(ExampleMixin::class.java.supplied())
+                            .build()
+                }
+            }
+
+            it("should return a single transformation") {
+                val transformations = ki.collectTransformations(agentConfigMock, instrumentationMock)
+                assertEquals(transformations.size, 1)
+                val transformation = transformations[0]
+                assertEquals(transformation.mixins.size(), 1)
+                assertEquals(transformation.bridges.size(), 0)
+                assertEquals(transformation.transformations.size(), 0)
+                assertEquals(transformation.isActive, true)
+                assertEquals(transformation.elementMatcher.isDefined, true)
+
+                verify(agentConfigMock).shouldInjectInBootstrap()
+                verify(agentConfigMock).tempDir
+                verifyNoMoreInteractions(agentConfigMock)
+                verify(instrumentationMock).appendToBootstrapClassLoaderSearch(any())
+                verifyNoMoreInteractions(instrumentationMock)
+            }
+        }
+
+        on("instrumenting with mixin and advisor without bootstrap injection") {
 
             val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
                 on { shouldInjectInBootstrap() } doReturn false
             }
-
             val instrumentationMock = mock<Instrumentation> {}
 
             val ki = kamonInstrumentation {
@@ -73,13 +108,14 @@ object KamonInstrumentationSpec : Spek({
                             .withMixin(ExampleMixin::class.java.supplied())
                             .withAdvisorFor(
                                     method("executeMethod")
-                                            .and(takesArguments(String::class.java, Int::class.java)),
+                                            and
+                                            takesArguments(String::class.java, Int::class.java),
                                     ExampleAdvisor::class.java.supplied())
                             .build()
                 }
             }
 
-            it("should return two transformation") {
+            it("should return two transformations") {
                 val transformations = ki.collectTransformations(agentConfigMock, instrumentationMock)
                 assertEquals(transformations.size, 1)
                 val transformation = transformations[0]
@@ -88,10 +124,52 @@ object KamonInstrumentationSpec : Spek({
                 assertEquals(transformation.transformations.size(), 1)
                 assertEquals(transformation.isActive, true)
                 assertEquals(transformation.elementMatcher.isDefined, true)
+
+                verify(agentConfigMock).shouldInjectInBootstrap()
+                verifyNoMoreInteractions(agentConfigMock)
+                verifyNoMoreInteractions(instrumentationMock)
+            }
+        }
+
+        // FIXME mock BootstrapInjector in order to not create a jar file and so on
+        on("instrumenting with mixin and advisor for bootstrap injection") {
+
+            val agentConfigMock = mock<AgentConfiguration.ModuleConfiguration> {
+                on { shouldInjectInBootstrap() } doReturn true
+            }
+            val instrumentationMock = mock<Instrumentation> {}
+
+            val ki = kamonInstrumentation {
+                forSubtypeOf("laala") { builder ->
+                    builder
+                            .withMixin(ExampleMixin::class.java.supplied())
+                            .withAdvisorFor(
+                                    method("executeMethod")
+                                            and
+                                            takesArguments(String::class.java, Int::class.java),
+                                    ExampleAdvisor::class.java.supplied())
+                            .build()
+                }
+            }
+
+            it("should return two transformations") {
+                val transformations = ki.collectTransformations(agentConfigMock, instrumentationMock)
+                assertEquals(transformations.size, 1)
+                val transformation = transformations[0]
+                assertEquals(transformation.mixins.size(), 1)
+                assertEquals(transformation.bridges.size(), 0)
+                assertEquals(transformation.transformations.size(), 1)
+                assertEquals(transformation.isActive, true)
+                assertEquals(transformation.elementMatcher.isDefined, true)
+
+                verify(agentConfigMock).shouldInjectInBootstrap()
+                verify(agentConfigMock).tempDir
+                verifyNoMoreInteractions(agentConfigMock)
+                verify(instrumentationMock).appendToBootstrapClassLoaderSearch(any())
+                verifyNoMoreInteractions(instrumentationMock)
             }
         }
     }
-
 })
 
 class ExampleMixin

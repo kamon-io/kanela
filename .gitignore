@@ -91,3 +91,5 @@ fabric.properties
 hs_err_pid*
 
 /agent/src/main/scala/*.sc
+
+*.jar

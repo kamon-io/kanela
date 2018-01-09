@@ -16,13 +16,15 @@
 
 package kamon.agent.kotlin
 
-import kamon.agent.libs.io.vavr.Function1
 import kamon.agent.api.instrumentation.InstrumentationDescription
+import kamon.agent.libs.io.vavr.Function1
 import kamon.agent.libs.net.bytebuddy.description.method.MethodDescription
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatcher
 import java.util.function.Supplier
 import kamon.agent.api.instrumentation.KamonInstrumentation as JKamonInstrumentation
 import kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers as BBMatchers
+
+typealias Element = ElementMatcher.Junction<MethodDescription>
 
 class KamonInstrumentation: JKamonInstrumentation(), ElementMatcherSugar {
 
@@ -45,25 +47,38 @@ class KamonInstrumentation: JKamonInstrumentation(), ElementMatcherSugar {
 
 interface ElementMatcherSugar {
 
-    fun isConstructor(): ElementMatcher.Junction<MethodDescription> = BBMatchers.isConstructor()
 
-    fun isAbstract(): ElementMatcher.Junction<MethodDescription> =
+    fun isConstructor(): Element = BBMatchers.isConstructor()
+
+    fun isAbstract(): Element =
     BBMatchers.isAbstract()
 
-    fun method(name: String): ElementMatcher.Junction<MethodDescription> =
+    fun method(name: String): Element =
     BBMatchers.named(name)
 
-    fun takesArguments(quantity: Int): ElementMatcher.Junction<MethodDescription> =
+    fun takesArguments(quantity: Int): Element =
     BBMatchers.takesArguments(quantity)
 
-    fun takesArguments(vararg classes: Class<*>): ElementMatcher.Junction<MethodDescription> =
+    fun takesArguments(vararg classes: Class<*>): Element =
         BBMatchers.takesArguments(*classes)
 
-    fun withArgument(index: Int, `type`: Class<*>): ElementMatcher.Junction<MethodDescription> =
+    fun withArgument(index: Int, `type`: Class<*>): Element =
     BBMatchers.takesArgument(index, `type`)
 
-    fun anyMethod(vararg names: String): ElementMatcher.Junction<MethodDescription> =
+    fun anyMethod(vararg names: String): Element =
         names.map { method(it) }.reduce { a, b -> a.or(b) }
+
+    infix fun String.or(right: String): List<String> {
+        return listOf(this, right)
+    }
+
+    infix fun List<String>.or(right: String): List<String> {
+        return this.plus(right)
+    }
+
+    infix fun Element.and(right: Element): Element {
+        return this.and(right)
+    }
 }
 
 fun String.supplied(): Supplier<String> = Supplier { this }
