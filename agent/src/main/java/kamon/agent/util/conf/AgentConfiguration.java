@@ -91,7 +91,6 @@ public class AgentConfiguration {
     }
 
     @Value(staticConstructor = "from")
-//    @NonFinal
     public static class ModuleConfiguration {
         String name;
         List<String> instrumentations;
