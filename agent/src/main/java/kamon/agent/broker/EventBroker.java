@@ -20,7 +20,6 @@
 package kamon.agent.broker;
 
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import lombok.val;
 
 import java.lang.reflect.Method;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 @Value
-@NonFinal
 public class EventBroker {
     Map<Class, List<SubscriberInfo>> map = new LinkedHashMap<>();
 

@@ -32,7 +32,6 @@ import lombok.experimental.NonFinal;
 import static java.text.MessageFormat.format;
 
 @Value
-@NonFinal
 @Experimental
 @RequiredArgsConstructor
 public class SystemThroughputCircuitBreaker {

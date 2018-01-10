@@ -26,7 +26,6 @@ import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.log.LazyLogger;
 import lombok.Value;
-import lombok.experimental.NonFinal;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
@@ -35,7 +34,6 @@ import java.lang.instrument.Instrumentation;
 import static java.text.MessageFormat.format;
 
 @Value
-@NonFinal
 @Experimental
 public class Reinstrumenter {
     Instrumentation instrumentation;

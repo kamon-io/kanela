@@ -26,7 +26,6 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kamon.agent.util.log.LazyLogger;
 import lombok.*;
-import lombok.experimental.NonFinal;
 import org.pmw.tinylog.Level;
 
 import java.io.File;
@@ -38,7 +37,6 @@ import static java.text.MessageFormat.format;
 
 
 @Value
-@NonFinal
 public class AgentConfiguration {
     Boolean debugMode;
     DumpConfig dump;
@@ -93,7 +91,7 @@ public class AgentConfiguration {
     }
 
     @Value(staticConstructor = "from")
-    @NonFinal
+//    @NonFinal
     public static class ModuleConfiguration {
         String name;
         List<String> instrumentations;
@@ -110,7 +108,6 @@ public class AgentConfiguration {
     }
 
     @Value
-    @NonFinal
     public class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
@@ -130,7 +127,7 @@ public class AgentConfiguration {
     }
 
     @Value
-    @NonFinal
+//    @NonFinal
     public class CircuitBreakerConfig {
         boolean enabled;
         double freeMemoryThreshold;
@@ -148,7 +145,6 @@ public class AgentConfiguration {
     }
 
     @Value
-    @NonFinal
     public class OldGarbageCollectorConfig {
         boolean shouldLogAfterGc;
 

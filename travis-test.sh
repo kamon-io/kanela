@@ -9,7 +9,6 @@ runTests () {
     && ./gradlew :agent-test:simple-instrumentation-spec \
     && ./gradlew :agent-test:attach-in-runtime-spec \
     && ./gradlew :agent-test:stoppable-instrumentation-spec \
-    && ./gradlew :agent-kotlin-extension:test \
     || exit 1
   echo "[info] $(date) - finished gradle test"
 }

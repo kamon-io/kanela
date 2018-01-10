@@ -47,8 +47,11 @@ gradle-app.setting
 /build
 */build
 
+*.jar
+
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+!agent/libs/byte-buddy-.*.jar
 
 # Cache of project
 .gradletasknamecache
@@ -91,5 +94,3 @@ fabric.properties
 hs_err_pid*
 
 /agent/src/main/scala/*.sc
-
-*.jar
