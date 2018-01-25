@@ -18,7 +18,6 @@ package kamon.agent.util.log;
 
 import kamon.agent.util.AnsiColor;
 import kamon.agent.util.conf.AgentConfiguration;
-import lombok.experimental.var;
 import lombok.val;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
@@ -40,7 +39,7 @@ public class LazyLogger {
 
     static {
         val logLevel = AgentConfiguration.instance().getLogLevel();
-        var configurator = Configurator.currentConfig()
+        val configurator = Configurator.currentConfig()
                 .locale(Locale.US)
                 .writingThread("main")
                 .formatPattern("{date:HH:mm:ss.SSS} [{thread}] {level}:{message}")

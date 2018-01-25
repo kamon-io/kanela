@@ -126,7 +126,6 @@ public class AgentConfiguration {
     }
 
     @Value
-//    @NonFinal
     public class CircuitBreakerConfig {
         boolean enabled;
         double freeMemoryThreshold;

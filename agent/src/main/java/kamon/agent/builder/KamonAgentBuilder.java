@@ -38,8 +38,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
-import static net.bytebuddy.matcher.ElementMatchers.nameMatches;
-import static net.bytebuddy.matcher.ElementMatchers.not;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Value(staticConstructor = "from")
 class KamonAgentBuilder {
@@ -78,12 +77,12 @@ class KamonAgentBuilder {
 
         agentBuilder = withRetransformationForRuntime(agentBuilder);
         agentBuilder = withBootstrapAttaching(agentBuilder);
+        agentBuilder = withIgnore(agentBuilder);
 
         return agentBuilder
-                .ignore(ignoreMatches())
                 .with(DefaultInstrumentationListener.instance())
                 .with(additionalListeners());
-    }
+}
 
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
@@ -101,6 +100,14 @@ class KamonAgentBuilder {
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
         return agentBuilder;
+    }
+
+    private AgentBuilder withIgnore(AgentBuilder agentBuilder) {
+        val builder = agentBuilder.ignore(ignoreMatches());
+        if (moduleDescription.shouldInjectInBootstrap()) return builder;
+        return builder
+                .or(any(), isBootstrapClassLoader())
+                .or(any(), isExtensionClassLoader());
     }
 
     private AgentBuilder.Listener additionalListeners() {

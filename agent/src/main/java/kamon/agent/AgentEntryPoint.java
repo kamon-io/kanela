@@ -46,12 +46,9 @@ public class AgentEntryPoint {
             AgentBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
 
-            //run the other stuff in an async way ;)
-            new Thread(() -> {
-                Reinstrumenter.attach(instrumentation, configuration, transformers);
-                OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-                SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-            }).start();
+            Reinstrumenter.attach(instrumentation, configuration, transformers);
+            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
 
         }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup completed in " + timeSpent + " ms"));
     }
