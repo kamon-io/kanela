@@ -58,9 +58,4 @@ public class AgentLogger {
     public static void error(final Supplier<String> msg) { org.pmw.tinylog.Logger.error(msg.get()); }
 
     public static void error(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(msg.get(),t);}
-
-    public static void main(String... args ){
-        Logger.info("La puta que te pario");
-    }
-
 }
