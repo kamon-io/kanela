@@ -16,7 +16,7 @@
 
 package kamon.agent.api.instrumentation.listener;
 
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -25,7 +25,6 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import static java.text.MessageFormat.format;
-import static kamon.agent.util.AnsiColor.ParseColors;
 
 @Value(staticConstructor = "instance")
 @EqualsAndHashCode(callSuper = false)
@@ -33,11 +32,11 @@ public class DebugInstrumentationListener extends AgentBuilder.Listener.Adapter 
 
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-        LazyLogger.info(() -> ParseColors(format(":yellow,n:Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName())));
+        AgentLogger.info(() -> format("Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
     }
 
     @Override
     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-        LazyLogger.debug(() -> ParseColors(format(":red,n:Ignored => {0} and loaded from {1}", typeDescription, classLoader)));
+        AgentLogger.debug(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
     }
 }

@@ -23,7 +23,7 @@ import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
@@ -68,8 +68,8 @@ public class OldGarbageCollectorListener {
     public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
             Try.of(() -> new OldGarbageCollectorListener(configuration, jvm))
-               .andThen(() -> LazyLogger.infoColor(() -> format("Old Garbage Collector Listener was activated.")))
-               .onFailure((cause) -> LazyLogger.errorColor(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
+               .andThen(() -> AgentLogger.info(() -> format("Old Garbage Collector Listener was activated.")))
+               .onFailure((cause) -> AgentLogger.error(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
         }
     }
 
@@ -101,7 +101,7 @@ public class OldGarbageCollectorListener {
             percentageFreeMemory.forEach((freeMemory) -> {
                 val event = GcEvent.from(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
                 if(config.isShouldLogAfterGc()) {
-                    LazyLogger.warnColor(() -> format("{0}", event));
+                    AgentLogger.warn(() -> format("{0}", event));
                 }
                 broker.publish(event);
             });

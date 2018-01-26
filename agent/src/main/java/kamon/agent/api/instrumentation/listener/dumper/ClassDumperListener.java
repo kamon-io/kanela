@@ -19,7 +19,7 @@ package kamon.agent.api.instrumentation.listener.dumper;
 import io.vavr.CheckedFunction0;
 import io.vavr.control.Try;
 import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
@@ -72,6 +72,6 @@ public class ClassDumperListener extends Listener.Adapter {
     }
 
     private <R> void runSafe(CheckedFunction0<R> thunk, String msg) {
-        Try.of(thunk).onFailure((cause) -> LazyLogger.errorColor(() -> msg, cause));
+        Try.of(thunk).onFailure((cause) -> AgentLogger.error(() -> msg, cause));
     }
 }

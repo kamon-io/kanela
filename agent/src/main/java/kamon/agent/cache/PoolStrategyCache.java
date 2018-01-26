@@ -17,7 +17,7 @@
 package kamon.agent.cache;
 
 import kamon.agent.util.NamedThreadFactory;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
@@ -59,7 +59,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
     private ExpirationListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value) ->   LazyLogger.debug(() -> format("Expiring key: " + key + "with value" + value));
+        return (key, value) ->   AgentLogger.debug(() -> format("Expiring key: " + key + "with value" + value));
     }
 
     public static PoolStrategyCache instance() {

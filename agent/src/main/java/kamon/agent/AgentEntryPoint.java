@@ -22,7 +22,7 @@ import kamon.agent.util.BootstrapInjector;
 import kamon.agent.util.banner.AgentBanner;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.OldGarbageCollectorListener;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.Value;
 import lombok.val;
 
@@ -50,7 +50,7 @@ public class AgentEntryPoint {
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
 
-        }, (timeSpent) -> LazyLogger.infoColor(() -> "Startup completed in " + timeSpent + " ms"));
+        }, (timeSpent) -> AgentLogger.info(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
     public static void premain(String args, Instrumentation instrumentation) {

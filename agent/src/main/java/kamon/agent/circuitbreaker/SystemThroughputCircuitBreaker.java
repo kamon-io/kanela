@@ -24,7 +24,7 @@ import kamon.agent.util.annotation.Experimental;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.GcEvent;
 import kamon.agent.util.jvm.Jvm;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.NonFinal;
@@ -46,22 +46,22 @@ public class SystemThroughputCircuitBreaker {
         if(config.isEnabled()){
             Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> LazyLogger.infoColor(() -> "System Throughput CircuitBreaker was activated."))
+                    .andThen(() -> AgentLogger.info(() -> "System Throughput CircuitBreaker was activated."))
                     .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
-                    .andThen(() -> LazyLogger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
-                    .onFailure((cause) -> LazyLogger.errorColor(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
+                    .andThen(() -> AgentLogger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
+                    .onFailure((cause) -> AgentLogger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
         }
     }
 
     @Subscribe
     public void onGCEvent(GcEvent event) {
         if((jvm.getGcCpuTimePercent(event) >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-            LazyLogger.warnColor(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
+            AgentLogger.warn(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
             EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.StopModules.instance());
             trip();
         } else {
             if (isTripped()) {
-                LazyLogger.infoColor(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
+                AgentLogger.info(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
                 reset();
                 EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.RestartModules.instance());
             }

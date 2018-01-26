@@ -24,7 +24,7 @@ import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.resubmitter.PeriodicResubmitter;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.Value;
 import lombok.experimental.var;
 import lombok.val;
@@ -86,7 +86,7 @@ class KamonAgentBuilder {
 
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
-            LazyLogger.infoColor(() -> "Retransformation Strategy activated.");
+            AgentLogger.info(() -> "Retransformation Strategy activated.");
             agentBuilder = agentBuilder.disableClassFormatChanges()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());
@@ -96,7 +96,7 @@ class KamonAgentBuilder {
 
     private AgentBuilder withBootstrapAttaching(AgentBuilder agentBuilder) {
         if(moduleDescription.shouldInjectInBootstrap()){
-            LazyLogger.infoColor(() -> "Bootstrap Injection activated.");
+            AgentLogger.info(() -> "Bootstrap Injection activated.");
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
         return agentBuilder;

@@ -24,7 +24,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import kamon.agent.util.log.LazyLogger;
+import kamon.agent.util.log.AgentLogger;
 import lombok.*;
 import org.pmw.tinylog.Level;
 
@@ -179,13 +179,13 @@ public class AgentConfiguration {
 
     private Config loadConfig() {
         return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
-                .onFailure(missing -> LazyLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
+                .onFailure(missing -> AgentLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
                 .get();
     }
 
     private List<String> getInstrumentations(Config config) {
         return Try.of(() -> List.ofAll(config.getStringList("instrumentations")))
-                .onFailure(exc -> LazyLogger.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc))
+                .onFailure(exc -> AgentLogger.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc))
                 .getOrElse(Nil.instance());
     }
 

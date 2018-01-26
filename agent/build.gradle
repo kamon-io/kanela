@@ -16,12 +16,6 @@
 
 
 buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "http://oss.jfrog.org/artifactory/simple/oss-snapshot-local/"
-        }
-    }
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
@@ -40,6 +34,7 @@ dependencies {
     compile 'com.typesafe:config:1.3.2'
     compile 'net.jodah:expiringmap:0.5.8'
     compile 'org.tinylog:tinylog:1.3.2'
+    compile 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
     compile files('libs/byte-buddy-1.7.9.jar')
 
     testCompile 'org.mockito:mockito-core:2.7.22'
@@ -64,10 +59,16 @@ shadowJar.dependsOn bootstrapJar
 shadowJar {
     baseName = 'kamon-agent'
     classifier = null
-    exclude 'META-INF/services/*'
+
+    mergeServiceFiles {
+       path = 'META-INF/services/org.pmw.tinylog.*'
+    }
+
+    exclude 'META-INF/services/javax.*'
     exclude 'META-INF/maven/**'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
+    exclude 'tinylog.properties'
 
     //exclude agentBootstrapClasses
 
@@ -76,6 +77,9 @@ shadowJar {
     relocate 'com.typesafe.config', 'kamon.agent.libs.com.typesafe.config'
     relocate 'org.pmw.tinylog', 'kamon.agent.libs.org.pmw.tinylog'
     relocate 'net.jodah', 'kamon.agent.libs.net.jodah'
+    relocate ('com.github.tobiasrm', 'kamon.agent.libs.com.github.tobiasrm') {
+        exclude 'com.github.tobiasrm.Main'
+    }
 
     dependencies {
         exclude(dependency('org.projectlombok:lombok:1.16.18'))
