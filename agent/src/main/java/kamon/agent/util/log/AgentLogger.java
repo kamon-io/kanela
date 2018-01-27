@@ -35,10 +35,10 @@ public class AgentLogger {
 
     static {
         Try.run(() -> Configurator
-                .fromResource("kamon-log.properties")
+                .fromResource("kanela-log.properties")
                 .writingThread("main")
                 .level(AgentConfiguration.instance().getLogLevel())
-                .addWriter(new RollingFileWriter("kamon-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
+                .addWriter(new RollingFileWriter("kanela-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
                 .activate())
                 .getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
     }

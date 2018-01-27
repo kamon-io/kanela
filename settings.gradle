@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-rootProject.name = 'kamon-agent'
+rootProject.name = 'kanela'
 
 include 'agent'
 include 'agent-test'

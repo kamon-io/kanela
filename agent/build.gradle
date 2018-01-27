@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2018 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -57,7 +57,7 @@ task bootstrapJar(type: Jar) {
 shadowJar.dependsOn bootstrapJar
 
 shadowJar {
-    baseName = 'kamon-agent'
+    baseName = 'kanela-agent'
     classifier = null
 
     mergeServiceFiles {
@@ -102,8 +102,8 @@ jar {
     manifest {
         attributes 'Built-By': System.getProperty("user.name")
         attributes 'Build-Jdk': System.getProperty("java.version")
-        attributes 'Premain-Class': "kamon.agent.KamonAgent"
-        attributes 'Agent-Class': "kamon.agent.KamonAgent"
+        attributes 'Premain-Class': "kamon.agent.Kanela"
+        attributes 'Agent-Class': "kamon.agent.Kanela"
         attributes 'Can-Redefine-Classes': "true"
         attributes 'Can-Set-Native-Method-Prefix': "true"
         attributes 'Can-Retransform-Classes': "true"
@@ -119,14 +119,14 @@ bintray {
 
     pkg {
         repo = 'releases'
-        name = 'kamon-agent'
+        name = 'kanela'
         userOrg = 'kamon-io'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/kamon-io/kamon-agent'
+        vcsUrl = 'https://github.com/kamon-io/kanela'
 
         version {
             name = "${version}"
-            desc = 'Kamon Agent(experimental)'
+            desc = 'Kanela(experimental)'
             released  = new Date()
         }
     }
@@ -171,12 +171,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             groupId 'io.kamon'
-            artifactId 'kamon-agent'
+            artifactId 'kanela-agent'
             version "${version}"
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'The Open Source java agent for Kamon')
-                root.appendNode('name', 'Kamon Agent')
+                root.appendNode('description', 'The Kamon Instrumentation Agent')
+                root.appendNode('name', 'Kanela')
                 root.appendNode('url', 'http://kamon.io')
                 root.children().last() + pomConfig
             }

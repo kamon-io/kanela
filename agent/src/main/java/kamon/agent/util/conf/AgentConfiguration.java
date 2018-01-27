@@ -179,7 +179,7 @@ public class AgentConfiguration {
 
     private Config loadConfig() {
         return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
-                .onFailure(missing -> AgentLogger.warn(() -> "It has not been found any configuration for Kamon Agent.", missing))
+                .onFailure(missing -> AgentLogger.warn(() -> "It has not been found any configuration for Kanela Agent.", missing))
                 .get();
     }
 

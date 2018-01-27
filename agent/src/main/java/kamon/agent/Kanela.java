@@ -18,7 +18,7 @@ package kamon.agent;
 
 import java.lang.instrument.Instrumentation;
 
-public final class KamonAgent {
+public final class Kanela {
 
     /**
      * JVM hook to statically load the javaagent at startup.

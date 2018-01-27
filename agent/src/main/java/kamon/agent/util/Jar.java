@@ -18,7 +18,7 @@
 package kamon.agent.util;
 
 import io.vavr.control.Try;
-import kamon.agent.KamonAgent;
+import kamon.agent.Kanela;
 import lombok.Value;
 import lombok.val;
 
@@ -33,7 +33,7 @@ public class Jar {
     public static Try<JarFile> getEmbeddedJar(String jarName) {
         return Try.of(() -> {
             val tempFile = File.createTempFile(jarName, ".jar");
-            val resourceAsStream = KamonAgent.class.getResourceAsStream(jarName + ".jar");
+            val resourceAsStream = Kanela.class.getResourceAsStream(jarName + ".jar");
             Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return new JarFile(tempFile);
         });

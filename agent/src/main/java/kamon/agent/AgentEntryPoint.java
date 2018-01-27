@@ -19,7 +19,7 @@ package kamon.agent;
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.BootstrapInjector;
-import kamon.agent.util.banner.AgentBanner;
+import kamon.agent.util.banner.KanelaBanner;
 import kamon.agent.util.conf.AgentConfiguration;
 import kamon.agent.util.jvm.OldGarbageCollectorListener;
 import kamon.agent.util.log.AgentLogger;
@@ -33,7 +33,7 @@ import static kamon.agent.util.LatencyUtils.withTimeSpent;
 @Value
 public class AgentEntryPoint {
     /**
-     * Kamon Agent entry point.
+     * Kanela entry point.
      *
      * @param args Agent argument list
      * @param instrumentation {@link Instrumentation}
@@ -43,7 +43,7 @@ public class AgentEntryPoint {
             BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
             val configuration = AgentConfiguration.instance();
-            AgentBanner.show(configuration);
+            KanelaBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
 
             Reinstrumenter.attach(instrumentation, configuration, transformers);
