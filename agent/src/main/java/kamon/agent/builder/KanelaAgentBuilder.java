@@ -23,8 +23,8 @@ import kamon.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kamon.agent.cache.PoolStrategyCache;
 import kamon.agent.resubmitter.PeriodicResubmitter;
 import kamon.agent.util.ListBuilder;
-import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.conf.KanelaConfiguration;
+import kamon.agent.util.log.Logger;
 import lombok.Value;
 import lombok.experimental.var;
 import lombok.val;
@@ -41,10 +41,10 @@ import java.util.ArrayList;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Value(staticConstructor = "from")
-class KamonAgentBuilder {
+class KanelaAgentBuilder {
 
-    AgentConfiguration config;
-    AgentConfiguration.ModuleConfiguration moduleDescription;
+    KanelaConfiguration config;
+    KanelaConfiguration.ModuleConfiguration moduleDescription;
     Instrumentation instrumentation;
 
     private static final PoolStrategyCache poolStrategyCache = PoolStrategyCache.instance();
@@ -86,7 +86,7 @@ class KamonAgentBuilder {
 
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
-            AgentLogger.info(() -> "Retransformation Strategy activated.");
+            Logger.info(() -> "Retransformation Strategy activated.");
             agentBuilder = agentBuilder.disableClassFormatChanges()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());
@@ -96,7 +96,7 @@ class KamonAgentBuilder {
 
     private AgentBuilder withBootstrapAttaching(AgentBuilder agentBuilder) {
         if(moduleDescription.shouldInjectInBootstrap()){
-            AgentLogger.info(() -> "Bootstrap Injection activated.");
+            Logger.info(() -> "Bootstrap Injection activated.");
             agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
         return agentBuilder;

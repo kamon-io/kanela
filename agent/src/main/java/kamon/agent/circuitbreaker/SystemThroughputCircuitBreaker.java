@@ -21,10 +21,10 @@ import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
 import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.annotation.Experimental;
-import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.KanelaConfiguration;
 import kamon.agent.util.jvm.GcEvent;
 import kamon.agent.util.jvm.Jvm;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.NonFinal;
@@ -35,33 +35,33 @@ import static java.text.MessageFormat.format;
 @Experimental
 @RequiredArgsConstructor
 public class SystemThroughputCircuitBreaker {
-    AgentConfiguration.CircuitBreakerConfig config;
+    KanelaConfiguration.CircuitBreakerConfig config;
     Jvm jvm;
 
     @NonFinal private volatile int tripped = 0;
 
-    public static void attach(AgentConfiguration.CircuitBreakerConfig config) { attach(config, Jvm.instance()); }
+    public static void attach(KanelaConfiguration.CircuitBreakerConfig config) { attach(config, Jvm.instance()); }
 
-    public static void attach(AgentConfiguration.CircuitBreakerConfig config, Jvm jvm) {
+    public static void attach(KanelaConfiguration.CircuitBreakerConfig config, Jvm jvm) {
         if(config.isEnabled()){
             Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> AgentLogger.info(() -> "System Throughput CircuitBreaker was activated."))
+                    .andThen(() -> Logger.info(() -> "System Throughput CircuitBreaker was activated."))
                     .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
-                    .andThen(() -> AgentLogger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
-                    .onFailure((cause) -> AgentLogger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
+                    .andThen(() -> Logger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
+                    .onFailure((cause) -> Logger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
         }
     }
 
     @Subscribe
     public void onGCEvent(GcEvent event) {
         if((jvm.getGcCpuTimePercent(event) >= config.getGcProcessCPUThreshold()) && ((event.getPercentageFreeMemoryAfterGc() <= config.getFreeMemoryThreshold()))) {
-            AgentLogger.warn(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
+            Logger.warn(() -> format("System Throughput Circuit BreakerCircuit => percentage of free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
             EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.StopModules.instance());
             trip();
         } else {
             if (isTripped()) {
-                AgentLogger.info(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
+                Logger.info(() -> format("System Throughput Circuit BreakerCircuit => The System back to normal :) free memory {0} and  Process GC CPU time percentage {1}.", event.getPercentageFreeMemoryAfterGc(), jvm.getGcCpuTimePercent(event)));
                 reset();
                 EventBroker.instance().publish(Reinstrumenter.ReinstrumentationProtocol.RestartModules.instance());
             }

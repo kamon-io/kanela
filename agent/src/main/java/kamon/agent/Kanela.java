@@ -30,7 +30,7 @@ public final class Kanela {
      * @param instrumentation {@link Instrumentation}
      */
     public static void premain(String args, Instrumentation instrumentation) throws Exception {
-        AgentEntryPoint.premain(args, instrumentation);
+        KanelaEntryPoint.premain(args, instrumentation);
     }
 
     /**
@@ -43,6 +43,6 @@ public final class Kanela {
      * @param instrumentation {@link Instrumentation}
      */
     public static void agentmain(String args, Instrumentation instrumentation) throws Exception {
-        AgentEntryPoint.agentmain(args, instrumentation);
+        KanelaEntryPoint.agentmain(args, instrumentation);
     }
 }

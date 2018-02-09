@@ -18,16 +18,16 @@ package kamon.agent.circuitbraker
 
 import kamon.agent.broker.EventBroker
 import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker
-import kamon.agent.util.conf.AgentConfiguration
+import kamon.agent.util.conf.KanelaConfiguration
 import kamon.agent.util.jvm.{GcEvent, Jvm}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class CircuitBreakerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The CircuitBreaker" should {
     "should trip when the thresholds are exceeded" in {
-      val circuitBreakerConfig = spy(AgentConfiguration.instance().getCircuitBreakerConfig)
+      val circuitBreakerConfig = spy(KanelaConfiguration.instance().getCircuitBreakerConfig)
       when(circuitBreakerConfig.getFreeMemoryThreshold).thenReturn(20.0)
       when(circuitBreakerConfig.getGcProcessCPUThreshold).thenReturn(20.0)
 

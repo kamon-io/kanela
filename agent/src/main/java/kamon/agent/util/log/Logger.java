@@ -17,9 +17,8 @@
 package kamon.agent.util.log;
 
 import io.vavr.control.Try;
-import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.KanelaConfiguration;
 import org.pmw.tinylog.Configurator;
-import org.pmw.tinylog.Logger;
 import org.pmw.tinylog.labelers.TimestampLabeler;
 import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;
@@ -28,22 +27,22 @@ import org.pmw.tinylog.writers.RollingFileWriter;
 import java.util.function.Supplier;
 
 /**
- * Lazy Logger implementing {@link Logger}, which supports lazy evaluation of messages.<br>
+ * Lazy Logger implementing {@link org.pmw.tinylog.Logger}, which supports lazy evaluation of messages.<br>
  * The message to be logged must be inside a {@link Supplier} which will be evaluated only if the level of debug is enabled.
  */
-public class AgentLogger {
+public class Logger {
 
     static {
         Try.run(() -> Configurator
                 .fromResource("kanela-log.properties")
                 .writingThread("main")
-                .level(AgentConfiguration.instance().getLogLevel())
+                .level(KanelaConfiguration.instance().getLogLevel())
                 .addWriter(new RollingFileWriter("kanela-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
                 .activate())
                 .getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
     }
 
-    private AgentLogger(){}
+    private Logger(){}
 
     public static void debug(final Supplier<String> msg) { org.pmw.tinylog.Logger.debug(msg.get());}
 

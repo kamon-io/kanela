@@ -16,7 +16,7 @@
 
 package kamon.agent.api.instrumentation.listener;
 
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
@@ -32,7 +32,7 @@ public class DefaultInstrumentationListener extends Listener.Adapter {
 
     @Override
     public void onError(String error, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-        AgentLogger.info(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
+        Logger.info(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
     }
 
     public static DefaultInstrumentationListener instance() {

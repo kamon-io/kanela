@@ -23,7 +23,7 @@ import kamon.agent.api.instrumentation.bridge.BridgeDescription;
 import kamon.agent.api.instrumentation.mixin.MixinDescription;
 import kamon.agent.util.ListBuilder;
 import kamon.agent.util.BootstrapInjector;
-import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration;
+import kamon.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;

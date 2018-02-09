@@ -18,7 +18,7 @@ package kamon.agent.util.banner;
 
 import kamon.agent.util.AnsiColor;
 import kamon.agent.util.BuildInfo;
-import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.KanelaConfiguration;
 import lombok.experimental.var;
 import lombok.val;
 
@@ -38,7 +38,7 @@ public class KanelaBanner {
 
     private static final int STRAP_LINE_SIZE = 10;
 
-    public static void show(AgentConfiguration configuration) {
+    public static void show(KanelaConfiguration configuration) {
         if (configuration.getShowBanner()) {
             val printStream = System.out;
 

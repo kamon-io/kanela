@@ -18,7 +18,7 @@ package app.kamon.specs
 
 import app.kamon.cases.simple.TestClass
 import app.kamon.utils.ForkTest
-import kamon.agent.KamonAgent
+import kamon.agent.Kanela
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
@@ -35,7 +35,7 @@ class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll 
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 
     // attach agent
-    AgentLoader.attachAgentToJVM(classOf[KamonAgent])
+    AgentLoader.attachAgentToJVM(classOf[Kanela])
 
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }

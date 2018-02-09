@@ -21,10 +21,10 @@ import io.vavr.collection.List;
 import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.broker.Subscribe;
-import kamon.agent.builder.KamonAgentFileTransformer;
+import kamon.agent.builder.KanelaFileTransformer;
 import kamon.agent.util.annotation.Experimental;
-import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.conf.KanelaConfiguration;
+import kamon.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -37,33 +37,33 @@ import static java.text.MessageFormat.format;
 @Experimental
 public class Reinstrumenter {
     Instrumentation instrumentation;
-    AgentConfiguration configuration;
-    List<KamonAgentFileTransformer> transformers;
+    KanelaConfiguration configuration;
+    List<KanelaFileTransformer> transformers;
 
-    public static void attach(Instrumentation instrumentation, AgentConfiguration configuration, List<KamonAgentFileTransformer> transformers) {
+    public static void attach(Instrumentation instrumentation, KanelaConfiguration configuration, List<KanelaFileTransformer> transformers) {
         Try.of(() -> new Reinstrumenter(instrumentation, configuration, transformers))
-                .andThen(() -> AgentLogger.info(() -> format("Reinstrumenter was activated.")))
+                .andThen(() -> Logger.info(() -> format("Reinstrumenter was activated.")))
                 .andThen(reinstrumenter -> EventBroker.instance().add(reinstrumenter))
-                .andThen(() -> AgentLogger.debug(() -> format("Reinstrumenter is listening for Reinstrumentation Events.")))
-                .onFailure((cause) -> AgentLogger.error(() -> format("Error when trying to activate Reinstrumenter."), cause));
+                .andThen(() -> Logger.debug(() -> format("Reinstrumenter is listening for Reinstrumentation Events.")))
+                .onFailure((cause) -> Logger.error(() -> format("Error when trying to activate Reinstrumenter."), cause));
     }
 
     @Subscribe
     public void onStopModules(ReinstrumentationProtocol.StopModules stopEvent) {
-        AgentLogger.warn(() -> "Trying to stop modules.....");
-        val stoppables = this.transformers.filter(KamonAgentFileTransformer::isStoppable)
-                                          .map(KamonAgentFileTransformer::getClassFileTransformer)
+        Logger.warn(() -> "Trying to stop modules.....");
+        val stoppables = this.transformers.filter(KanelaFileTransformer::isStoppable)
+                                          .map(KanelaFileTransformer::getClassFileTransformer)
                                           .map(transformer -> transformer.reset(this.instrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION));
 
-        if(stoppables.forAll(s -> s.equals(true))) AgentLogger.warn(() -> "All modules are been stopped.");
-        else AgentLogger.warn(() -> "Error trying stop some modules.");
+        if(stoppables.forAll(s -> s.equals(true))) Logger.warn(() -> "All modules are been stopped.");
+        else Logger.warn(() -> "Error trying stop some modules.");
     }
 
     @Subscribe
     public void onRestartModules(ReinstrumentationProtocol.RestartModules restartEvent) {
-        AgentLogger.warn(() -> "Trying to reapply the removed transformations...");
-        this.transformers.filter(KamonAgentFileTransformer::isStoppable)
-                         .map(KamonAgentFileTransformer::getAgentBuilder)
+        Logger.warn(() -> "Trying to reapply the removed transformations...");
+        this.transformers.filter(KanelaFileTransformer::isStoppable)
+                         .map(KanelaFileTransformer::getAgentBuilder)
                          .forEach(transformer -> transformer.installOn(this.instrumentation));
     }
 

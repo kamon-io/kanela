@@ -16,7 +16,7 @@
 
 package kamon.agent.api.instrumentation.listener;
 
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -32,11 +32,11 @@ public class DebugInstrumentationListener extends AgentBuilder.Listener.Adapter 
 
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-        AgentLogger.info(() -> format("Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
+        Logger.info(() -> format("Transformed => {0} and loaded from {1}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
     }
 
     @Override
     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-        AgentLogger.debug(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
+        Logger.debug(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
     }
 }

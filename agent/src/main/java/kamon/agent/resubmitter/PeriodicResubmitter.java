@@ -19,7 +19,7 @@ package kamon.agent.resubmitter;
 import io.vavr.Function0;
 import kamon.agent.util.NamedThreadFactory;
 import kamon.agent.util.ShutdownHook;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.ResubmissionScheduler;
 
@@ -42,7 +42,7 @@ public class PeriodicResubmitter {
 
     private static Function0<ResubmissionScheduler> newResubmitting() {
         return () -> {
-            AgentLogger.info(() -> "Periodic Resubmitter was activated.");
+            Logger.info(() -> "Periodic Resubmitter was activated.");
             ShutdownHook.register(executor);
             return new ResubmissionScheduler.WithFixedDelay(executor, TIMEOUT, TimeUnit.SECONDS);
         };

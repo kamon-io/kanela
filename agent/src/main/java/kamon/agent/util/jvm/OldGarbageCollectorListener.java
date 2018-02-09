@@ -22,8 +22,8 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kamon.agent.broker.EventBroker;
 import kamon.agent.util.annotation.Experimental;
-import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.conf.KanelaConfiguration;
+import kamon.agent.util.log.Logger;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
@@ -46,10 +46,10 @@ public class OldGarbageCollectorListener {
     long jvmStartTime;
     EventBroker broker;
     Option<MemoryPoolMXBean> oldGenPool;
-    AgentConfiguration.OldGarbageCollectorConfig config;
+    KanelaConfiguration.OldGarbageCollectorConfig config;
 
     @SneakyThrows
-    private OldGarbageCollectorListener(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
+    private OldGarbageCollectorListener(KanelaConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         val memoryBeans = List.ofAll(ManagementFactory.getMemoryPoolMXBeans());
 
         this.jvmStartTime = ManagementFactory.getRuntimeMXBean().getStartTime();
@@ -65,15 +65,15 @@ public class OldGarbageCollectorListener {
      * Attach and start the listener.
      *
      */
-    public static void attach(AgentConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
+    public static void attach(KanelaConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
             Try.of(() -> new OldGarbageCollectorListener(configuration, jvm))
-               .andThen(() -> AgentLogger.info(() -> format("Old Garbage Collector Listener was activated.")))
-               .onFailure((cause) -> AgentLogger.error(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
+               .andThen(() -> Logger.info(() -> format("Old Garbage Collector Listener was activated.")))
+               .onFailure((cause) -> Logger.error(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
         }
     }
 
-    public static void attach(AgentConfiguration.OldGarbageCollectorConfig config) {
+    public static void attach(KanelaConfiguration.OldGarbageCollectorConfig config) {
         attach(config, Jvm.instance());
     }
 
@@ -101,7 +101,7 @@ public class OldGarbageCollectorListener {
             percentageFreeMemory.forEach((freeMemory) -> {
                 val event = GcEvent.from(info, (double) freeMemory, jvmStartTime + info.getGcInfo().getStartTime());
                 if(config.isShouldLogAfterGc()) {
-                    AgentLogger.warn(() -> format("{0}", event));
+                    Logger.warn(() -> format("{0}", event));
                 }
                 broker.publish(event);
             });

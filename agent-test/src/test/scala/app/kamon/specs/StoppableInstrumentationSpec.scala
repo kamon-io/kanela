@@ -18,7 +18,7 @@ package app.kamon.specs
 
 import app.kamon.cases.simple.TestClass
 import app.kamon.utils.ForkTest
-import kamon.agent.KamonAgent
+import kamon.agent.Kanela
 import kamon.agent.broker.EventBroker
 import kamon.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
@@ -36,7 +36,7 @@ class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAnd
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
     // attach agent
-    AgentLoader.attachAgentToJVM(classOf[KamonAgent])
+    AgentLoader.attachAgentToJVM(classOf[Kanela])
     Thread.sleep(5000) // FIXME: maybe a better solution?
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
     EventBroker.instance.publish(StopModules.instance)

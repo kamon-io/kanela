@@ -19,10 +19,10 @@ package kamon.agent;
 import io.vavr.collection.List;
 import io.vavr.control.Try;
 import kamon.agent.api.instrumentation.KamonInstrumentation;
-import kamon.agent.builder.Agent;
-import kamon.agent.builder.KamonAgentFileTransformer;
-import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.builder.AgentInstaller;
+import kamon.agent.builder.KanelaFileTransformer;
+import kamon.agent.util.conf.KanelaConfiguration;
+import kamon.agent.util.log.Logger;
 
 import java.lang.instrument.Instrumentation;
 
@@ -34,24 +34,24 @@ public class InstrumentationLoader {
      * Load from the current classpath all defined instrumentations {@link KamonInstrumentation}.
      *
      * @param instrumentation {@link Instrumentation}
-     * @param configuration {@link AgentConfiguration}
-     * @return a list of {@link KamonAgentFileTransformer}
+     * @param configuration {@link KanelaConfiguration}
+     * @return a list of {@link KanelaFileTransformer}
      */
-    public static List<KamonAgentFileTransformer> load(Instrumentation instrumentation, AgentConfiguration configuration) {
+    public static List<KanelaFileTransformer> load(Instrumentation instrumentation, KanelaConfiguration configuration) {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
-            AgentLogger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
+            Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
                                     .map(InstrumentationLoader::loadInstrumentation)
                                     .filter(KamonInstrumentation::isActive)
                                     .sortBy(KamonInstrumentation::order)
                                     .flatMap(kamonInstrumentation -> kamonInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
-                                    .foldLeft(Agent.from(configuration, moduleConfiguration, instrumentation), Agent::addTypeTransformation)
+                                    .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)
                                     .install();
         });
     }
 
     private static KamonInstrumentation loadInstrumentation(String instrumentationClassName) {
-        AgentLogger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
+        Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KamonInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
                   .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
     }

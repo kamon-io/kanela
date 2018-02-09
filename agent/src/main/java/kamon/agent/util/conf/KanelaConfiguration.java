@@ -24,7 +24,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.*;
 import org.pmw.tinylog.Level;
 
@@ -37,7 +37,7 @@ import static java.text.MessageFormat.format;
 
 
 @Value
-public class AgentConfiguration {
+public class KanelaConfiguration {
     Boolean debugMode;
     DumpConfig dump;
     CircuitBreakerConfig circuitBreakerConfig;
@@ -49,14 +49,14 @@ public class AgentConfiguration {
     Config config;
 
     private static class Holder {
-        private static final AgentConfiguration Instance = new AgentConfiguration();
+        private static final KanelaConfiguration Instance = new KanelaConfiguration();
     }
 
-    public static AgentConfiguration instance() {
+    public static KanelaConfiguration instance() {
         return Holder.Instance;
     }
 
-    private AgentConfiguration() {
+    private KanelaConfiguration() {
         this.config = loadConfig();
         this.debugMode = getDebugMode(config);
         this.showBanner = getShowBanner(config);
@@ -138,7 +138,7 @@ public class AgentConfiguration {
         }
 
         public void circuitBreakerRunning() {
-            AgentConfiguration.this.addExtraParameter("circuit-breaker-running", true);
+            KanelaConfiguration.this.addExtraParameter("circuit-breaker-running", true);
         }
     }
 
@@ -151,7 +151,7 @@ public class AgentConfiguration {
         }
 
         public boolean isCircuitBreakerRunning() {
-            return (boolean) AgentConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
+            return (boolean) KanelaConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
         }
     }
 
@@ -179,13 +179,13 @@ public class AgentConfiguration {
 
     private Config loadConfig() {
         return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
-                .onFailure(missing -> AgentLogger.warn(() -> "It has not been found any configuration for Kanela Agent.", missing))
+                .onFailure(missing -> Logger.warn(() -> "It has not been found any configuration for Kanela Agent.", missing))
                 .get();
     }
 
     private List<String> getInstrumentations(Config config) {
         return Try.of(() -> List.ofAll(config.getStringList("instrumentations")))
-                .onFailure(exc -> AgentLogger.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc))
+                .onFailure(exc -> Logger.warn(() -> "The instrumentations have not been found. Perhaps you have forgotten to add them to the config?", exc))
                 .getOrElse(Nil.instance());
     }
 

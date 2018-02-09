@@ -17,7 +17,7 @@
 package kamon.agent.util.jvm
 
 import kamon.agent.broker.{EventBroker, Subscribe}
-import kamon.agent.util.conf.AgentConfiguration
+import kamon.agent.util.conf.KanelaConfiguration
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, Ignore, Matchers, WordSpecLike}
@@ -26,7 +26,7 @@ import org.scalatest.{BeforeAndAfterAll, Ignore, Matchers, WordSpecLike}
 class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The OldGarbageCollectorListener" should {
     "receive a event when the GC is triggered" in {
-      val oldGarbageCollectorConfig = spy(AgentConfiguration.instance().getOldGarbageCollectorConfig)
+      val oldGarbageCollectorConfig = spy(KanelaConfiguration.instance().getOldGarbageCollectorConfig)
       when(oldGarbageCollectorConfig.isCircuitBreakerRunning).thenReturn(true)
       when(oldGarbageCollectorConfig.isShouldLogAfterGc).thenReturn(false)
 

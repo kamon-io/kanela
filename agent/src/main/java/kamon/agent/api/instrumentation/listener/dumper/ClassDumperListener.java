@@ -18,8 +18,8 @@ package kamon.agent.api.instrumentation.listener.dumper;
 
 import io.vavr.CheckedFunction0;
 import io.vavr.control.Try;
-import kamon.agent.util.conf.AgentConfiguration;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.conf.KanelaConfiguration;
+import kamon.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
@@ -37,10 +37,10 @@ public class ClassDumperListener extends Listener.Adapter {
 
     File dumpDir;
     File jarFile;
-    AgentConfiguration.DumpConfig config;
+    KanelaConfiguration.DumpConfig config;
 
     private ClassDumperListener(){
-        this.config = AgentConfiguration.instance().getDump();
+        this.config = KanelaConfiguration.instance().getDump();
         this.dumpDir = new File(config.getDumpDir());
         this.jarFile = new File(config.getDumpDir() + File.separator + config.getJarName() + ".jar");
     }
@@ -72,6 +72,6 @@ public class ClassDumperListener extends Listener.Adapter {
     }
 
     private <R> void runSafe(CheckedFunction0<R> thunk, String msg) {
-        Try.of(thunk).onFailure((cause) -> AgentLogger.error(() -> msg, cause));
+        Try.of(thunk).onFailure((cause) -> Logger.error(() -> msg, cause));
     }
 }

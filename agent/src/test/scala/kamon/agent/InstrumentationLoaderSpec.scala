@@ -18,12 +18,12 @@ package temp.kamon.agent
 
 import java.lang.instrument.{ClassFileTransformer, Instrumentation}
 
-import kamon.agent.util.conf.AgentConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import io.vavr.collection.{List => JList}
 import kamon.agent.InstrumentationLoader
-import kamon.agent.util.conf.AgentConfiguration.ModuleConfiguration
+import kamon.agent.util.conf.KanelaConfiguration.ModuleConfiguration
+import kamon.agent.util.conf.KanelaConfiguration
 import org.mockito.ArgumentMatchers._
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
@@ -31,8 +31,8 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
   "with the config empty kamon.agent.modules.x-module.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
 
-    val agentConfiguration = spy(AgentConfiguration.instance())
-    val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
+    val agentConfiguration = spy(KanelaConfiguration.instance())
+    val dumpConfigMock = spy(KanelaConfiguration.instance().getDump)
 
     val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
 
@@ -58,7 +58,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
       .thenReturn("x-module")
 
     intercept[RuntimeException] {
-      val agentConfiguration = spy(mock(classOf[AgentConfiguration]))
+      val agentConfiguration = spy(mock(classOf[KanelaConfiguration]))
       when(agentConfiguration.getAgentModules)
         .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
@@ -71,8 +71,8 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
   "with an existing instrumentation" should "register it correctly" in {
     val instrumentationMock = mock(classOf[Instrumentation])
 
-    val agentConfiguration = spy(AgentConfiguration.instance())
-    val dumpConfigMock = spy(AgentConfiguration.instance().getDump)
+    val agentConfiguration = spy(KanelaConfiguration.instance())
+    val dumpConfigMock = spy(KanelaConfiguration.instance().getDump)
 
     val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
 

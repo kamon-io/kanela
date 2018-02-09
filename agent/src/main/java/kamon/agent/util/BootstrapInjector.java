@@ -16,7 +16,7 @@
 
 package kamon.agent.util;
 
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.description.type.TypeDescription;
@@ -34,7 +34,7 @@ public class BootstrapInjector {
 
     public static void injectJar(Instrumentation instrumentation, String jarName) {
         val jarFile = Jar.getEmbeddedJar(jarName)
-                .onFailure(error -> AgentLogger.error(error::getMessage, error))
+                .onFailure(error -> Logger.error(error::getMessage, error))
                 .get();
 
         instrumentation.appendToBootstrapClassLoaderSearch(jarFile);

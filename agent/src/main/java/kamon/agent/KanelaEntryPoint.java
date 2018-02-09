@@ -20,9 +20,9 @@ import kamon.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kamon.agent.reinstrument.Reinstrumenter;
 import kamon.agent.util.BootstrapInjector;
 import kamon.agent.util.banner.KanelaBanner;
-import kamon.agent.util.conf.AgentConfiguration;
+import kamon.agent.util.conf.KanelaConfiguration;
 import kamon.agent.util.jvm.OldGarbageCollectorListener;
-import kamon.agent.util.log.AgentLogger;
+import kamon.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 
@@ -31,7 +31,7 @@ import java.lang.instrument.Instrumentation;
 import static kamon.agent.util.LatencyUtils.withTimeSpent;
 
 @Value
-public class AgentEntryPoint {
+public class KanelaEntryPoint {
     /**
      * Kanela entry point.
      *
@@ -42,7 +42,7 @@ public class AgentEntryPoint {
         withTimeSpent(() -> {
             BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
-            val configuration = AgentConfiguration.instance();
+            val configuration = KanelaConfiguration.instance();
             KanelaBanner.show(configuration);
             val transformers = InstrumentationLoader.load(instrumentation, configuration);
 
@@ -50,7 +50,7 @@ public class AgentEntryPoint {
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
 
-        }, (timeSpent) -> AgentLogger.info(() -> "Startup completed in " + timeSpent + " ms"));
+        }, (timeSpent) -> Logger.info(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
     public static void premain(String args, Instrumentation instrumentation) {
@@ -58,7 +58,7 @@ public class AgentEntryPoint {
     }
 
     public static void agentmain(String args, Instrumentation instrumentation) {
-        AgentConfiguration.instance().runtimeAttach();
+        KanelaConfiguration.instance().runtimeAttach();
         premain(args, instrumentation);
     }
 }

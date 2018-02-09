@@ -23,7 +23,7 @@ import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 
 @Value(staticConstructor = "from")
 @ToString(exclude="classFileTransformer")
-public class KamonAgentFileTransformer {
+public class KanelaFileTransformer {
     AgentBuilder agentBuilder;
     ResettableClassFileTransformer classFileTransformer;
     boolean stoppable;
