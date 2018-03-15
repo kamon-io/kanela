@@ -18,9 +18,9 @@ package app.kamon.java.instrumentation;
 
 import app.kamon.java.instrumentation.advisor.FakeWorkerAdvisor;
 import app.kamon.java.instrumentation.mixin.MonitorMixin;
-import kanela.agent.api.instrumentation.KamonInstrumentation;
+import kanela.agent.api.instrumentation.KanelaInstrumentation;
 
-import static kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
+import static kanela.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 
 public class MonitorInstrumentation extends KanelaInstrumentation {
     public MonitorInstrumentation() {
