@@ -43,7 +43,7 @@ public class PeriodicResubmitter {
 
     private static Function0<ResubmissionScheduler> newResubmitting() {
         return () -> {
-            Logger.info(() -> "Periodic Resubmitter was activated.");
+            Logger.info(() -> "Periodic Resubmitter activated.");
             ShutdownHook.register(executor);
             return new ResubmissionScheduler.WithFixedDelay(executor, TIMEOUT, TimeUnit.SECONDS);
         };

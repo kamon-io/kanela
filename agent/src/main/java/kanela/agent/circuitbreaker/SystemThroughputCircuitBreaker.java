@@ -46,7 +46,7 @@ public class SystemThroughputCircuitBreaker {
         if(config.isEnabled()){
             Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
                     .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> Logger.info(() -> "System Throughput CircuitBreaker was activated."))
+                    .andThen(() -> Logger.info(() -> "System Throughput CircuitBreaker activated."))
                     .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
                     .andThen(() -> Logger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
                     .onFailure((cause) -> Logger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));

@@ -43,7 +43,7 @@ public class Reinstrumenter {
 
     public static void attach(Instrumentation instrumentation, KanelaConfiguration configuration, List<KanelaFileTransformer> transformers) {
         Try.of(() -> new Reinstrumenter(instrumentation, configuration, transformers))
-                .andThen(() -> Logger.info(() -> format("Reinstrumenter was activated.")))
+                .andThen(() -> Logger.info(() -> format("Reinstrumenter activated.")))
                 .andThen(reinstrumenter -> EventBroker.instance().add(reinstrumenter))
                 .andThen(() -> Logger.debug(() -> format("Reinstrumenter is listening for Reinstrumentation Events.")))
                 .onFailure((cause) -> Logger.error(() -> format("Error when trying to activate Reinstrumenter."), cause));
