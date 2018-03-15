@@ -115,7 +115,7 @@ public class KanelaConfiguration {
 
         DumpConfig(Config config) {
             this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
-            this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kamon-agent/dump");
+            this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kanela-agent/dump");
             this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
         }
@@ -178,7 +178,7 @@ public class KanelaConfiguration {
     }
 
     private Config loadConfig() {
-        return Try.of(() -> loadDefaultConfig().getConfig("kamon.agent"))
+        return Try.of(() -> loadDefaultConfig().getConfig("kanela"))
                 .onFailure(missing -> Logger.warn(() -> "It has not been found any configuration for Kanela Agent.", missing))
                 .get();
     }
