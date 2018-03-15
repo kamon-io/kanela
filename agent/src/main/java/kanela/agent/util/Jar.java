@@ -14,40 +14,28 @@
  * =========================================================================================
  */
 
-buildscript {
-    ext.scala_version = '2.12.4'
-    ext.agent_version = project(":agent").version
-    ext.kamon_agent_dep = "io.kamon:kanela-agent:${agent_version}"
-}
+package kanela.agent.util;
 
-allprojects {
-    apply plugin: 'java'
+import io.vavr.control.Try;
+import kanela.agent.Kanela;
 
-    configurations {
-        provided
-        agent
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.jar.JarFile;
+
+import lombok.Value;
+import lombok.val;
+
+@Value
+public class Jar {
+
+    public static Try<JarFile> getEmbeddedJar(String jarName) {
+        return Try.of(() -> {
+            val tempFile = File.createTempFile(jarName, ".jar");
+            val resourceAsStream = Kanela.class.getResourceAsStream(jarName + ".jar");
+            Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return new JarFile(tempFile);
+        });
     }
-
-    sourceSets {
-        main.compileClasspath += configurations.provided
-        test.compileClasspath += configurations.provided
-        test.runtimeClasspath += configurations.provided
-    }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        compile 'io.vavr:vavr:0.9.2'
-        compileOnly 'org.projectlombok:lombok:1.16.20'
-
-        agent(kamon_agent_dep)
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = "4.6"
 }

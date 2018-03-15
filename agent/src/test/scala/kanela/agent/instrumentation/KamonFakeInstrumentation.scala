@@ -14,40 +14,8 @@
  * =========================================================================================
  */
 
-buildscript {
-    ext.scala_version = '2.12.4'
-    ext.agent_version = project(":agent").version
-    ext.kamon_agent_dep = "io.kamon:kanela-agent:${agent_version}"
-}
+package kanela.agent.instrumentation
 
-allprojects {
-    apply plugin: 'java'
+import kanela.agent.api.instrumentation.KanelaInstrumentation
 
-    configurations {
-        provided
-        agent
-    }
-
-    sourceSets {
-        main.compileClasspath += configurations.provided
-        test.compileClasspath += configurations.provided
-        test.runtimeClasspath += configurations.provided
-    }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-    }
-
-    dependencies {
-        compile 'io.vavr:vavr:0.9.2'
-        compileOnly 'org.projectlombok:lombok:1.16.20'
-
-        agent(kamon_agent_dep)
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = "4.6"
-}
+class KamonFakeInstrumentation extends KanelaInstrumentation
