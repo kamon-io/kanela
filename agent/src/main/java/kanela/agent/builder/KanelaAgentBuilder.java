@@ -85,9 +85,9 @@ class KanelaAgentBuilder {
 }
 
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
-        if (config.isAttachedInRuntime() || moduleDescription.isStoppable()) {
-            Logger.info(() -> "Retransformation Strategy activated.");
-            agentBuilder = agentBuilder.disableClassFormatChanges()
+        if (config.isAttachedInRuntime() || moduleDescription.isStoppable() || moduleDescription.shouldInjectInBootstrap()) {
+            Logger.info(() -> "Retransformation Strategy activated for: " + moduleDescription.getName());
+            agentBuilder = agentBuilder //.disableClassFormatChanges()?
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());
         }

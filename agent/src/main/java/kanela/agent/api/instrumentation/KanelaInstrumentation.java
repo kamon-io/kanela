@@ -20,6 +20,7 @@ import io.vavr.Function0;
 import io.vavr.Function1;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
+import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.ListBuilder;
 import kanela.agent.util.BootstrapInjector;
@@ -65,6 +66,9 @@ public abstract class KanelaInstrumentation {
         val advisors = instrumentationDescription.getInterceptors();
         val transformers  = instrumentationDescription.getTransformers();
 
+        if (moduleConfiguration.shouldSupportLegacyBytecode()) {
+            transformers.add(LegacySupportTransformer.Instance);
+        }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
             val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());

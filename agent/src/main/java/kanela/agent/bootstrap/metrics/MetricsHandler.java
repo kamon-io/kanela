@@ -20,31 +20,31 @@ import java.util.Map;
 
 
 /**
- * {@code MetricsTrampoline} provides methods for creating and manipulating metrics from
+ * {@code MetricsHandler} provides methods for creating and manipulating metrics from
  * instrumented bytecode.
  *
- * <p>{@code MetricsTrampoline} avoids tight coupling with the concrete trace API through the {@link
- * MetricsTrampoline} interface.
+ * <p>{@code MetricsHandler} avoids tight coupling with the concrete trace API through the {@link
+ * MetricsHandler} interface.
  *
- * <p>Both {@link MetricsTrampoline} and {@link MetricsProvider} are loaded by the bootstrap classloader
+ * <p>Both {@link MetricsHandler} and {@link MetricsProvider} are loaded by the bootstrap classloader
  * so that they can be used from classes loaded by the bootstrap classloader. A concrete
  * implementation of {@link MetricsProvider} will be loaded by the system classloader. This allows for
  * using the same metrics API as the instrumented application.
  *
- * <p>{@code MetricsTrampoline} is implemented as a static class to allow for easy and fast use from
+ * <p>{@code MetricsHandler} is implemented as a static class to allow for easy and fast use from
  * instrumented bytecode.
  *
  * @since 0.10
  */
-public final class MetricsTrampoline {
+public final class MetricsHandler {
 
     private volatile static MetricsProvider metricsProvider = MetricsProvider.NoOp.INSTANCE;
 
-    private MetricsTrampoline() {}
+    private MetricsHandler() {}
 
     public static void setMetricsProvider(MetricsProvider metricsProvider) {
         if(metricsProvider != MetricsProvider.NoOp.INSTANCE) {
-            MetricsTrampoline.metricsProvider = metricsProvider;
+            MetricsHandler.metricsProvider = metricsProvider;
         }
     }
 

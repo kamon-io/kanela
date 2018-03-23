@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
  *
  * @since 0.10
  */
-public interface ContextManipulationProvider {
+public interface ContextProvider {
 
     /**
      * Wraps a {@link Runnable} so that it executes with the context that is associated with the
@@ -45,7 +45,7 @@ public interface ContextManipulationProvider {
      */
     <A> Callable wrapInContextAware(Callable<A> callable);
 
-    enum NoOp implements ContextManipulationProvider {
+    enum NoOp implements ContextProvider {
 
         INSTANCE;
 

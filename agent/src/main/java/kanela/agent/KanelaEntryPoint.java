@@ -23,13 +23,12 @@ import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
 import kanela.agent.util.log.Logger;
+import lombok.Value;
+import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
 import static kanela.agent.util.LatencyUtils.withTimeSpent;
-
-import lombok.Value;
-import lombok.val;
 
 @Value
 public class KanelaEntryPoint {

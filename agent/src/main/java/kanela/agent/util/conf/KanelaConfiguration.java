@@ -81,9 +81,10 @@ public class KanelaConfiguration {
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
+                    val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
 
-                    return ModuleConfiguration.from(name, instrumentations, within, order, stoppable, injectInBootstrap, createTempDirectory(tempDirPrefix));
+                    return ModuleConfiguration.from(name, instrumentations, within, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix));
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .toList()
@@ -99,10 +100,16 @@ public class KanelaConfiguration {
         boolean stoppable;
         @Getter(AccessLevel.NONE)
         boolean injectInBootstrap;
+        @Getter(AccessLevel.NONE)
+        boolean legacyBytecodeSupport;
         File tempDir;
 
         public boolean shouldInjectInBootstrap() {
             return injectInBootstrap;
+        }
+
+        public boolean shouldSupportLegacyBytecode() {
+            return legacyBytecodeSupport;
         }
     }
 
@@ -239,7 +246,7 @@ public class KanelaConfiguration {
                     "org\\.groovy.\\..*",
                     "net\\.bytebuddy.\\..*",
                     "\\.asm.\\..*",
-                    "kamon\\.agent\\..*",
+                    "kanela\\.agent\\..*",
                     "kamon\\.testkit\\..*",
                     "kamon\\.instrumentation\\..*",
                     "akka\\.testkit\\..*",

@@ -19,34 +19,34 @@ package kanela.agent.bootstrap.tracing;
 import java.io.Closeable;
 
 /**
- * {@code TraceTrampoline} provides methods for creating and manipulating trace spans from
+ * {@code TraceHandler} provides methods for creating and manipulating trace spans from
  * instrumented bytecode.
  *
- * <p>{@code TraceTrampoline} avoids tight coupling with the concrete trace API through the {@link
+ * <p>{@code TraceHandler} avoids tight coupling with the concrete trace API through the {@link
  * TraceProvider} interface.
  *
- * <p>Both {@link TraceTrampoline} and {@link TraceProvider} are loaded by the bootstrap classloader
+ * <p>Both {@link TraceHandler} and {@link TraceProvider} are loaded by the bootstrap classloader
  * so that they can be used from classes loaded by the bootstrap classloader. A concrete
  * implementation of {@link TraceProvider} will be loaded by the system classloader. This allows for
  * using the same trace API as the instrumented application.
  *
- * <p>{@code TraceTrampoline} is implemented as a static class to allow for easy and fast use from
+ * <p>{@code TraceHandler} is implemented as a static class to allow for easy and fast use from
  * instrumented bytecode. We cannot use dependency injection for the instrumented bytecode.
  *
  * @since 0.10
  */
-public final class TraceTrampoline  {
+public final class TraceHandler {
 
     private volatile static TraceProvider traceProvider = TraceProvider.NoOp.INSTANCE;
 
-    private TraceTrampoline() {}
+    private TraceHandler() {}
 
     public static void setTraceProvider(TraceProvider traceProvider) {
         if(traceProvider != TraceProvider.NoOp.INSTANCE) {
-            TraceTrampoline.traceProvider = traceProvider;
+            TraceHandler.traceProvider = traceProvider;
         }
     }
 
     public static Closeable startSpan(String spanName) { return traceProvider.startSpan(spanName); }
-    public static void finishSpan(Closeable scope, Throwable throwable) {traceProvider.finishSpan(scope, throwable);}
+    public static void finishSpan(Closeable scope, Throwable throwable) { traceProvider.finishSpan(scope, throwable);}
 }
