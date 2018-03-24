@@ -1,5 +1,5 @@
 # Kanela: The Kamon Instrumentation Agent <img align="right" src="https://rawgit.com/kamon-io/Kamon/master/kamon-logo.svg" height="150px" style="padding-left: 20px"/>
-[![Build Status](https://travis-ci.org/kamon-io/kanela.svg?branch=master)
+![Build Status](https://travis-ci.org/kamon-io/kanela.svg?branch=master)
 
 **Kanela** is a Java Agent written in Java 8+ and powered by [ByteBuddy] with some additionally [ASM] features to provide a simple way to instrument applications running on the JVM and allow introduce Kamon features such as context propagation and metrics.
 
