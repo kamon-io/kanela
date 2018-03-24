@@ -45,7 +45,7 @@ public class Kanela {
      * Try to Attach Kanela to the current process.
      */
     public static void attach()  {
-        tryLoadKanelaAgent()
+        Try.of(() -> Class.forName("kanela.agent.Kanela"))
                 .flatMapTry(Kanela::kanelaJar)
                 .andThen((agentJar) -> ByteBuddyAgent.attach(agentJar, getCurrentPID()))
                 .onSuccess((ignored) -> log.info(() -> "The Kanela agent was attached successfully"))
@@ -54,13 +54,10 @@ public class Kanela {
 
     private static Try<File> kanelaJar(Class clazz) {
         return Try.of(() -> getKanelaJar(clazz))
-                .orElse(Try.of(() -> generateKanelaJar(clazz)))
+                .orElse(() -> Try.of(() -> generateKanelaJar(clazz)))
                 .onFailure(cause -> log.severe(() -> "Error trying to obtain the Kanela Agent jar: " + cause.getMessage()));
     }
 
-    private static Try<Class<?>> tryLoadKanelaAgent() {
-        return Try.of(() -> Class.forName("kanela.agent.Kanela"));
-    }
 
     /**
      * Return the Kanela Agent Jar File .
