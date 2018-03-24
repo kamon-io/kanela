@@ -18,7 +18,7 @@ package app.kamon.java.instrumentation.mixin;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;
-import kamon.agent.api.instrumentation.mixin.Initializer;
+import kanela.agent.api.instrumentation.mixin.Initializer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2018 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -15,27 +15,21 @@
  */
 
 
-buildscript {
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
-    }
-}
-
 plugins {
     id 'java'
     id 'scala'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.7.3'
-    id 'com.github.maiflai.scalatest' version '0.18'
-    id 'com.github.johnrengelman.shadow' version '2.0.0'
+    id 'com.github.maiflai.scalatest' version '0.19'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
 
 dependencies {
     compile 'com.typesafe:config:1.3.2'
     compile 'net.jodah:expiringmap:0.5.8'
-    compile 'org.tinylog:tinylog:1.3.2'
+    compile 'org.tinylog:tinylog:1.3.4'
     compile 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
-    compile files('libs/byte-buddy-1.7.9.jar')
+    compile files('libs/byte-buddy-1.8.0.jar')
 
     testCompile 'org.mockito:mockito-core:2.7.22'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
@@ -43,7 +37,7 @@ dependencies {
     testRuntime 'org.pegdown:pegdown:1.4.2'
 }
 
-def agentBootstrapClasses = 'kamon/agent/bootstrap/**'
+def agentBootstrapClasses = 'kanela/agent/bootstrap/**'
 
 task bootstrapJar(type: Jar) {
     // Output to 'bootstrap.jar'.
@@ -57,7 +51,7 @@ task bootstrapJar(type: Jar) {
 shadowJar.dependsOn bootstrapJar
 
 shadowJar {
-    baseName = 'kamon-agent'
+    baseName = 'kanela-agent'
     classifier = null
 
     mergeServiceFiles {
@@ -72,21 +66,21 @@ shadowJar {
 
     //exclude agentBootstrapClasses
 
-    relocate 'net.bytebuddy', 'kamon.agent.libs.net.bytebuddy'
-    relocate 'io.vavr', 'kamon.agent.libs.io.vavr'
-    relocate 'com.typesafe.config', 'kamon.agent.libs.com.typesafe.config'
-    relocate 'org.pmw.tinylog', 'kamon.agent.libs.org.pmw.tinylog'
-    relocate 'net.jodah', 'kamon.agent.libs.net.jodah'
-    relocate ('com.github.tobiasrm', 'kamon.agent.libs.com.github.tobiasrm') {
-        exclude 'com.github.tobiasrm.Main'
+    relocate 'net.bytebuddy', 'kanela.agent.libs.net.bytebuddy'
+    relocate 'io.vavr', 'kanela.agent.libs.io.vavr'
+    relocate 'com.typesafe.config', 'kanela.agent.libs.com.typesafe.config'
+    relocate 'org.pmw.tinylog', 'kanela.agent.libs.org.pmw.tinylog'
+    relocate 'net.jodah', 'kanela.agent.libs.net.jodah'
+    relocate ('com.github.tobiasrm', 'kanela.agent.libs.com.github.tobiasrm') {
+        exclude 'com.github.tobiasrm.Main.class'
     }
 
     dependencies {
-        exclude(dependency('org.projectlombok:lombok:1.16.18'))
+        exclude('org.projectlombok:lombok:1.16.20')
     }
 
     doLast {
-        def agentBootstrapJar = 'kamon/agent/bootstrap.jar'
+        def agentBootstrapJar = 'kanela/agent/bootstrap.jar'
 
         // Bundle bootstrap.jar.
         ant.jar(update: 'true', destfile: shadowJar.archivePath) {
@@ -102,8 +96,8 @@ jar {
     manifest {
         attributes 'Built-By': System.getProperty("user.name")
         attributes 'Build-Jdk': System.getProperty("java.version")
-        attributes 'Premain-Class': "kamon.agent.KamonAgent"
-        attributes 'Agent-Class': "kamon.agent.KamonAgent"
+        attributes 'Premain-Class': "kanela.agent.Kanela"
+        attributes 'Agent-Class': "kanela.agent.Kanela"
         attributes 'Can-Redefine-Classes': "true"
         attributes 'Can-Set-Native-Method-Prefix': "true"
         attributes 'Can-Retransform-Classes': "true"
@@ -119,14 +113,14 @@ bintray {
 
     pkg {
         repo = 'releases'
-        name = 'kamon-agent'
+        name = 'kanela'
         userOrg = 'kamon-io'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/kamon-io/kamon-agent'
+        vcsUrl = 'https://github.com/kamon-io/kanela'
 
         version {
             name = "${version}"
-            desc = 'Kamon Agent(experimental)'
+            desc = 'Kanela'
             released  = new Date()
         }
     }
@@ -160,7 +154,7 @@ def pomConfig = {
     }
 
     scm {
-       url "https://github.com/kamon-io/kamon-agent"
+       url "https://github.com/kamon-io/kanela"
     }
 }
 
@@ -171,12 +165,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             groupId 'io.kamon'
-            artifactId 'kamon-agent'
+            artifactId 'kanela-agent'
             version "${version}"
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'The Open Source java agent for Kamon')
-                root.appendNode('name', 'Kamon Agent')
+                root.appendNode('description', 'The Kamon Instrumentation Agent')
+                root.appendNode('name', 'Kanela')
                 root.appendNode('url', 'http://kamon.io')
                 root.children().last() + pomConfig
             }

@@ -51,7 +51,7 @@ gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
-!agent/libs/byte-buddy-.*.jar
+!agent/libs/byte-buddy-*.jar
 
 # Cache of project
 .gradletasknamecache

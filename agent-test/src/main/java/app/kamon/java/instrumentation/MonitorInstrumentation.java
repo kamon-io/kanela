@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2018 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -18,11 +18,11 @@ package app.kamon.java.instrumentation;
 
 import app.kamon.java.instrumentation.advisor.FakeWorkerAdvisor;
 import app.kamon.java.instrumentation.mixin.MonitorMixin;
-import kamon.agent.api.instrumentation.KamonInstrumentation;
+import kanela.agent.api.instrumentation.KanelaInstrumentation;
 
-import static kamon.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
+import static kanela.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 
-public class MonitorInstrumentation extends KamonInstrumentation {
+public class MonitorInstrumentation extends KanelaInstrumentation {
     public MonitorInstrumentation() {
         forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
             builder.withMixin(() -> MonitorMixin.class)
