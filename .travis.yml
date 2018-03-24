@@ -1,29 +1,5 @@
 language: java
 
-sudo: false
-dist: trusty
-
-before_install:
-  - unset _JAVA_OPTIONS
-  - wget https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh
-
-matrix:
-  include:
-# Java 9
-    - jdk: oraclejdk9
-      env: JDK='JDK 9' TARGET='-Pjava9'
-      install: . ./install-jdk.sh -F 9 -L GPL
-# Java 10
-#    - env: JDK='JDK 10' TARGET='-Pjava10'
-#      install: . ./install-jdk.sh -F 10 -L GPL
-# Java 11
-#    - env: JDK='JDK 11' TARGET='-Pjava11'
-#      install: . ./install-jdk.sh -F 11 -L BCL
-# The following environments are known to fail
- # allow_failures:
-  #  - env: JDK='JDK 10' TARGET='-Pjava10'
-   # - env: JDK='JDK 11' TARGET='-Pjava11'
-
 install:
   - ./gradlew :agent:publishToMavenLocal
   - ./gradlew assemble
@@ -31,6 +7,7 @@ install:
 script:
   - ./travis-test.sh
 
+jdk:
+   - oraclejdk8
 
-
-
+sudo: false
