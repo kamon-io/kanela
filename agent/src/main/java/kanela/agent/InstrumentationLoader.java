@@ -42,7 +42,7 @@ public class InstrumentationLoader {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
                                     .map(InstrumentationLoader::loadInstrumentation)
-                                    .filter(KanelaInstrumentation::isActive)
+                                    .filter(kamonInstrumentation -> kamonInstrumentation.isEnabled(moduleConfiguration))
                                     .sortBy(KanelaInstrumentation::order)
                                     .flatMap(kamonInstrumentation -> kamonInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
                                     .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)

@@ -78,13 +78,14 @@ public class KanelaConfiguration {
                     val name = moduleConfig.getString("name");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
+                    val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                     val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
 
-                    return ModuleConfiguration.from(name, instrumentations, within, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix));
+                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix));
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .toList()
@@ -96,6 +97,7 @@ public class KanelaConfiguration {
         String name;
         List<String> instrumentations;
         String withinPackage;
+        boolean enabled;
         int order;
         boolean stoppable;
         @Getter(AccessLevel.NONE)
@@ -186,7 +188,7 @@ public class KanelaConfiguration {
 
     private Config loadConfig() {
         return Try.of(() -> loadDefaultConfig().getConfig("kanela"))
-                .onFailure(missing -> Logger.warn(() -> "It has not been found any configuration for Kanela Agent.", missing))
+                .onFailure(missing -> Logger.error(() -> "It has not been found any configuration for Kanela Agent.", missing))
                 .get();
     }
 

@@ -24,6 +24,7 @@ import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.ListBuilder;
 import kanela.agent.util.BootstrapInjector;
+import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
@@ -115,8 +116,8 @@ public abstract class KanelaInstrumentation {
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    public boolean isActive() {
-        return true;
+    public boolean isEnabled(ModuleConfiguration moduleConfiguration) {
+        return moduleConfiguration.isEnabled();
     }
 
     public int order() {
