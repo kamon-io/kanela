@@ -29,6 +29,12 @@ import net.bytebuddy.jar.asm.tree.MethodNode;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * Merge Two Classes into One, based on [1] and [2]
+ *
+ * [1]: http://asm.ow2.org/current/asm-transformations.pdf
+ * [2]: https://github.com/glowroot/glowroot/blob/master/agent/plugin-api/src/main/java/org/glowroot/agent/plugin/api/weaving/Mixin.java
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class MixinClassVisitor extends ClassVisitor {

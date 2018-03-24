@@ -154,7 +154,7 @@ def pomConfig = {
     }
 
     scm {
-       url "https://github.com/kamon-io/kamon-agent"
+       url "https://github.com/kamon-io/kanela"
     }
 }
 
