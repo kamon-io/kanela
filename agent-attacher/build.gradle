@@ -30,14 +30,78 @@ shadowJar {
     baseName = 'kanela-attacher'
     classifier = null
 
-//    exclude 'META-INF/services/javax.*'
-//    exclude 'META-INF/maven/**'
-//    exclude 'META-INF/*.DSA'
-//    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/services/javax.*'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
 
+    relocate 'io.vavr', 'kanela.agent.attacher.libs.io.vavr'
     relocate 'net.bytebuddy', 'kanela.agent.attacher.libs.net.bytebuddy'
 
     dependencies {
         exclude('org.projectlombok:lombok:1.16.20')
     }
+}
+
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    }
+    developers {
+        developer {
+            id "dpsoft"
+            name "Diego Parra"
+            url "https://twitter.com/diegolparra"
+        }
+
+        developer {
+            id "ivantopo"
+            name "Ivan Topolnjak"
+            url "https://twitter.com/ivantopo"
+        }
+
+        developer {
+            id "cspinetta"
+            name "Cristian Spinetta"
+            url "https://twitter.com/c_spinetta"
+        }
+    }
+
+    scm {
+        url "https://github.com/kamon-io/kanela"
+    }
+}
+
+publishing {
+    publications {
+        shadowPublication(MavenPublication) { publication ->
+            project.shadow.component(publication)
+            artifact sourcesJar
+            artifact javadocJar
+            groupId 'io.kamon'
+            artifactId 'kanela-agent-attacher'
+            version "${version}"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Attacher for Kanela Agent')
+                root.appendNode('name', 'Kanela Agent Attacher')
+                root.appendNode('url', 'http://kamon.io')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
