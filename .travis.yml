@@ -12,7 +12,7 @@ matrix:
 # Java 9
     - jdk: oraclejdk9
       env: JDK='JDK 9' TARGET='-Pjava9'
-      install: echo "The default Travis install script is being skipped!"
+      install: . ./install-jdk.sh -F 9 -L GPL
 # Java 10
 #    - env: JDK='JDK 10' TARGET='-Pjava10'
 #      install: . ./install-jdk.sh -F 10 -L GPL
