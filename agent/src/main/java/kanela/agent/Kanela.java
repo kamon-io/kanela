@@ -20,10 +20,6 @@ import java.lang.instrument.Instrumentation;
 
 public final class Kanela {
 
-
-    private static volatile Instrumentation instrumentation;
-
-
     /**
      * JVM hook to statically load the javaagent at startup.
      *
