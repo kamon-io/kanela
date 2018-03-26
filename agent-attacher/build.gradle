@@ -96,12 +96,22 @@ publishing {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['shadowPublication']
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+    pkg {
+        repo = 'releases'
+        name = 'kanela-attacher'
+        userOrg = 'kamon-io'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/kamon-io/kanela'
+
+        version {
+            name = "${version}"
+            desc = 'Kanela Attacher'
+            released  = new Date()
+        }
+    }
 }
