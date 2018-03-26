@@ -48,7 +48,6 @@ public class Kanela {
         Try.of(() -> Class.forName("kanela.agent.Kanela"))
                 .flatMapTry(Kanela::kanelaJar)
                 .andThen((agentJar) -> ByteBuddyAgent.attach(agentJar, getCurrentPID()))
-                .onSuccess((ignored) -> log.info(() -> "The Kanela agent was attached successfully"))
                 .onFailure((cause) -> log.severe(() -> "Error trying to attach the Kanela Agent to process with Id: "+ getCurrentPID() + " with error: " + cause.getMessage()));
     }
 
