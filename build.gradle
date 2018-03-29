@@ -18,10 +18,22 @@ buildscript {
     ext.scala_version = '2.12.5'
     ext.agent_version = project(":agent").version
     ext.kamon_agent_dep = "io.kamon:kanela-agent:${agent_version}"
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+
+    dependencies {
+       classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+    }
 }
+
 
 allprojects {
     apply plugin: 'java'
+    apply plugin: 'com.jfrog.bintray'
 
     configurations {
         provided

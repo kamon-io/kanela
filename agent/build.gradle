@@ -19,7 +19,6 @@ plugins {
     id 'java'
     id 'scala'
     id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.7.3'
     id 'com.github.maiflai.scalatest' version '0.19'
     id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
