@@ -14,14 +14,27 @@
  * =========================================================================================
  */
 
-package app.kamon.java.instrumentation.mixin;
+package app.kanela;
 
-import io.vavr.collection.List;
+import lombok.SneakyThrows;
+import lombok.Value;
 
-import java.util.Map;
+import java.util.Random;
 
-public interface MonitorAware {
-    List<Long> execTimings(String methodName);
-    Map<String, List<Long>> execTimings();
-    List<Long> addExecTimings(String methodName, long time);
+@Value(staticConstructor = "newInstance")
+public class FakeWorker {
+
+    private Random r = new Random();
+
+    @SneakyThrows
+    public void heavyTask() {
+        Thread.sleep((long)(r.nextFloat() * 500));
+    }
+
+    @SneakyThrows
+    public void lightTask() {
+        Thread.sleep((long)(r.nextFloat() * 10));
+    }
+
+
 }

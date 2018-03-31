@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package app.kamon.java.instrumentation.mixin;
+package app.kanela.instrumentation.mixin;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;

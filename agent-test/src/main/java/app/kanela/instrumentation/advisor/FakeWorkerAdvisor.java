@@ -14,9 +14,9 @@
  * =========================================================================================
  */
 
-package app.kamon.java.instrumentation.advisor;
+package app.kanela.instrumentation.advisor;
 
-import app.kamon.java.instrumentation.mixin.MonitorAware;
+import app.kanela.instrumentation.mixin.MonitorAware;
 import kanela.agent.libs.net.bytebuddy.asm.Advice.*;
 import lombok.val;
 

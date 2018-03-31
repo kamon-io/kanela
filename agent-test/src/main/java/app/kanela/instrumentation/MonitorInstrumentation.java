@@ -14,17 +14,17 @@
  * =========================================================================================
  */
 
-package app.kamon.java.instrumentation;
+package app.kanela.instrumentation;
 
-import app.kamon.java.instrumentation.advisor.FakeWorkerAdvisor;
-import app.kamon.java.instrumentation.mixin.MonitorMixin;
+import app.kanela.instrumentation.advisor.FakeWorkerAdvisor;
+import app.kanela.instrumentation.mixin.MonitorMixin;
 import kanela.agent.api.instrumentation.KanelaInstrumentation;
 
 import static kanela.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 
 public class MonitorInstrumentation extends KanelaInstrumentation {
     public MonitorInstrumentation() {
-        forTargetType(() -> "app.kamon.java.FakeWorker", builder ->
+        forTargetType(() -> "app.kanela.FakeWorker", builder ->
             builder.withMixin(() -> MonitorMixin.class)
                    .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
                    .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
