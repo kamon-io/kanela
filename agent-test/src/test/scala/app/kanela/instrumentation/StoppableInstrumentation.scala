@@ -22,7 +22,7 @@ import kanela.agent.scala.KanelaInstrumentation
 class StoppableInstrumentation extends KanelaInstrumentation {
   val methodName = method("addValue")
 
-  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
+  forTargetType("app.kanela.cases.simple.TestClass") { builder ⇒
     builder
       .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
       .build()

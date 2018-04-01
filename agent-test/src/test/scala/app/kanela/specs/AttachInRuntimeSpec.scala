@@ -17,7 +17,7 @@
 package app.kanela.specs
 
 import app.kanela.cases.simple.TestClass
-import kanela.agent.Kanela
+import kanela.agent.attacher
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
@@ -28,8 +28,7 @@ class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll 
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 
-    // attach agent
-    AgentLoader.attachAgentToJVM(classOf[Kanela])
+    attacher.Kanela.attach()
 
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
   }

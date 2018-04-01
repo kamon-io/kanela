@@ -22,7 +22,7 @@ import kanela.agent.scala.KanelaInstrumentation
 class MultiMixinsInstrumentation extends KanelaInstrumentation {
   import app.kanela.instrumentation.mixin.MixinOverMixin._
 
-  forTargetType("app.kamon.cases.multimixins.WithMultiMixinsClass") { builder ⇒
+  forTargetType("app.kanela.cases.multimixins.WithMultiMixinsClass") { builder ⇒
     builder
       .withMixin(classOf[MixinOverMixin1])
       .withMixin(classOf[MixinOverMixin2])

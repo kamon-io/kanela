@@ -17,7 +17,7 @@
 package app.kanela.specs
 
 import app.kanela.cases.simple.TestClass
-import kanela.agent.Kanela
+import kanela.agent.attacher
 import kanela.agent.broker.EventBroker
 import kanela.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
@@ -30,7 +30,7 @@ class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAnd
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
     // attach agent
-    AgentLoader.attachAgentToJVM(classOf[Kanela])
+    attacher.Kanela.attach()
     Thread.sleep(5000) // FIXME: maybe a better solution?
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
     EventBroker.instance.publish(StopModules.instance)

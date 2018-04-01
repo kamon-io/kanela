@@ -23,7 +23,7 @@ import kanela.agent.scala.KanelaInstrumentation
 class SimpleInstrumentation extends KanelaInstrumentation {
   private val methodName = method("addValue")
 
-  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
+  forTargetType("app.kanela.cases.simple.TestClass") { builder ⇒
     builder
       .withMixin(classOf[SpyMixin])
       .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
