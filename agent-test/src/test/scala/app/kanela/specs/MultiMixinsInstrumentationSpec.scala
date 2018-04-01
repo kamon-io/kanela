@@ -14,27 +14,19 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.specs
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import app.kanela.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
+import app.kanela.cases.multimixins.WithMultiMixinsClass
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-import java.util.Random;
+class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
-
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+  "Multiple Mixins over a single subType" should "introduce all types appropriately" in {
+    val mixinsClass = new WithMultiMixinsClass()
+    mixinsClass.process shouldBe "Hi"
+    mixinsClass.isInstanceOf[MixinAware1] shouldBe true
+    mixinsClass.isInstanceOf[MixinAware2] shouldBe true
+    mixinsClass.isInstanceOf[MixinAware3] shouldBe true
+  }
 }

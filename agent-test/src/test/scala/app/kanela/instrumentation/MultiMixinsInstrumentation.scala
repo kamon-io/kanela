@@ -14,27 +14,19 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.instrumentation
 
-import lombok.SneakyThrows;
-import lombok.Value;
-
-import java.util.Random;
-
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
-
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
+import kanela.agent.scala.KanelaInstrumentation
 
 
+class MultiMixinsInstrumentation extends KanelaInstrumentation {
+  import app.kanela.instrumentation.mixin.MixinOverMixin._
+
+  forTargetType("app.kamon.cases.multimixins.WithMultiMixinsClass") { builder ⇒
+    builder
+      .withMixin(classOf[MixinOverMixin1])
+      .withMixin(classOf[MixinOverMixin2])
+      .withMixin(classOf[MixinOverMixin3])
+      .build()
+  }
 }

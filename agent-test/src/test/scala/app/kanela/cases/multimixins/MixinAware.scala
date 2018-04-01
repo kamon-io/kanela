@@ -14,27 +14,18 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.cases.multimixins
 
-import lombok.SneakyThrows;
-import lombok.Value;
+object MixinAware {
+  trait MixinAware1 {
+    def dummyMethod1: String
+  }
 
-import java.util.Random;
+  trait MixinAware2 {
+    def dummyMethod2: String
+  }
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
-
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+  trait MixinAware3 {
+    def dummyMethod3: String
+  }
 }

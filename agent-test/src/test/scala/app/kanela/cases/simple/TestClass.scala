@@ -14,27 +14,10 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.cases.simple
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import scala.collection.mutable.ListBuffer
 
-import java.util.Random;
-
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
-
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+class TestClass {
+  def addValue(values: ListBuffer[String]): ListBuffer[String] = values += "body"
 }

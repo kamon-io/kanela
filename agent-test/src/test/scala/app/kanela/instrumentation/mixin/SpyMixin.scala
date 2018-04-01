@@ -14,27 +14,21 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.instrumentation.mixin
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import app.kanela.cases.simple.SpyAware
+import kanela.agent.api.instrumentation.mixin.Initializer
 
-import java.util.Random;
+import scala.collection.mutable.ListBuffer
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
+class SpyMixin extends SpyAware {
+  private var _tracks: ListBuffer[String] = _
+  def tracks: ListBuffer[String] = _tracks
+  def addTracks(v: String): Unit = { this._tracks += v }
 
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+  @Initializer
+  def _initializer(): Unit = {
+    this._tracks = ListBuffer.empty
+    this.addTracks("init")
+  }
 }

@@ -14,27 +14,22 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.instrumentation.advisor
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import kanela.agent.libs.net.bytebuddy.asm.Advice._
+import collection.mutable.ListBuffer
 
-import java.util.Random;
+class TestMethodAdvisor
+object TestMethodAdvisor {
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
+  @OnMethodEnter
+  def onMethodEnter(@Argument(value = 0, readOnly = false) values: ListBuffer[String]): Unit = {
+    values += "enter"
+  }
 
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
+  @OnMethodExit
+  def onMethodExit(@Return(readOnly = false) values: ListBuffer[String]): Unit = {
+    values += "exit"
+  }
 
 }

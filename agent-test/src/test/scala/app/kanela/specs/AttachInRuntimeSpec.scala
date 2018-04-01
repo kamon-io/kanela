@@ -14,27 +14,23 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.specs
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import app.kanela.cases.simple.TestClass
+import kanela.agent.Kanela
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-import java.util.Random;
+import scala.collection.mutable.ListBuffer
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
+class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-    private Random r = new Random();
+  "Kamon agent" should "be able to attach in runtime and instrument the loaded classes" in {
+    val testClass = new TestClass()
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
+    // attach agent
+    AgentLoader.attachAgentToJVM(classOf[Kanela])
 
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+    testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
+  }
 }

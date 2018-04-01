@@ -14,27 +14,22 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.instrumentation.advisor
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import app.kanela.cases.simple.SpyAware
+import kanela.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
 
-import java.util.Random;
+object SpyAdvisor {
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
+  @OnMethodEnter
+  def onMethodEnter(@This instance: Object): Unit = {
+    instance.asInstanceOf[SpyAware].addTracks("enter")
+  }
 
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+  @OnMethodExit
+  def onMethodExit(@This instance: Object): Unit = {
+    instance.asInstanceOf[SpyAware].addTracks("exit")
+  }
 }
+
+class SpyAdvisor

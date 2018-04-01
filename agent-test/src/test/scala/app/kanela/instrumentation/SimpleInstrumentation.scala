@@ -14,27 +14,21 @@
  * =========================================================================================
  */
 
-package app.kanela;
+package app.kanela.instrumentation
 
-import lombok.SneakyThrows;
-import lombok.Value;
+import app.kanela.instrumentation.mixin.SpyMixin
+import app.kanela.instrumentation.advisor.{SpyAdvisor, TestMethodAdvisor}
+import kanela.agent.scala.KanelaInstrumentation
 
-import java.util.Random;
+class SimpleInstrumentation extends KanelaInstrumentation {
+  private val methodName = method("addValue")
 
-@Value(staticConstructor = "newInstance")
-public class FakeWorker {
-
-    private Random r = new Random();
-
-    @SneakyThrows
-    public void heavyTask() {
-        Thread.sleep((long)(r.nextFloat() * 500));
-    }
-
-    @SneakyThrows
-    public void lightTask() {
-        Thread.sleep((long)(r.nextFloat() * 10));
-    }
-
-
+  forTargetType("app.kamon.cases.simple.TestClass") { builder ⇒
+    builder
+      .withMixin(classOf[SpyMixin])
+      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
+      .withAdvisorFor(methodName, classOf[SpyAdvisor])
+      .build()
+  }
 }
+
