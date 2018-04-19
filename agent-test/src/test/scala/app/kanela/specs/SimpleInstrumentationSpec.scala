@@ -17,11 +17,11 @@
 package app.kanela.specs
 
 import app.kanela.cases.simple.{SpyAware, TestClass}
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
-class SimpleInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+class SimpleInstrumentationSpec extends FlatSpec with Matchers {
 
   "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {
     val testClass = new TestClass()

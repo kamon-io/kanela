@@ -16,13 +16,12 @@
 
 package app.kanela.instrumentation
 
-import app.kanela.instrumentation.mixin.SpyMixin
 import app.kanela.instrumentation.advisor.{SpyAdvisor, TestMethodAdvisor}
+import app.kanela.instrumentation.mixin.SpyMixin
 import kanela.agent.scala.KanelaInstrumentation
 
 class SimpleInstrumentation extends KanelaInstrumentation {
   private val methodName = method("addValue")
-
   forTargetType("app.kanela.cases.simple.TestClass") { builder ⇒
     builder
       .withMixin(classOf[SpyMixin])

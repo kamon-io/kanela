@@ -17,19 +17,19 @@
 package app.kanela.instrumentation.advisor
 
 import kanela.agent.libs.net.bytebuddy.asm.Advice._
+
 import collection.mutable.ListBuffer
 
 class TestMethodAdvisor
 object TestMethodAdvisor {
 
-  @OnMethodEnter
+  @OnMethodEnter(suppress = classOf[Exception])
   def onMethodEnter(@Argument(value = 0, readOnly = false) values: ListBuffer[String]): Unit = {
     values += "enter"
   }
 
-  @OnMethodExit
+  @OnMethodExit(backupArguments = false)
   def onMethodExit(@Return(readOnly = false) values: ListBuffer[String]): Unit = {
     values += "exit"
   }
-
 }

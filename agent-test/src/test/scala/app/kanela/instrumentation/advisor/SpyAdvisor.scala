@@ -32,4 +32,4 @@ object SpyAdvisor {
   }
 }
 
-class SpyAdvisor
+class   SpyAdvisor
