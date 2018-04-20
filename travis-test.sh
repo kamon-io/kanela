@@ -4,6 +4,8 @@
 
 runTests () {
   ./gradlew :agent:test \
+    && ./gradlew :agent:publishToMavenLocal \
+    && ./gradlew :agent-attacher:publishToMavenLocal \
     && ./gradlew :agent-test:test \
     && ./gradlew :agent-test:multi-mixins-spec \
     && ./gradlew :agent-test:simple-instrumentation-spec \
