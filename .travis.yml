@@ -2,6 +2,7 @@ language: java
 
 install:
   - ./gradlew :agent:publishToMavenLocal
+  - ./gradlew :agent-attacher:publishToMavenLocal
   - ./gradlew assemble
 
 script:
