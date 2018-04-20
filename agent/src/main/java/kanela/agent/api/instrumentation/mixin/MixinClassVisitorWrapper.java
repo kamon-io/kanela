@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2018 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -24,7 +24,6 @@ import net.bytebuddy.description.field.FieldList;
 import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.pool.TypePool;
 
@@ -35,9 +34,7 @@ public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
     MixinDescription mixin;
 
     @Override
-    public int mergeReader(int flags) {
-        return flags | ClassReader.EXPAND_FRAMES;
-    }
+    public int mergeReader(int flags) { return flags; }
 
     @Override
     public ClassVisitor wrap(TypeDescription instrumentedType,
@@ -49,6 +46,6 @@ public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
                              int writerFlags,
                              int readerFlags) {
 
-        return  MixinClassVisitor.from(mixin, instrumentedType.getInternalName(), classVisitor);
+        return MixinClassVisitor.from(mixin, instrumentedType.getInternalName(), classVisitor);
     }
 }

@@ -19,6 +19,7 @@ package kanela.agent.api.instrumentation.mixin;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.val;
 import net.bytebuddy.jar.asm.*;
 import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
@@ -57,7 +58,7 @@ public class MixinClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (name.equals(ConstructorDescriptor) && mixin.getMixinInit().isDefined()) {
-            MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+            val mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new MixinInitializer(mv, access, name, desc, type, mixin);
         }
         return super.visitMethod(access, name, desc, signature, exceptions);
@@ -67,8 +68,8 @@ public class MixinClassVisitor extends ClassVisitor {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void visitEnd() {
-        ClassReader cr = new ClassReader(mixin.getMixinClass());
-        ClassNode cn = new ClassNode();
+        val cr = new ClassReader(mixin.getMixinClass());
+        val cn = new ClassNode();
         cr.accept(cn, ClassReader.EXPAND_FRAMES);
 
         ((List<FieldNode>) cn.fields).forEach(fieldNode -> fieldNode.accept(this));

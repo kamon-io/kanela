@@ -21,7 +21,7 @@ plugins {
 }
 
 dependencies {
-    compile 'net.bytebuddy:byte-buddy-agent:1.8.1'
+    compile 'net.bytebuddy:byte-buddy-agent:1.8.6'
     testCompile 'org.mockito:mockito-core:2.7.22'
 }
 

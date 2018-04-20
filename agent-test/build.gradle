@@ -30,8 +30,9 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.2.3'
     compile 'ch.qos.logback:logback-classic:1.2.3'
 
-    compile 'io.kamon:kanela-agent-attacher:0.0.10'
-    compile 'io.kamon:kanela-agent:0.0.10'
+    compile "io.kamon:kanela-agent-attacher:${agent_version}"
+    compile 'io.kamon:kanela-agent:0.0.11'
+    compile 'io.kamon:kanela-scala-extension_2.12:0.0.10'
 
     provided(kamon_agent_dep)
 
@@ -43,15 +44,15 @@ dependencies {
 def KamonAgentTestRunning = null
 
 def singleTests = [
-        [taskName: 'multi-mixins-spec', clazz: 'app.kamon.specs.MultiMixinsInstrumentationSpec',
-         jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.MultiMixinsInstrumentation']],
-        [taskName: 'simple-instrumentation-spec', clazz: 'app.kamon.specs.SimpleInstrumentationSpec',
-         jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.SimpleInstrumentation']],
-        [taskName: 'attach-in-runtime-spec', clazz: 'app.kamon.specs.AttachInRuntimeSpec', attachKamonAgent: false,
-         jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation', '-Dkamon.agent.show-banner=false']],
-        [taskName: 'stoppable-instrumentation-spec', clazz: 'app.kamon.specs.StoppableInstrumentationSpec', attachKamonAgent: false,
-         jvmArgs: ['-Dkamon.agent.modules.test-module.instrumentations.0=app.kamon.instrumentation.StoppableInstrumentation',
-                   '-Dkamon.agent.modules.test-module.stoppable=true', '-Dkamon.agent.show-banner=false']],
+        [taskName: 'multi-mixins-spec', clazz: 'app.kanela.specs.MultiMixinsInstrumentationSpec',
+         jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.MultiMixinsInstrumentation']],
+        [taskName: 'simple-instrumentation-spec', clazz: 'app.kanela.specs.SimpleInstrumentationSpec',
+         jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.SimpleInstrumentation']],
+        [taskName: 'attach-in-runtime-spec', clazz: 'app.kanela.specs.AttachInRuntimeSpec', attachKamonAgent: false,
+         jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.StoppableInstrumentation', '-Dkanela.show-banner=false']],
+        [taskName: 'stoppable-instrumentation-spec', clazz: 'app.kanela.specs.StoppableInstrumentationSpec', attachKamonAgent: false,
+         jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.StoppableInstrumentation',
+                   '-Dkanela.modules.test-module.stoppable=true', '-Dkanela.show-banner=false']],
 ]
 
 run.doFirst {
