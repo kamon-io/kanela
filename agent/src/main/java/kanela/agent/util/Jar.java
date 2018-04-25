@@ -18,18 +18,20 @@ package kanela.agent.util;
 
 import io.vavr.control.Try;
 import kanela.agent.Kanela;
+import lombok.Value;
+import lombok.val;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarFile;
-
-import lombok.Value;
-import lombok.val;
+import java.util.stream.Collectors;
 
 @Value
 public class Jar {
-
     public static Try<JarFile> getEmbeddedJar(String jarName) {
         return Try.of(() -> {
             val tempFile = File.createTempFile(jarName, ".jar");
@@ -37,5 +39,25 @@ public class Jar {
             Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return new JarFile(tempFile);
         });
+    }
+
+    public static Try<List<ExtensionJar>> fromString(String arguments) {
+        return stringToMap(arguments)
+                .mapTry(map -> map.entrySet()
+                        .stream()
+                        .map(k -> ExtensionJar.from(k.getKey(), k.getValue()))
+                        .collect(Collectors.toList()));
+    }
+
+    private static Try<Map<String,String>> stringToMap(String value) {
+        return Try.of(() -> Arrays.stream(value.split(";"))
+                .map(s -> s.split(":"))
+                .collect(Collectors.toMap(k -> k[0], v -> v[1])));
+    }
+
+    @Value(staticConstructor = "from")
+    static class ExtensionJar {
+        String agentLocation;
+        String classLoader;
     }
 }

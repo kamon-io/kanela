@@ -110,4 +110,29 @@ public class Kanela {
         jos.close();
         return jarFile;
     }
+
+    /**
+     * Runs the attacher as a Java application.
+     *
+     * @param args The the process id, and the path to the Kanela Agent jar
+     *
+     */
+    public static void main(String... args) {
+        try {
+
+            if(args.length < 3) {
+                log.info("Proper Usage is: java -jar kanela-agent-attacher-[version].jar <pid> <path-to-kanela-agent.jar> <kanela-agent-arguments>");
+                System.exit(0);
+            }
+
+            val pid = args[0];
+            val agentJar = args[1];
+            val agentArguments = args[2];
+
+            ByteBuddyAgent.attach(new File(agentJar), pid, agentArguments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
 }
