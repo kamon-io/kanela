@@ -36,7 +36,6 @@ public @interface Bridge {
      * Classes of the java.lang package can be specified by their unqualified name; all other classes names must be fully qualified.
      *
      * @return the method declaration
-     *
      */
     String value();
 }
