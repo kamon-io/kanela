@@ -19,6 +19,7 @@ package kanela.agent;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
+import kanela.agent.util.ExtensionLoader;
 import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
@@ -35,17 +36,17 @@ public class KanelaEntryPoint {
     /**
      * Kanela entry point.
      *
-     * @param args Agent argument list
+     * @param arguments Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
-    private static void start(String args, Instrumentation instrumentation) {
+    private static void start(String arguments, Instrumentation instrumentation) {
         withTimeSpent(() -> {
-            BootstrapInjector.injectJar(instrumentation, "bootstrap");
-
             val configuration = KanelaConfiguration.instance();
             KanelaBanner.show(configuration);
-            val transformers = InstrumentationLoader.load(instrumentation, configuration);
+            BootstrapInjector.injectJar(instrumentation, "bootstrap");
+            ExtensionLoader.attach(arguments, instrumentation);
 
+            val transformers = InstrumentationLoader.load(instrumentation, configuration);
             Reinstrumenter.attach(instrumentation, configuration, transformers);
             OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
             SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
@@ -53,12 +54,12 @@ public class KanelaEntryPoint {
         }, (timeSpent) -> Logger.info(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
-    public static void premain(String args, Instrumentation instrumentation) {
-        start(args, instrumentation);
+    public static void premain(String arguments, Instrumentation instrumentation) {
+        start(arguments, instrumentation);
     }
 
-    public static void agentmain(String args, Instrumentation instrumentation) {
+    public static void agentmain(String arguments, Instrumentation instrumentation) {
         KanelaConfiguration.instance().runtimeAttach();
-        premain(args, instrumentation);
+        premain(arguments, instrumentation);
     }
 }

@@ -42,9 +42,9 @@ public class InstrumentationLoader {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
                                     .map(InstrumentationLoader::loadInstrumentation)
-                                    .filter(kamonInstrumentation -> kamonInstrumentation.isEnabled(moduleConfiguration))
+                                    .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                                     .sortBy(KanelaInstrumentation::order)
-                                    .flatMap(kamonInstrumentation -> kamonInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
+                                    .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
                                     .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)
                                     .install();
         });

@@ -87,7 +87,7 @@ class KanelaAgentBuilder {
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable() || moduleDescription.shouldInjectInBootstrap()) {
             Logger.info(() -> "Retransformation Strategy activated for: " + moduleDescription.getName());
-            agentBuilder = agentBuilder.disableClassFormatChanges()
+            agentBuilder = agentBuilder.disableClassFormatChanges() // enable restrictions imposed by most VMs and also HotSpot.
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());
         }

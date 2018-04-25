@@ -21,7 +21,7 @@ plugins {
 }
 
 dependencies {
-    compile 'net.bytebuddy:byte-buddy-agent:1.8.6'
+    compile 'net.bytebuddy:byte-buddy-agent:1.8.8'
     testCompile 'org.mockito:mockito-core:2.7.22'
 }
 
@@ -42,6 +42,16 @@ shadowJar {
     }
 }
 
+
+jar {
+    manifest {
+        attributes 'Built-By': System.getProperty("user.name")
+        attributes 'Build-Jdk': System.getProperty("java.version")
+        attributes 'Main-Class': "kanela.agent.attacher.Kanela"
+    }
+}
+
+jar.finalizedBy shadowJar
 
 def pomConfig = {
     licenses {
