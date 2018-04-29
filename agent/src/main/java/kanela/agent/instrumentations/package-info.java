@@ -14,10 +14,12 @@
  * =========================================================================================
  */
 
-rootProject.name = 'kanela'
 
-include 'agent'
-include 'agent-instrumentations'
-include 'agent-attacher'
-include 'agent-test'
-
+/**
+ * Contains classes that need to be loaded by the bootstrap classloader because they are used from
+ * classes loaded by the bootstrap classloader.
+ *
+ * <p>NB: Do not add direct dependencies on classes that are not loaded by the bootstrap
+ * classloader. Keep this package small.
+ */
+package kanela.agent.instrumentations;

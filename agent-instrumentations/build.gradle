@@ -14,10 +14,20 @@
  * =========================================================================================
  */
 
-rootProject.name = 'kanela'
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
 
-include 'agent'
-include 'agent-instrumentations'
-include 'agent-attacher'
-include 'agent-test'
+configurations {
+    implementation {
+        exclude group: 'io.vavr', module: 'vavr'
+    }
+}
 
+dependencies {
+    //kamon logback modules
+    implementation('io.kamon:kamon-logback_2.12:1.0.0') {
+        transitive = false
+    }
+}
