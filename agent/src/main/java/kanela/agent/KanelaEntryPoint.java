@@ -19,6 +19,7 @@ package kanela.agent;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
+import kanela.agent.util.BuildInModuleLoader;
 import kanela.agent.util.ExtensionLoader;
 import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.conf.KanelaConfiguration;
@@ -43,7 +44,9 @@ public class KanelaEntryPoint {
         withTimeSpent(() -> {
             val configuration = KanelaConfiguration.instance();
             KanelaBanner.show(configuration);
+
             BootstrapInjector.injectJar(instrumentation, "bootstrap");
+            BuildInModuleLoader.attach(instrumentation);
             ExtensionLoader.attach(arguments, instrumentation);
 
             val transformers = InstrumentationLoader.load(instrumentation, configuration);

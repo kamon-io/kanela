@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class BootstrapInjector {
 
     public static void injectJar(Instrumentation instrumentation, String jarName) {
-        val jarFile = Jar.getEmbeddedJar(jarName)
+        val jarFile = Jar.getEmbeddedJar(jarName + ".jar")
                 .onFailure(error -> Logger.error(error::getMessage, error))
                 .get();
 

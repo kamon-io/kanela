@@ -14,8 +14,22 @@
  * =========================================================================================
  */
 
+package kanela.agent.util;
 
-/**
- * Contains all the Kamon instrumentation modules
- */
-package kanela.agent.instrumentations;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+
+import java.net.URL;
+import java.net.URLClassLoader;
+
+@Value
+@EqualsAndHashCode(callSuper = false)
+public class KanelaClassLoader extends URLClassLoader {
+    static {
+        registerAsParallelCapable();
+    }
+
+    public KanelaClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+    }
+}

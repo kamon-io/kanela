@@ -14,8 +14,28 @@
  * =========================================================================================
  */
 
+package kanela.agent.util;
 
-/**
- * Contains all the Kamon instrumentation modules
- */
-package kanela.agent.instrumentations;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
+import lombok.experimental.var;
+import lombok.val;
+
+public class Lang {
+
+    public static String getRunningJavaVersion() {
+        val version = System.getProperty("java.version");
+        var pos = version.indexOf('.');
+        pos = version.indexOf('.', pos+1);
+        return version.substring (0, pos);
+    }
+
+    public static Option<String> getRunningScalaVersion() {
+        return Try.of(() -> {
+            val props = new java.util.Properties();
+            props.load(Lang.class.getResourceAsStream("/library.properties"));
+            val version = props.getProperty("version.number");
+            return version.substring(0, version.lastIndexOf("."));
+        }).toOption();
+    }
+}

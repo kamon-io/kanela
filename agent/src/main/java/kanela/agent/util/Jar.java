@@ -23,19 +23,21 @@ import lombok.val;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Value
 public class Jar {
+
     public static Try<JarFile> getEmbeddedJar(String jarName) {
         return Try.of(() -> {
             val tempFile = File.createTempFile(jarName, ".jar");
-            val resourceAsStream = Kanela.class.getResourceAsStream(jarName + ".jar");
+            val resourceAsStream = Kanela.class.getResourceAsStream(jarName);
             Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return new JarFile(tempFile);
         });
@@ -49,10 +51,32 @@ public class Jar {
                         .collect(Collectors.toList()));
     }
 
+    public static Try<List<String>> searchWith(Pattern pattern) {
+       return getKanelaJar().mapTry(kanelaJar -> {
+            val names = new ArrayList<String>();
+            try (JarFile jarFile = kanelaJar) {
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry jarEntry = entries.nextElement();
+                    if (!pattern.matcher(jarEntry.getName()).matches()) continue;
+                    names.add(jarEntry.getName());
+                }
+            }
+            return names;
+        });
+    }
+
     private static Try<Map<String,String>> stringToMap(String value) {
         return Try.of(() -> Arrays.stream(value.split(";"))
                 .map(s -> s.split(":"))
                 .collect(Collectors.toMap(k -> k[0], v -> v[1])));
+    }
+
+    private static Try<JarFile> getKanelaJar() {
+        return Try.of(() -> {
+            val location = Kanela.class.getProtectionDomain().getCodeSource().getLocation();
+            return new JarFile(Paths.get(location.toURI()).toFile());
+        });
     }
 
     @Value(staticConstructor = "from")
