@@ -27,7 +27,10 @@ configurations {
 
 dependencies {
     //kamon logback modules
-    implementation('io.kamon:kamon-logback_2.12:1.0.0') {
+    implementation('io.kamon:kamon-logback_2.12:1.0.2') {
+        transitive = false
+    }
+    implementation('io.kamon:kanela-scala-extension_2.12:0.0.10') {
         transitive = false
     }
 }

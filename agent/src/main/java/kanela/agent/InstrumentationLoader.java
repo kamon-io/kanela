@@ -41,7 +41,7 @@ public class InstrumentationLoader {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
-                                    .map(InstrumentationLoader::loadInstrumentation)
+                                    .flatMap(InstrumentationLoader::loadInstrumentation)
                                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                                     .sortBy(KanelaInstrumentation::order)
                                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
@@ -50,10 +50,10 @@ public class InstrumentationLoader {
         });
     }
 
-    private static KanelaInstrumentation loadInstrumentation(String instrumentationClassName) {
+    private static Try<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         return Try.of(() -> (KanelaInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
-                  .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
+                  .onFailure((cause) -> Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause)));
     }
 
 

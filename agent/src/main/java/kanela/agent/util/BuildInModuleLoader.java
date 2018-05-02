@@ -16,6 +16,7 @@
 
 package kanela.agent.util;
 
+import kanela.agent.Kanela;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
