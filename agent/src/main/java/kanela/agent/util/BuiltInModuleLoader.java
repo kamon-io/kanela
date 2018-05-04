@@ -27,10 +27,12 @@ import java.util.stream.Collectors;
 
 @Value
 public class BuiltInModuleLoader {
-    private static final Pattern pattern = Pattern.compile("kanela/agent/instrumentations/(.*).jar");
+    private static final Pattern instrumentationPattern = Pattern.compile("kanela/agent/instrumentations/(.*).jar");
+    private static final Pattern filterScalaPattern = Pattern.compile(".*_[0-9]\\.[0-9]+\\.jar");
+
     //TODO:Improve this Please
     public static List<URL> getUrlModules() {
-        return Jar.searchWith(pattern)
+        return Jar.searchWith(instrumentationPattern)
                 .map(BuiltInModuleLoader::collectAll)
                 .map(modules -> modules.stream().map(module -> Jar.getEmbeddedFile("/" + module).get()).collect(Collectors.toList()))
                 .onFailure((cause) -> Logger.error(() -> "Error when trying to Load build-in instrumentation modules.", cause))
@@ -40,12 +42,16 @@ public class BuiltInModuleLoader {
     private static List<String> collectAll(List<String> modules) {
         return Lang.getRunningScalaVersion()
                 .map(scalaVersion -> filterScalaModules(scalaVersion, modules))
-                .getOrElse(modules.stream().filter(x -> !x.contains("_2.1")).collect(Collectors.toList()));
+                .getOrElse(modules.stream().filter(moduleName -> filterScalaPattern.matcher(moduleName).matches()).collect(Collectors.toList()));
     }
 
     private static List<String> filterScalaModules(String scalaVersion, List<String> scalaModules) {
         return scalaModules.stream()
-                .filter(moduleName -> moduleName.contains(scalaVersion))
+                .filter(moduleName -> moduleName.matches(scalaRegexVersion(scalaVersion)))
                 .collect(Collectors.toList());
+    }
+
+    private static String scalaRegexVersion(String scalaVersion) {
+        return ".*/[^/]*_"+ scalaVersion.replace(".", "\\.") + "[^/]*.*";
     }
 }
