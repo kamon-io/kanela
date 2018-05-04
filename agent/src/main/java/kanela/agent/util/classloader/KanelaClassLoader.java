@@ -55,7 +55,8 @@ public class KanelaClassLoader {
     }
 
     private ClassLoader getParentClassLoader() {
-        if (!Lang.getRunningJavaVersion().startsWith("9")) return null; //bootstrap
+        val javaVersion = Lang.getRunningJavaVersion();
+        if (javaVersion.startsWith("1.7") || javaVersion.startsWith("1.8")) return null;
         //platform classloader is parent of system in java > 9
         return Try.of(() -> {
             final Method method = ClassLoader.class.getDeclaredMethod("getPlatformClassLoader");

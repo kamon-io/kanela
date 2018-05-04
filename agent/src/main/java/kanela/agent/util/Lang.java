@@ -25,7 +25,7 @@ import lombok.val;
 public class Lang {
 
     public static String getRunningJavaVersion() {
-        return System.getProperty("java.version");
+        return System.getProperty("java.version", "");
     }
 
     public static Option<String> getRunningScalaVersion() {

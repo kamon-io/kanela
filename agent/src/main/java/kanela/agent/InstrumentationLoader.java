@@ -34,6 +34,7 @@ public class InstrumentationLoader {
      * Load from the current classpath all defined instrumentations {@link KanelaInstrumentation}.
      *
      * @param instrumentation {@link Instrumentation}
+     * @param configuration {@link ClassLoader}
      * @param configuration {@link KanelaConfiguration}
      * @return a list of {@link KanelaFileTransformer}
      */
