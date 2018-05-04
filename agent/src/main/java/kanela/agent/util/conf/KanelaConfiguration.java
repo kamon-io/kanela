@@ -70,6 +70,7 @@ public class KanelaConfiguration {
     @SneakyThrows
     public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
+        System.out.println("-------------------------------------------------->>>>>>>>>>>>> " + config);
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
@@ -215,7 +216,7 @@ public class KanelaConfiguration {
 
     private Config loadDefaultConfig() {
         return ConfigFactory
-                .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
+                .load(Thread.currentThread().getContextClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
     }
 

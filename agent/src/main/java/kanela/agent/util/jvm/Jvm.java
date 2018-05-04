@@ -17,9 +17,7 @@
 
 package kanela.agent.util.jvm;
 
-import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.val;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
@@ -28,12 +26,6 @@ import java.lang.management.MemoryPoolMXBean;
 public class Jvm {
 
     private static final Jvm instance = new Jvm();
-
-    @SneakyThrows
-    private Jvm() {
-        val jvm = ManagementFactory.getRuntimeMXBean().getName();
-        val pid = Integer.parseInt(jvm.substring(0, jvm.indexOf('@')));
-    }
 
     public static Jvm instance() {
         return instance;

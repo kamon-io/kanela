@@ -22,6 +22,7 @@ import lombok.Value;
 import lombok.val;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -35,11 +36,16 @@ import java.util.stream.Collectors;
 public class Jar {
 
     public static Try<JarFile> getEmbeddedJar(String jarName) {
+        return getEmbeddedFile(jarName).mapTry(file -> new JarFile(file.getFile()));
+    }
+
+    public static Try<URL> getEmbeddedFile(String jarName) {
         return Try.of(() -> {
             val tempFile = File.createTempFile(jarName, ".jar");
+            tempFile.deleteOnExit();
             val resourceAsStream = Kanela.class.getResourceAsStream(jarName);
             Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            return new JarFile(tempFile);
+            return tempFile.toURI().toURL();
         });
     }
 
@@ -54,7 +60,7 @@ public class Jar {
     public static Try<List<String>> searchWith(Pattern pattern) {
        return getKanelaJar().mapTry(kanelaJar -> {
             val names = new ArrayList<String>();
-            try (JarFile jarFile = kanelaJar) {
+            try (JarFile jarFile = new JarFile(kanelaJar.getFile())) {
                 Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements()) {
                     JarEntry jarEntry = entries.nextElement();
@@ -72,10 +78,10 @@ public class Jar {
                 .collect(Collectors.toMap(k -> k[0], v -> v[1])));
     }
 
-    private static Try<JarFile> getKanelaJar() {
+    public static Try<URL> getKanelaJar() {
         return Try.of(() -> {
             val location = Kanela.class.getProtectionDomain().getCodeSource().getLocation();
-            return new JarFile(Paths.get(location.toURI()).toFile());
+            return Paths.get(location.toURI()).toUri().toURL();
         });
     }
 

@@ -18,16 +18,14 @@ package kanela.agent.util;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import lombok.experimental.var;
+import lombok.Value;
 import lombok.val;
 
+@Value
 public class Lang {
 
     public static String getRunningJavaVersion() {
-        val version = System.getProperty("java.version");
-        var pos = version.indexOf('.');
-        pos = version.indexOf('.', pos+1);
-        return version.substring (0, pos);
+        return System.getProperty("java.version");
     }
 
     public static Option<String> getRunningScalaVersion() {

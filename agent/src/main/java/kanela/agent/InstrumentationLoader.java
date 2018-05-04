@@ -37,11 +37,11 @@ public class InstrumentationLoader {
      * @param configuration {@link KanelaConfiguration}
      * @return a list of {@link KanelaFileTransformer}
      */
-    public static List<KanelaFileTransformer> load(Instrumentation instrumentation, KanelaConfiguration configuration) {
+    public static List<KanelaFileTransformer> load(Instrumentation instrumentation, ClassLoader ctxClassloader, KanelaConfiguration configuration) {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
-                                    .flatMap(InstrumentationLoader::loadInstrumentation)
+                                    .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
                                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                                     .sortBy(KanelaInstrumentation::order)
                                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
@@ -50,14 +50,9 @@ public class InstrumentationLoader {
         });
     }
 
-    private static Try<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName) {
+    private static Try<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
-        return Try.of(() -> (KanelaInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
+        return Try.of(() -> (KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance())
                   .onFailure((cause) -> Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause)));
-    }
-
-
-    private static ClassLoader getClassLoader(Class<?> clazz) {
-      return clazz.getClassLoader() == null ? ClassLoader.getSystemClassLoader() : clazz.getClassLoader();
     }
 }

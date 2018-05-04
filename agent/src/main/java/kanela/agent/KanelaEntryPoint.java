@@ -19,9 +19,9 @@ package kanela.agent;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
-import kanela.agent.util.BuildInModuleLoader;
 import kanela.agent.util.ExtensionLoader;
 import kanela.agent.util.banner.KanelaBanner;
+import kanela.agent.util.classloader.KanelaClassLoader;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
 import kanela.agent.util.log.Logger;
@@ -40,28 +40,28 @@ public class KanelaEntryPoint {
      * @param arguments Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
-    private static void start(String arguments, Instrumentation instrumentation) {
+    private static void start(final String arguments, final Instrumentation instrumentation) {
         withTimeSpent(() -> {
-            val configuration = KanelaConfiguration.instance();
-            KanelaBanner.show(configuration);
+            KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
+                val configuration = KanelaConfiguration.instance();
+                KanelaBanner.show(configuration);
 
-            BootstrapInjector.injectJar(instrumentation, "bootstrap");
-            BuildInModuleLoader.attach(instrumentation);
-            ExtensionLoader.attach(arguments, instrumentation);
+                BootstrapInjector.injectJar(instrumentation, "bootstrap");
+                ExtensionLoader.attach(arguments, instrumentation);
 
-            val transformers = InstrumentationLoader.load(instrumentation, configuration);
-            Reinstrumenter.attach(instrumentation, configuration, transformers);
-            OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-            SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-
+                val transformers = InstrumentationLoader.load(instrumentation, kanelaClassLoader, configuration);
+                Reinstrumenter.attach(instrumentation, configuration, transformers);
+                OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+                SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+            });
         }, (timeSpent) -> Logger.info(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
-    public static void premain(String arguments, Instrumentation instrumentation) {
+    public static void premain(final String arguments, final Instrumentation instrumentation) {
         start(arguments, instrumentation);
     }
 
-    public static void agentmain(String arguments, Instrumentation instrumentation) {
+    public static void agentmain(final String arguments, final Instrumentation instrumentation) {
         KanelaConfiguration.instance().runtimeAttach();
         premain(arguments, instrumentation);
     }
