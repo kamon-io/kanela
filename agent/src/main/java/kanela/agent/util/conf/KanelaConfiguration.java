@@ -70,7 +70,7 @@ public class KanelaConfiguration {
     @SneakyThrows
     public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
-        System.out.println("-------------------------------------------------->>>>>>>>>>>>> " + config);
+        Logger.debug(() -> "Loaded configuration => " + config.root().render());
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
@@ -234,6 +234,7 @@ public class KanelaConfiguration {
                 Case($("DEBUG"), Level.DEBUG),
                 Case($("ERROR"), Level.ERROR),
                 Case($("WARNING"), Level.WARNING),
+                Case($("TRACE"), Level.TRACE),
                 Case($("OFF"), Level.OFF)
             );
     }

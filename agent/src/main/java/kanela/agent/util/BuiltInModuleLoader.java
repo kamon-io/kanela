@@ -22,6 +22,7 @@ import lombok.Value;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -30,13 +31,19 @@ public class BuiltInModuleLoader {
     private static final Pattern instrumentationPattern = Pattern.compile("kanela/agent/instrumentations/(.*).jar");
     private static final Pattern filterScalaPattern = Pattern.compile(".*_[0-9]\\.[0-9]+\\.jar");
 
-    //TODO:Improve this Please
     public static List<URL> getUrlModules() {
         return Jar.searchWith(instrumentationPattern)
                 .map(BuiltInModuleLoader::collectAll)
-                .map(modules -> modules.stream().map(module -> Jar.getEmbeddedFile("/" + module).get()).collect(Collectors.toList()))
+                .map(BuiltInModuleLoader::urlsToJars)
                 .onFailure((cause) -> Logger.error(() -> "Error when trying to Load build-in instrumentation modules.", cause))
                 .getOrElse(Collections.emptyList());
+    }
+
+    private static List<URL> urlsToJars(List<String> urls) {
+        return io.vavr.collection.List.ofAll(urls)
+                .map(url -> Jar.getEmbeddedFile("/" + url))
+                .flatMap(Function.identity())
+                .toJavaList();
     }
 
     private static List<String> collectAll(List<String> modules) {
@@ -52,6 +59,6 @@ public class BuiltInModuleLoader {
     }
 
     private static String scalaRegexVersion(String scalaVersion) {
-        return ".*/[^/]*_"+ scalaVersion.replace(".", "\\.") + "[^/]*.*";
+        return ".*/[^/]*_" + scalaVersion.replace(".", "\\.") + "[^/]*.*";
     }
 }
