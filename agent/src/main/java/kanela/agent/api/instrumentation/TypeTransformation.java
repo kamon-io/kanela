@@ -16,7 +16,6 @@
 
 package kanela.agent.api.instrumentation;
 
-import io.vavr.collection.HashSet;
 import io.vavr.control.Option;
 import lombok.Value;
 import lombok.val;
@@ -26,28 +25,28 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Value
 public class TypeTransformation {
 
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
-    io.vavr.collection.Set<AgentBuilder.Transformer> bridges;
-    io.vavr.collection.Set<AgentBuilder.Transformer> mixins;
-    io.vavr.collection.Set<AgentBuilder.Transformer> transformations;
+    List<AgentBuilder.Transformer> bridges;
+    List<AgentBuilder.Transformer> mixins;
+    List<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
     static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher,
-                                 Set<AgentBuilder.Transformer> bridges,
-                                 Set<AgentBuilder.Transformer> mixins,
-                                 Set<AgentBuilder.Transformer>... transformers) {
+                                 List<AgentBuilder.Transformer> bridges,
+                                 List<AgentBuilder.Transformer> mixins,
+                                 List<AgentBuilder.Transformer>... transformers) {
 
         val transformations = Arrays.stream(transformers)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        return new TypeTransformation(elementMatcher, HashSet.ofAll(bridges), HashSet.ofAll(mixins), HashSet.ofAll(transformations));
+        return new TypeTransformation(elementMatcher, bridges, mixins, transformations);
     }
 
     public Boolean isActive() {

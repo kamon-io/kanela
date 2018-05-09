@@ -59,11 +59,17 @@ class KanelaAgentBuilder {
     AgentBuilder build() {
         return typeTransformations.build().foldLeft(newAgentBuilder(), (agent, typeTransformation) -> {
             val transformers = new ArrayList<AgentBuilder.Transformer>();
-            transformers.addAll(typeTransformation.getBridges().toJavaList());
-            transformers.addAll(typeTransformation.getMixins().toJavaList());
-            transformers.addAll(typeTransformation.getTransformations().toJavaList());
-            return agent.type(typeTransformation.getElementMatcher().get())
-                    .transform(new AgentBuilder.Transformer.Compound(transformers));
+            transformers.addAll(typeTransformation.getBridges());
+            transformers.addAll(typeTransformation.getMixins());
+            transformers.addAll(typeTransformation.getTransformations());
+
+            for (AgentBuilder.Transformer transformer : transformers) {
+                agent  = agent
+                        .type(typeTransformation.getElementMatcher().get())
+                        .transform(transformer)
+                        .asDecorator();
+             }
+             return agent;
         });
     }
 
