@@ -19,13 +19,17 @@ package kanela.agent.util.classloader;
 import io.vavr.control.Try;
 import kanela.agent.util.BuiltInModuleLoader;
 import kanela.agent.util.Lang;
+import kanela.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
 
+import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.jar.JarFile;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -36,6 +40,8 @@ public class KanelaClassLoader {
     private KanelaClassLoader(Instrumentation instrumentation) {
         val modules = BuiltInModuleLoader.getUrlModules();
         val classpath = modules.toArray(new URL[modules.size()]);
+        appendToSystemClassloader(instrumentation, classpath);
+
         contextClassLoader = new ChildFirstURLClassLoader(classpath, getParentClassLoader());
     }
 
@@ -61,5 +67,11 @@ public class KanelaClassLoader {
             val method = ClassLoader.class.getDeclaredMethod("getPlatformClassLoader");
             return (ClassLoader) method.invoke(null);
         }).getOrElse(() -> null);
+    }
+
+    private void appendToSystemClassloader(final Instrumentation instrumentation, final URL[] urls) {
+        Arrays.asList(urls).forEach(url -> Try
+                .run(() -> instrumentation.appendToSystemClassLoaderSearch(new JarFile(new File(url.toURI()))))
+                .onFailure((cause) -> Logger.warn(() -> "Error trying to append module to the System Class Loader", cause)));
     }
 }
