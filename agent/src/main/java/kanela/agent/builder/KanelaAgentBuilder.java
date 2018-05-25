@@ -38,6 +38,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 
+import static kanela.agent.util.classloader.ClassLoaderNameMatcher.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Value(staticConstructor = "from")
@@ -109,11 +110,13 @@ class KanelaAgentBuilder {
     }
 
     private AgentBuilder withIgnore(AgentBuilder agentBuilder) {
-        val builder = agentBuilder.ignore(ignoreMatches());
+        val builder = agentBuilder.ignore(ignoreMatches())
+                .or(any(), isExtensionClassLoader())
+                .or(any(), isKanelaClassLoader())
+                .or(any(), isGroovyClassLoader())
+                .or(any(), isReflectionClassLoader());
         if (moduleDescription.shouldInjectInBootstrap()) return builder;
-        return builder
-                .or(any(), isBootstrapClassLoader())
-                .or(any(), isExtensionClassLoader());
+        return builder.or(any(), isBootstrapClassLoader());
     }
 
     private AgentBuilder.Listener additionalListeners() {

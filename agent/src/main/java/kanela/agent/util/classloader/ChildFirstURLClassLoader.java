@@ -42,7 +42,7 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
 
     private ClassLoader system;
 
-    public ChildFirstURLClassLoader(URL[] classpath, ClassLoader parent) {
+    ChildFirstURLClassLoader(URL[] classpath, ClassLoader parent) {
         super(classpath, parent);
         system = getSystemClassLoader();
     }

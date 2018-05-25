@@ -26,12 +26,27 @@ configurations {
 }
 
 dependencies {
-    //kamon logback modules
-    implementation('io.kamon:kamon-logback_2.12:1.0.2') {
+    implementation('io.kamon:kamon-logback_2.12:1.0.3') {
         transitive = false
     }
 
     implementation('io.kamon:kamon-jdbc_2.12:1.0.2') {
+        transitive = false
+    }
+
+    implementation('io.kamon:kamon-scala-future_2.12:1.0.2') {
+        transitive = false
+    }
+
+    implementation('io.kamon:kamon-executors_2.12:1.0.3') {
+        transitive = false
+    }
+
+    implementation('io.kamon:kamon-akka-2.5_2.12:1.0.2') {
+        transitive = false
+    }
+
+    implementation('io.kamon:kamon-akka-http-2.5_2.12:1.1.1') {
         transitive = false
     }
 
