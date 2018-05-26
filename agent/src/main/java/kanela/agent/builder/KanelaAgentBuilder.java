@@ -116,10 +116,8 @@ class KanelaAgentBuilder {
                 .or(any(), isGroovyClassLoader())
                 .or(any(), isReflectionClassLoader());
 
-        if (moduleDescription.shouldInjectInBootstrap())
-            builder = builder.or(any(), isBootstrapClassLoader());
-
-        return builder;
+        if (moduleDescription.shouldInjectInBootstrap()) return builder;
+        return builder.or(any(), isBootstrapClassLoader());
     }
 
     private AgentBuilder.Listener additionalListeners() {
