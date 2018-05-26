@@ -110,13 +110,16 @@ class KanelaAgentBuilder {
     }
 
     private AgentBuilder withIgnore(AgentBuilder agentBuilder) {
-        val builder = agentBuilder.ignore(ignoreMatches())
+        var builder = agentBuilder.ignore(ignoreMatches())
                 .or(any(), isExtensionClassLoader())
                 .or(any(), isKanelaClassLoader())
                 .or(any(), isGroovyClassLoader())
                 .or(any(), isReflectionClassLoader());
-        if (moduleDescription.shouldInjectInBootstrap()) return builder;
-        return builder.or(any(), isBootstrapClassLoader());
+
+        if (moduleDescription.shouldInjectInBootstrap())
+            builder = builder.or(any(), isBootstrapClassLoader());
+
+        return builder;
     }
 
     private AgentBuilder.Listener additionalListeners() {
