@@ -84,7 +84,7 @@ public class KanelaConfiguration {
                     val name = moduleConfig.getString("name");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
-                    val enabled = Try.of(() -> moduleConfig.getBoolean("isEnabled")).getOrElse(true);
+                    val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
@@ -133,7 +133,7 @@ public class KanelaConfiguration {
         String jarName;
 
         DumpConfig(Config config) {
-            this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.isEnabled")).getOrElse(false);
+            this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
             this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kanela-agent/dump");
             this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
@@ -151,7 +151,7 @@ public class KanelaConfiguration {
         double gcProcessCPUThreshold;
 
         CircuitBreakerConfig(Config config) {
-            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.isEnabled")).getOrElse(false);
+            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.enabled")).getOrElse(false);
             this.freeMemoryThreshold = Try.of(() -> config.getDouble("circuit-breaker.free-memory-threshold")).getOrElse(50.0);
             this.gcProcessCPUThreshold = Try.of(() -> config.getDouble("circuit-breaker.gc-process-cpu-threshold")).getOrElse(10.0);
         }
