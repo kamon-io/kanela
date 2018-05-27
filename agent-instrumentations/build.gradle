@@ -30,7 +30,7 @@ dependencies {
         transitive = false
     }
 
-    implementation('io.kamon:kamon-jdbc_2.12:1.0.4') {
+    implementation('io.kamon:kamon-jdbc_2.12:1.0.5') {
         transitive = false
     }
 
