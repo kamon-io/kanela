@@ -257,14 +257,14 @@ public class KanelaConfiguration {
 
     private boolean isEnabled(ModuleConfiguration module) {
         if (module.enabled) return true;
-        Logger.info(() -> "The Module: " + module.getName() + " is disabled");
+        Logger.info(() -> "The Module: " + module.getName() + " disabled");
         return false;
     }
 
     private boolean byBundleName(ModuleConfiguration module) {
         if (module.bundleName.equalsIgnoreCase("unknown")) return true;
         if(bundleNamesFromManifests.contains(module.bundleName)) return true;
-        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the bundle name in manifest");
+        Logger.info(() -> "The Module: " + module.getName() + " disabled because not found the bundle name in manifest");
         return false;
     }
 
