@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.jar.Manifest;
 
 @Value
-public final class Manifests {
+public class Manifests {
     public static List<Manifest> getAll() {
         return Try.of(() -> {
             val resources = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF");
