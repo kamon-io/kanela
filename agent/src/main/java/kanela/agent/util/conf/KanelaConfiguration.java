@@ -24,6 +24,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import kanela.agent.util.Manifests;
 import kanela.agent.util.log.Logger;
 import lombok.*;
 import org.pmw.tinylog.Level;
@@ -31,6 +32,8 @@ import org.pmw.tinylog.Level;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Set;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -47,6 +50,7 @@ public class KanelaConfiguration {
     Level logLevel;
     @Getter(AccessLevel.PRIVATE)
     Config config;
+    Set<String> bundleNamesFromManifests;
 
     private static class Holder {
         private static final KanelaConfiguration Instance = new KanelaConfiguration();
@@ -65,6 +69,7 @@ public class KanelaConfiguration {
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
         this.logLevel = getLoggerLevel(config);
+        this.bundleNamesFromManifests = bundleNamesFromManifests();
     }
 
     @SneakyThrows
@@ -79,16 +84,19 @@ public class KanelaConfiguration {
                     val name = moduleConfig.getString("name");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
-                    val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
+                    val enabled = Try.of(() -> moduleConfig.getBoolean("isEnabled")).getOrElse(true);
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                     val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
+                    val bundleName = Try.of(() -> moduleConfig.getString("bundle-name")).getOrElse("unknown");
 
-                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix));
+                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), bundleName);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
+                .filter(this::isEnabled)
+                .filter(this::byBundleName)
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
     }
@@ -106,6 +114,7 @@ public class KanelaConfiguration {
         @Getter(AccessLevel.NONE)
         boolean legacyBytecodeSupport;
         File tempDir;
+        String bundleName;
 
         public boolean shouldInjectInBootstrap() {
             return injectInBootstrap;
@@ -124,7 +133,7 @@ public class KanelaConfiguration {
         String jarName;
 
         DumpConfig(Config config) {
-            this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
+            this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.isEnabled")).getOrElse(false);
             this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kanela-agent/dump");
             this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
@@ -142,7 +151,7 @@ public class KanelaConfiguration {
         double gcProcessCPUThreshold;
 
         CircuitBreakerConfig(Config config) {
-            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.enabled")).getOrElse(false);
+            this.enabled = Try.of(() -> config.getBoolean("circuit-breaker.isEnabled")).getOrElse(false);
             this.freeMemoryThreshold = Try.of(() -> config.getDouble("circuit-breaker.free-memory-threshold")).getOrElse(50.0);
             this.gcProcessCPUThreshold = Try.of(() -> config.getDouble("circuit-breaker.gc-process-cpu-threshold")).getOrElse(10.0);
         }
@@ -237,6 +246,26 @@ public class KanelaConfiguration {
                 Case($("TRACE"), Level.TRACE),
                 Case($("OFF"), Level.OFF)
             );
+    }
+
+    private Set<String> bundleNamesFromManifests() {
+        return List.ofAll(Manifests.getAll())
+                .map(manifest ->  manifest.getMainAttributes().getValue("Bundle-Name"))
+                .filter(Objects::nonNull)
+                .toJavaSet();
+    }
+
+    private boolean isEnabled(ModuleConfiguration module) {
+        if (module.enabled) return true;
+        Logger.info(() -> "The Module: " + module.getName() + " is disabled");
+        return false;
+    }
+
+    private boolean byBundleName(ModuleConfiguration module) {
+        if (module.bundleName.equalsIgnoreCase("unknown")) return true;
+        if(bundleNamesFromManifests.contains(module.bundleName)) return true;
+        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the bundle name in manifest");
+        return false;
     }
 
     private static class DefaultConfiguration {
