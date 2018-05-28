@@ -72,7 +72,6 @@ public class KanelaConfiguration {
         this.bundleNamesFromManifests = bundleNamesFromManifests();
     }
 
-    @SneakyThrows
     public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
         Logger.debug(() -> "Loaded configuration => " + config.root().render());
