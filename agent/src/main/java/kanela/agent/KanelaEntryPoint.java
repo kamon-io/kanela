@@ -52,8 +52,8 @@ public class KanelaEntryPoint {
                 Reinstrumenter.attach(instrumentation, configuration, transformers);
                 OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
                 SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-                });
             });
+        });
     }
 
     public static void premain(final String arguments, final Instrumentation instrumentation) {
