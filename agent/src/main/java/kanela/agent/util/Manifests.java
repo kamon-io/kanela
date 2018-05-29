@@ -30,11 +30,11 @@ public class Manifests {
     public static List<Manifest> getAll() {
         return Try.of(() -> {
             val resources = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF");
-            final List<Manifest> streams = new ArrayList<>(1);
+            final List<Manifest> manifests = new ArrayList<>(1);
             while (resources.hasMoreElements()) {
-                streams.add(new Manifest(resources.nextElement().openStream()));
+                manifests.add(new Manifest(resources.nextElement().openStream()));
             }
-            return streams;
+            return manifests;
         }).getOrElse(Collections::emptyList);
     }
 }
