@@ -16,30 +16,31 @@
 
 package kanela.agent.util;
 
-import lombok.SneakyThrows;
+import kanela.agent.util.log.Logger;
 import lombok.val;
-
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 
-public class LatencyUtils {
+public class Execution {
 
-    public static long timed(final Runnable thunk) {
+    public static void timed(final Runnable thunk) {
         val startMillis = System.nanoTime();
-        thunk.run();
-        return MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS);
+        try {
+            thunk.run();
+        } finally {
+            val timeSpent = MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS);
+            Logger.info(() -> "Startup completed in " + timeSpent + " ms");
+        }
     }
 
-    public static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) { timeSpent.accept(timed(thunk));}
-
-    @SneakyThrows
-    public static <T> T withTimeSpent(final Callable<T> thunk, Consumer<Long> timeSpent) {
-        val startMillis = System.nanoTime();
-        try { return thunk.call();}
-        finally { timeSpent.accept(MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS));}
+    public static void runWithTimeSpent(final Runnable thunk) {
+        try {
+            timed(thunk);
+        } catch (Throwable cause) {
+            Logger.error(() -> "Unable to start Kanela Agent. Please remove -javaagent from your startup arguments and contact Kanela support." + cause);
+            System.exit(1);
+        }
     }
 }

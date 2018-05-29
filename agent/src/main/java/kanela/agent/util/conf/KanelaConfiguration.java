@@ -37,6 +37,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.jar.Attributes;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -251,10 +252,7 @@ public class KanelaConfiguration {
     }
 
     private Set<String> getAllPropertiesFromManifest() {
-        return List.ofAll(Manifests.getAll())
-                .map(manifest ->  manifest.getMainAttributes().getValue("Implementation-Title"))
-                .filter(Objects::nonNull)
-                .toJavaSet();
+        return Manifests.getAllPropertiesFromAttributeName(Attributes.Name.IMPLEMENTATION_TITLE);
     }
 
     private boolean isEnabled(ModuleConfiguration module) {
@@ -266,7 +264,7 @@ public class KanelaConfiguration {
     private boolean byPropertyName(ModuleConfiguration module) {
         if (module.bundleName.equalsIgnoreCase("unknown")) return true;
         if(manifestProperties.contains(module.bundleName)) return true;
-        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the bundle name in manifest");
+        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the property in the manifest");
         return false;
     }
 

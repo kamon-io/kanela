@@ -24,13 +24,12 @@ import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.KanelaClassLoader;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
-import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
-import static kanela.agent.util.LatencyUtils.withTimeSpent;
+import static kanela.agent.util.Execution.runWithTimeSpent;
 
 @Value
 public class KanelaEntryPoint {
@@ -41,7 +40,7 @@ public class KanelaEntryPoint {
      * @param instrumentation {@link Instrumentation}
      */
     private static void start(final String arguments, final Instrumentation instrumentation) {
-        withTimeSpent(() -> {
+        runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
                 val configuration = KanelaConfiguration.instance();
                 KanelaBanner.show(configuration);
@@ -53,8 +52,8 @@ public class KanelaEntryPoint {
                 Reinstrumenter.attach(instrumentation, configuration, transformers);
                 OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
                 SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+                });
             });
-        }, (timeSpent) -> Logger.info(() -> "Startup completed in " + timeSpent + " ms"));
     }
 
     public static void premain(final String arguments, final Instrumentation instrumentation) {

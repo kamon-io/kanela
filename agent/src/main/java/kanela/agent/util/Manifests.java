@@ -20,22 +20,36 @@ import io.vavr.control.Try;
 import lombok.Value;
 import lombok.val;
 
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 @Value
 public class Manifests {
-    public static List<Manifest> getAll() {
+
+    public static Set<String> getAllPropertiesFromAttributeName(Attributes.Name name) {
+        return io.vavr.collection.List.ofAll(getAll())
+                .map(manifest -> manifest.getMainAttributes().getValue(name))
+                .filter(Objects::nonNull)
+                .toJavaSet();
+    }
+
+    private static List<Manifest> getAll() {
         return Try.of(() -> {
             val resources = Thread.currentThread().getContextClassLoader().getResources("META-INF/MANIFEST.MF");
-            final List<Manifest> manifests = new ArrayList<>(1);
+            final List<Manifest> manifests = new java.util.ArrayList<>(1);
             while (resources.hasMoreElements()) {
-                manifests.add(new Manifest(resources.nextElement().openStream()));
+                val url = resources.nextElement();
+                try(InputStream stream = url.openStream()) {
+                    manifests.add(new Manifest(stream));
+                }
             }
             return manifests;
-        }).getOrElse(Collections::emptyList);
+        }).getOrElse(Collections::<Manifest>emptyList);
     }
 }
 
