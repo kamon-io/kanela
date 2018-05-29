@@ -26,7 +26,10 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kanela.agent.util.Manifests;
 import kanela.agent.util.log.Logger;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Value;
+import lombok.val;
 import org.pmw.tinylog.Level;
 
 import java.io.File;
@@ -50,7 +53,7 @@ public class KanelaConfiguration {
     Level logLevel;
     @Getter(AccessLevel.PRIVATE)
     Config config;
-    Set<String> bundleNamesFromManifests;
+    Set<String> manifestProperties;
 
     private static class Holder {
         private static final KanelaConfiguration Instance = new KanelaConfiguration();
@@ -69,7 +72,7 @@ public class KanelaConfiguration {
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
         this.logLevel = getLoggerLevel(config);
-        this.bundleNamesFromManifests = bundleNamesFromManifests();
+        this.manifestProperties = getAllPropertiesFromManifest();
     }
 
     public List<ModuleConfiguration> getAgentModules() {
@@ -95,7 +98,7 @@ public class KanelaConfiguration {
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
-                .filter(this::byBundleName)
+                .filter(this::byPropertyName)
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
     }
@@ -247,9 +250,9 @@ public class KanelaConfiguration {
             );
     }
 
-    private Set<String> bundleNamesFromManifests() {
+    private Set<String> getAllPropertiesFromManifest() {
         return List.ofAll(Manifests.getAll())
-                .map(manifest ->  manifest.getMainAttributes().getValue("Bundle-Name"))
+                .map(manifest ->  manifest.getMainAttributes().getValue("Implementation-Title"))
                 .filter(Objects::nonNull)
                 .toJavaSet();
     }
@@ -260,9 +263,9 @@ public class KanelaConfiguration {
         return false;
     }
 
-    private boolean byBundleName(ModuleConfiguration module) {
+    private boolean byPropertyName(ModuleConfiguration module) {
         if (module.bundleName.equalsIgnoreCase("unknown")) return true;
-        if(bundleNamesFromManifests.contains(module.bundleName)) return true;
+        if(manifestProperties.contains(module.bundleName)) return true;
         Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the bundle name in manifest");
         return false;
     }

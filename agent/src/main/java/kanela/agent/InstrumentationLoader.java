@@ -17,7 +17,7 @@
 package kanela.agent;
 
 import io.vavr.collection.List;
-import io.vavr.control.Try;
+import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
@@ -51,9 +51,13 @@ public class InstrumentationLoader {
         });
     }
 
-    private static Try<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
+    private static Option<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
-        return Try.of(() -> (KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance())
-                  .onFailure((cause) -> Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause)));
+        try {
+            return Option.some((KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance());
+        } catch (Throwable cause) {
+            Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
+            return Option.none();
+        }
     }
 }
