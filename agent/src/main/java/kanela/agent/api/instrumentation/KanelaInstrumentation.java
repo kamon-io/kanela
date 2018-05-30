@@ -22,27 +22,25 @@ import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
-import kanela.agent.util.ListBuilder;
 import kanela.agent.util.BootstrapInjector;
-import kanela.agent.util.conf.KanelaConfiguration;
+import kanela.agent.util.ListBuilder;
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
-
-import lombok.val;
 
 public abstract class KanelaInstrumentation {
     private final ListBuilder<InstrumentationDescription> instrumentationDescriptions = ListBuilder.builder();
@@ -92,10 +90,10 @@ public abstract class KanelaInstrumentation {
                 collect(transformers, Function.identity()));
     }
 
-    private <T> Set<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
+    private <T> List<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
         return transformerList.stream()
                 .map(f)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
@@ -114,6 +112,23 @@ public abstract class KanelaInstrumentation {
         val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(named(f.get()))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+    }
+
+
+    public ElementMatcher.Junction<MethodDescription> method(String name){ return named(name);}
+
+    public ElementMatcher.Junction<MethodDescription> isConstructor() { return ElementMatchers.isConstructor();}
+
+    public ElementMatcher.Junction<MethodDescription> isAbstract() { return ElementMatchers.isAbstract();}
+
+    public ElementMatcher.Junction<MethodDescription> takesArguments(Integer quantity) { return ElementMatchers.takesArguments(quantity);}
+
+    public ElementMatcher.Junction<MethodDescription> withArgument(Integer index, Class<?> type) { return ElementMatchers.takesArgument(index, type);}
+
+    public ElementMatcher.Junction<MethodDescription> withArgument(Class<?> type) { return withArgument(0, type);}
+
+    public ElementMatcher.Junction<MethodDescription> anyMethods(String... names) {
+        return io.vavr.collection.List.of(names).map(this::method).reduce(ElementMatcher.Junction::or);
     }
 
     public boolean isEnabled(ModuleConfiguration moduleConfiguration) {

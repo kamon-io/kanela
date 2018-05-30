@@ -17,15 +17,14 @@
 package kanela.agent.api.instrumentation.listener;
 
 import kanela.agent.util.log.Logger;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import static java.text.MessageFormat.format;
-
-import lombok.EqualsAndHashCode;
-import lombok.Value;
 
 @Value(staticConstructor = "instance")
 @EqualsAndHashCode(callSuper = false)
@@ -38,6 +37,6 @@ public class DebugInstrumentationListener extends AgentBuilder.Listener.Adapter 
 
     @Override
     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-        Logger.debug(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
+        Logger.trace(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
     }
 }

@@ -46,6 +46,8 @@ public class Logger {
 
     public static void debug(final Supplier<String> msg) { org.pmw.tinylog.Logger.debug(msg.get());}
 
+    public static void trace(final Supplier<String> msg) { org.pmw.tinylog.Logger.trace(msg.get());}
+
     public static void info(final Supplier<String> msg) { org.pmw.tinylog.Logger.info(msg.get()); }
 
     public static void info(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.info(msg.get(),t);}

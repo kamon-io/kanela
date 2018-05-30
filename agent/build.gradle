@@ -23,12 +23,19 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
 
+configurations {
+    kamonInstrumentationBundle
+}
+
 dependencies {
+    kamonInstrumentationBundle project(':agent-instrumentations')
+
     compile 'com.typesafe:config:1.3.2'
     compile 'net.jodah:expiringmap:0.5.8'
     compile 'org.tinylog:tinylog:1.3.4'
     compile 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
-    compile files('libs/byte-buddy-1.8.8.jar')
+
+    compile files('libs/byte-buddy-1.8.12.jar')
 
     testCompile 'org.mockito:mockito-core:2.7.22'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
@@ -45,6 +52,14 @@ task bootstrapJar(type: Jar) {
 
     from sourceSets.main.output
     include agentBootstrapClasses
+}
+
+if(System.properties['kamon-modules-bundle'].toBoolean()) {
+    task copyToLib(type: Copy) {
+        into "$buildDir/libs/kamonBundle"
+        from configurations.kamonInstrumentationBundle
+    }
+    shadowJar.dependsOn copyToLib
 }
 
 shadowJar.dependsOn bootstrapJar
@@ -86,6 +101,16 @@ shadowJar {
             mappedresources {
                 fileset(file: bootstrapJar.archivePath)
                 globmapper(from: '*', to: agentBootstrapJar)
+            }
+        }
+
+        if(System.properties['kamon-modules-bundle'].toBoolean()) {
+            // Bundle kamon-modules.
+            ant.jar(update: 'true', destfile: shadowJar.archivePath) {
+                mappedresources {
+                    fileset(dir: "$buildDir/libs/kamonBundle")
+                    globmapper(from: '*', to: 'kanela/agent/instrumentations/*')
+                }
             }
         }
     }

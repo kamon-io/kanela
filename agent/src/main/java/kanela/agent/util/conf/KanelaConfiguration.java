@@ -24,13 +24,20 @@ import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import kanela.agent.util.Manifests;
 import kanela.agent.util.log.Logger;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Value;
+import lombok.val;
 import org.pmw.tinylog.Level;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.Set;
+import java.util.jar.Attributes;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -47,6 +54,7 @@ public class KanelaConfiguration {
     Level logLevel;
     @Getter(AccessLevel.PRIVATE)
     Config config;
+    Set<String> manifestProperties;
 
     private static class Holder {
         private static final KanelaConfiguration Instance = new KanelaConfiguration();
@@ -65,11 +73,12 @@ public class KanelaConfiguration {
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
         this.logLevel = getLoggerLevel(config);
+        this.manifestProperties = getAllPropertiesFromManifest();
     }
 
-    @SneakyThrows
     public List<ModuleConfiguration> getAgentModules() {
         val config = getConfig().getConfig("modules");
+        Logger.debug(() -> "Loaded configuration => " + config.root().render());
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
@@ -84,10 +93,13 @@ public class KanelaConfiguration {
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                     val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
+                    val bundleName = Try.of(() -> moduleConfig.getString("bundle-name")).getOrElse("unknown");
 
-                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix));
+                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), bundleName);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
+                .filter(this::isEnabled)
+                .filter(this::byPropertyName)
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
     }
@@ -105,6 +117,7 @@ public class KanelaConfiguration {
         @Getter(AccessLevel.NONE)
         boolean legacyBytecodeSupport;
         File tempDir;
+        String bundleName;
 
         public boolean shouldInjectInBootstrap() {
             return injectInBootstrap;
@@ -215,7 +228,7 @@ public class KanelaConfiguration {
 
     private Config loadDefaultConfig() {
         return ConfigFactory
-                .load(this.getClass().getClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
+                .load(Thread.currentThread().getContextClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
     }
 
@@ -233,8 +246,26 @@ public class KanelaConfiguration {
                 Case($("DEBUG"), Level.DEBUG),
                 Case($("ERROR"), Level.ERROR),
                 Case($("WARNING"), Level.WARNING),
+                Case($("TRACE"), Level.TRACE),
                 Case($("OFF"), Level.OFF)
             );
+    }
+
+    private Set<String> getAllPropertiesFromManifest() {
+        return Manifests.getAllPropertiesFromAttributeName(Attributes.Name.IMPLEMENTATION_TITLE);
+    }
+
+    private boolean isEnabled(ModuleConfiguration module) {
+        if (module.enabled) return true;
+        Logger.info(() -> "The Module: " + module.getName() + " is disabled");
+        return false;
+    }
+
+    private boolean byPropertyName(ModuleConfiguration module) {
+        if (module.bundleName.equalsIgnoreCase("unknown")) return true;
+        if(manifestProperties.contains(module.bundleName)) return true;
+        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the property in the manifest");
+        return false;
     }
 
     private static class DefaultConfiguration {

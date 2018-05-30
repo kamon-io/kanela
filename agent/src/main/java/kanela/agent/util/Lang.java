@@ -16,30 +16,24 @@
 
 package kanela.agent.util;
 
-import lombok.SneakyThrows;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
+import lombok.Value;
 import lombok.val;
 
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
+@Value
+public class Lang {
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
-
-public class LatencyUtils {
-
-    public static long timed(final Runnable thunk) {
-        val startMillis = System.nanoTime();
-        thunk.run();
-        return MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS);
+    public static String getRunningJavaVersion() {
+        return System.getProperty("java.version", "");
     }
 
-    public static void withTimeSpent(final Runnable thunk, Consumer<Long> timeSpent) { timeSpent.accept(timed(thunk));}
-
-    @SneakyThrows
-    public static <T> T withTimeSpent(final Callable<T> thunk, Consumer<Long> timeSpent) {
-        val startMillis = System.nanoTime();
-        try { return thunk.call();}
-        finally { timeSpent.accept(MILLISECONDS.convert((System.nanoTime() - startMillis), NANOSECONDS));}
+    public static Option<String> getRunningScalaVersion() {
+        return Try.of(() -> {
+            val props = new java.util.Properties();
+            props.load(Lang.class.getResourceAsStream("/library.properties"));
+            val version = props.getProperty("version.number");
+            return version.substring(0, version.lastIndexOf("."));
+        }).toOption();
     }
 }

@@ -22,22 +22,30 @@ import lombok.Value;
 import lombok.val;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Value
 public class Jar {
+
     public static Try<JarFile> getEmbeddedJar(String jarName) {
+        return getEmbeddedFile(jarName).mapTry(file -> new JarFile(file.getFile()));
+    }
+
+    public static Try<URL> getEmbeddedFile(String jarName) {
         return Try.of(() -> {
             val tempFile = File.createTempFile(jarName, ".jar");
-            val resourceAsStream = Kanela.class.getResourceAsStream(jarName + ".jar");
+            tempFile.deleteOnExit();
+            val resourceAsStream = Kanela.class.getResourceAsStream(jarName);
             Files.copy(resourceAsStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            return new JarFile(tempFile);
+            return tempFile.toURI().toURL();
         });
     }
 
@@ -49,10 +57,32 @@ public class Jar {
                         .collect(Collectors.toList()));
     }
 
+    public static Try<List<String>> searchWith(Pattern pattern) {
+       return getKanelaJar().mapTry(kanelaJar -> {
+            val names = new ArrayList<String>();
+            try (JarFile jarFile = new JarFile(kanelaJar.getFile())) {
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry jarEntry = entries.nextElement();
+                    if (!pattern.matcher(jarEntry.getName()).matches()) continue;
+                    names.add(jarEntry.getName());
+                }
+            }
+            return names;
+        });
+    }
+
     private static Try<Map<String,String>> stringToMap(String value) {
         return Try.of(() -> Arrays.stream(value.split(";"))
                 .map(s -> s.split(":"))
                 .collect(Collectors.toMap(k -> k[0], v -> v[1])));
+    }
+
+    public static Try<URL> getKanelaJar() {
+        return Try.of(() -> {
+            val location = Kanela.class.getProtectionDomain().getCodeSource().getLocation();
+            return Paths.get(location.toURI()).toUri().toURL();
+        });
     }
 
     @Value(staticConstructor = "from")

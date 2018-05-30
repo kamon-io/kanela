@@ -17,7 +17,7 @@
 package kanela.agent;
 
 import io.vavr.collection.List;
-import io.vavr.control.Try;
+import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
@@ -34,14 +34,15 @@ public class InstrumentationLoader {
      * Load from the current classpath all defined instrumentations {@link KanelaInstrumentation}.
      *
      * @param instrumentation {@link Instrumentation}
+     * @param ctxClassloader {@link ClassLoader}
      * @param configuration {@link KanelaConfiguration}
      * @return a list of {@link KanelaFileTransformer}
      */
-    public static List<KanelaFileTransformer> load(Instrumentation instrumentation, KanelaConfiguration configuration) {
+    public static List<KanelaFileTransformer> load(Instrumentation instrumentation, ClassLoader ctxClassloader, KanelaConfiguration configuration) {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
-                                    .map(InstrumentationLoader::loadInstrumentation)
+                                    .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
                                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                                     .sortBy(KanelaInstrumentation::order)
                                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
@@ -50,14 +51,13 @@ public class InstrumentationLoader {
         });
     }
 
-    private static KanelaInstrumentation loadInstrumentation(String instrumentationClassName) {
+    private static Option<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
-        return Try.of(() -> (KanelaInstrumentation) Class.forName(instrumentationClassName, true, getClassLoader(InstrumentationLoader.class)).newInstance())
-                  .getOrElseThrow((cause) -> new RuntimeException(format("Error trying to load Instrumentation {0}", instrumentationClassName), cause));
-    }
-
-
-    private static ClassLoader getClassLoader(Class<?> clazz) {
-      return clazz.getClassLoader() == null ? ClassLoader.getSystemClassLoader() : clazz.getClassLoader();
+        try {
+            return Option.some((KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance());
+        } catch (Throwable cause) {
+            Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
+            return Option.none();
+        }
     }
 }

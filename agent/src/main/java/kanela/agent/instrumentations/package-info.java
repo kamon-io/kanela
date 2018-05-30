@@ -14,10 +14,8 @@
  * =========================================================================================
  */
 
-rootProject.name = 'kanela'
 
-include 'agent'
-include 'agent-instrumentations'
-include 'agent-attacher'
-include 'agent-test'
-
+/**
+ * Contains all the Kamon instrumentation modules
+ */
+package kanela.agent.instrumentations;

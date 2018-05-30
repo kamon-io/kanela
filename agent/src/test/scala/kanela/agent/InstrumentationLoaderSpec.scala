@@ -43,7 +43,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
-    InstrumentationLoader.load(instrumentationMock, agentConfiguration)
+    InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
 
     verify(agentConfiguration, times(1)).getAgentModules
   }
@@ -61,7 +61,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
       when(agentConfiguration.getAgentModules)
         .thenReturn(JList.of(Array(agentModuleDescriptionMock): _*))
 
-      InstrumentationLoader.load(instrumentationMock, agentConfiguration)
+      InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
     }
 
     verifyZeroInteractions(instrumentationMock)
@@ -83,7 +83,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
-    InstrumentationLoader.load(instrumentationMock, agentConfiguration)
+    InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
 
     verify(instrumentationMock, times(1)).addTransformer(any(classOf[ClassFileTransformer]), anyBoolean())
   }
