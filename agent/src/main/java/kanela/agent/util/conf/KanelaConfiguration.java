@@ -35,9 +35,7 @@ import org.pmw.tinylog.Level;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Set;
-import java.util.jar.Attributes;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -252,7 +250,7 @@ public class KanelaConfiguration {
     }
 
     private Set<String> getAllPropertiesFromManifest() {
-        return Manifests.getAllPropertiesFromAttributeName(Attributes.Name.IMPLEMENTATION_TITLE);
+        return Manifests.getAllPropertiesFromTitleOrBundle();
     }
 
     private boolean isEnabled(ModuleConfiguration module) {

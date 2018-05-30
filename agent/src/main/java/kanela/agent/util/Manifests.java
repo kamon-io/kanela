@@ -21,21 +21,33 @@ import lombok.Value;
 import lombok.val;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.jar.Attributes;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 @Value
 public class Manifests {
 
-    public static Set<String> getAllPropertiesFromAttributeName(Attributes.Name name) {
+    public static Set<String> getAllPropertiesFromTitleOrBundle() {
         return io.vavr.collection.List.ofAll(getAll())
-                .map(manifest -> manifest.getMainAttributes().getValue(name))
+                .flatMap(manifest -> filterMapByKey(manifest.getMainAttributes().entrySet()))
                 .filter(Objects::nonNull)
                 .toJavaSet();
+    }
+
+    private static List<String> filterMapByKey(Set<Map.Entry<Object,Object>> entries) {
+        return entries.stream().filter(buildPredicate())
+                .map(entry -> entry.getValue().toString())
+                .collect(Collectors.toList());
+    }
+
+    private static Predicate<Map.Entry<Object, Object>> buildPredicate() {
+        List<Predicate<Map.Entry<Object, Object>>> allPredicates = Arrays.asList(
+                entry -> entry.getKey().toString().equalsIgnoreCase("Implementation-Title"),
+                entry -> entry.getKey().toString().equalsIgnoreCase("Bundle-Name")
+        );
+        return allPredicates.stream().reduce(w -> true, Predicate::or);
     }
 
     private static List<Manifest> getAll() {
