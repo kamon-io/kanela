@@ -143,7 +143,7 @@ bintray {
         vcsUrl = 'https://github.com/kamon-io/kanela'
 
         version {
-            name = "${version}"
+            name = "${project.version}"
             desc = 'Kanela'
             released  = new Date()
         }
@@ -190,7 +190,7 @@ publishing {
             artifact javadocJar
             groupId 'io.kamon'
             artifactId 'kanela-agent'
-            version "${version}"
+            version "${project.version}"
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'The Kamon Instrumentation Agent')
