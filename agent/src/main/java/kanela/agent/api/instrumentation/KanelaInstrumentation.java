@@ -18,6 +18,7 @@ package kanela.agent.api.instrumentation;
 
 import io.vavr.Function0;
 import io.vavr.Function1;
+import io.vavr.Function2;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
@@ -33,6 +34,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 
+import java.lang.annotation.Annotation;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,7 @@ public abstract class KanelaInstrumentation {
 
         val bridges = instrumentationDescription.getBridges();
         val mixins = instrumentationDescription.getMixins();
-        val advisors = instrumentationDescription.getInterceptors();
+        val advisors = instrumentationDescription.getAdvisors();
         val transformers  = instrumentationDescription.getTransformers();
 
         if (moduleConfiguration.shouldSupportLegacyBytecode()) {
@@ -98,22 +100,28 @@ public abstract class KanelaInstrumentation {
 
     public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> named(f.get()));
+        builder.addElementMatcher(() -> failSafe(named(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
     public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(hasSuperType(named(f.get()))));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(hasSuperType(named(f.get())))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    public void annotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public void forTypesAnnnotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(isAnnotatedWith(named(f.get()))));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(isAnnotatedWith(named(f.get())))));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
+    public void forTypesWithMethodsAnnotatedWith(Supplier<String> f, Function2<InstrumentationDescription.Builder, ElementMatcher.Junction<MethodDescription>, InstrumentationDescription> instrumentationFunction) {
+        val builder = new InstrumentationDescription.Builder();
+        final ElementMatcher.Junction<MethodDescription>  methodMatcher = isAnnotatedWith(named(f.get()));
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(hasSuperType(declaresMethod(methodMatcher)))));
+        instrumentationDescriptions.add(instrumentationFunction.apply(builder, methodMatcher));
+    }
 
     public ElementMatcher.Junction<MethodDescription> method(String name){ return named(name);}
 
@@ -127,9 +135,13 @@ public abstract class KanelaInstrumentation {
 
     public ElementMatcher.Junction<MethodDescription> withArgument(Class<?> type) { return withArgument(0, type);}
 
-    public ElementMatcher.Junction<MethodDescription> anyMethods(String... names) {
-        return io.vavr.collection.List.of(names).map(this::method).reduce(ElementMatcher.Junction::or);
-    }
+    public ElementMatcher.Junction<MethodDescription> anyMethods(String... names) { return io.vavr.collection.List.of(names).map(this::method).reduce(ElementMatcher.Junction::or); }
+
+    public ElementMatcher.Junction<MethodDescription> withReturnTypes(Class<?>... types) { return io.vavr.collection.List.of(types).map(ElementMatchers::returns).reduce(ElementMatcher.Junction::or);}
+
+    public ElementMatcher.Junction<MethodDescription> methodAnnotatedWith(String annotation) { return ElementMatchers.isAnnotatedWith(named(annotation)); }
+
+    public ElementMatcher.Junction<MethodDescription> methodAnnotatedWith(Class<? extends Annotation> annotation) { return ElementMatchers.isAnnotatedWith(annotation); }
 
     public boolean isEnabled(ModuleConfiguration moduleConfiguration) {
         return moduleConfiguration.isEnabled();
