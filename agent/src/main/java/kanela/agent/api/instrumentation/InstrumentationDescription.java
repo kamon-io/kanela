@@ -21,7 +21,6 @@ import io.vavr.control.Option;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
-import net.bytebuddy.TypeCache;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -43,14 +42,14 @@ public class InstrumentationDescription {
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     List<MixinDescription> mixins;
     List<BridgeDescription> bridges;
-    List<AdvisorDescription> interceptors;
+    List<AdvisorDescription> advisors;
     List<AgentBuilder.Transformer> transformers;
 
     private InstrumentationDescription(Builder builder) {
         this.elementMatcher  = builder.elementMatcher;
         this.mixins = builder.mixins;
         this.bridges = builder.bridges;
-        this.interceptors = builder.interceptors;
+        this.advisors = builder.advisors;
         this.transformers = builder.transformers;
     }
 
@@ -58,7 +57,7 @@ public class InstrumentationDescription {
         private Option<ElementMatcher<? super TypeDescription>> elementMatcher;
         private final List<MixinDescription> mixins =  new ArrayList<>();
         private final List<BridgeDescription> bridges =  new ArrayList<>();
-        private final List<AdvisorDescription> interceptors = new ArrayList<>();
+        private final List<AdvisorDescription> advisors = new ArrayList<>();
         private final List<AgentBuilder.Transformer> transformers = new ArrayList<>();
 
         Builder addElementMatcher(Supplier<ElementMatcher<? super TypeDescription>> f) {
@@ -77,7 +76,7 @@ public class InstrumentationDescription {
         }
 
         public Builder withAdvisorFor(ElementMatcher.Junction<MethodDescription> methodDescription , Supplier<Class<?>> classSupplier) {
-            interceptors.add(AdvisorDescription.of(methodDescription.and(defaultMethodElementMatcher()), classSupplier.get()));
+            advisors.add(AdvisorDescription.of(methodDescription.and(defaultMethodElementMatcher()), classSupplier.get()));
             return this;
         }
 
@@ -90,7 +89,6 @@ public class InstrumentationDescription {
             transformers.add(withTransformer(f));
             return this;
         }
-
 
         private AgentBuilder.Transformer withTransformer(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) { return f::apply; }
 
