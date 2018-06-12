@@ -48,9 +48,7 @@ public class AdviceExceptionHandler extends Advice.ExceptionHandler.Simple {
      *
      * <pre>
      * } catch(Throwable throwable) {
-     *   try{
      *     kanela.agent.bootstrap.log.LoggerHandler.error("An error occurred while trying to apply an advisor", throwable)
-     *   } catch(Throwable ignored) {}
      * }
      * </pre>
      */
@@ -63,32 +61,16 @@ public class AdviceExceptionHandler extends Advice.ExceptionHandler.Simple {
 
             @Override
             public Size apply(MethodVisitor methodVisitor, Implementation.Context implementationContext) {
-                val startTryBlock = new Label();
-                val endTryBlock = new Label();
-                val startCatchBlock = new Label();
                 val endCatchBlock = new Label();
-
-                // Initialization try-catch block
-                methodVisitor.visitTryCatchBlock(startTryBlock, endTryBlock, startCatchBlock, "java/lang/Throwable");
-                // starting try block
-                methodVisitor.visitLabel(startTryBlock);
                 //message
                 methodVisitor.visitLdcInsn("An error occurred while trying to apply an advisor");
                 // logger, message, throwable => throwable, message, logger
                 methodVisitor.visitInsn(Opcodes.SWAP);
                 methodVisitor.visitMethodInsn(INVOKESTATIC, "kanela/agent/bootstrap/log/LoggerHandler", "error", "(Ljava/lang/String;Ljava/lang/Throwable;)V", false);
-                // ending try block
-                methodVisitor.visitLabel(endTryBlock);
                 methodVisitor.visitJumpInsn(GOTO, endCatchBlock);
-                // starting catch block
-                methodVisitor.visitLabel(startCatchBlock);
-                methodVisitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] {"java/lang/Throwable"});
-                methodVisitor.visitInsn(Opcodes.POP);
                 // ending catch block
                 methodVisitor.visitLabel(endCatchBlock);
-                methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-                // pops a Throwable off the stack
-                return new StackManipulation.Size(-1, 3);
+                return new StackManipulation.Size(-1, 1);
             }
         };
     }

@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kanela.agent.circuitbraker
+package kanela.agent.circuitbreaker
 
 import kanela.agent.broker.EventBroker
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker
