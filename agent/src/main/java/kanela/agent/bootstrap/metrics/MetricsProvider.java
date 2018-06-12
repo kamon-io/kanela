@@ -18,6 +18,11 @@ package kanela.agent.bootstrap.metrics;
 
 import java.util.Map;
 
+/**
+ * Interface for accessing and manipulating metrics instruments.
+ *
+ * @since 0.10
+ */
 public interface MetricsProvider {
 
     // Counters
