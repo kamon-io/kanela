@@ -37,24 +37,19 @@ public class Logger {
     static {
         Try.run(() -> Configurator
                 .fromResource("kanela-log.properties")
-//                .writingThread("main")
+                .writingThread("main")
                 .level(KanelaConfiguration.instance().getLogLevel())
                 .addWriter(new RollingFileWriter("kanela-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
                 .activate())
-                .getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
-
-        //sets the logger provider in order to be able to access from advisors/interceptors
-        LoggerHandler.setLoggerProvider(new LoggerProvider() {
-            @Override
-            public void error(String msg, Throwable t) {
-                Logger.error(() -> msg, t);
-            }
-
-            @Override
-            public void info(String msg) {
-                Logger.info(() -> msg);
-            }
-        });
+                .andThen(() -> {
+                    //sets the logger provider in order to be able to access from advisors/interceptors
+                    LoggerHandler.setLoggerProvider(new LoggerProvider() {
+                        public void error(String msg, Throwable t) { Logger.error(() -> msg, t); }
+                        public void info(String msg) {
+                            Logger.info(() -> msg);
+                        }
+                    });
+                }).getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
     }
 
     private Logger(){}

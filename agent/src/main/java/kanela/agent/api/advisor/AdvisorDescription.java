@@ -24,11 +24,11 @@ import net.bytebuddy.matcher.ElementMatcher;
 @Value(staticConstructor = "of")
 public class AdvisorDescription {
     ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> interceptorClass;
+    Class<?> advisorClass;
 
     public AgentBuilder.Transformer makeTransformer() {
         return new AgentBuilder.Transformer.ForAdvice()
-                .advice(this.methodMatcher, interceptorClass.getName())
+                .advice(this.methodMatcher, advisorClass.getName())
                 .withExceptionHandler(AdviceExceptionHandler.instance());
     }
 }
