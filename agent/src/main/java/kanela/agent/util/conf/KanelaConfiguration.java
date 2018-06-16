@@ -268,20 +268,20 @@ public class KanelaConfiguration {
 
     private static class DefaultConfiguration {
         static final String withinPackage = List.of(
-                    "sun\\..*",
-                    "com\\.sun\\..*",
-                    "java\\..*",
-                    "javax\\..*",
-                    "org\\.aspectj.\\..*",
-                    "com\\.newrelic.\\..*",
-                    "org\\.groovy.\\..*",
-                    "net\\.bytebuddy.\\..*",
-                    "\\.asm.\\..*",
-                    "kanela\\.agent\\..*",
-                    "kamon\\.testkit\\..*",
-                    "kamon\\.instrumentation\\..*",
-                    "akka\\.testkit\\..*",
-                    "org\\.scalatest\\..*",
-                    "scala\\.(?!concurrent).*").mkString("|");
+                    "(?!sun\\..*)",
+                    "(?!com\\.sun\\..*)",
+                    "(?!java\\..*)",
+                    "(?!javax\\..*)",
+                    "(?!org\\.aspectj.\\..*)",
+                    "(?!com\\.newrelic.\\..*)",
+                    "(?!org\\.groovy.\\..*)",
+                    "(?!net\\.bytebuddy.\\..*)",
+                    "(?!\\.asm.\\..*)",
+                    "(?!kanela\\.agent\\..*)",
+                    "(?!kamon\\.testkit\\..*)",
+                    "(?!kamon\\.instrumentation\\..*)",
+                    "(?!akka\\.testkit\\..*)",
+                    "(?!org\\.scalatest\\..*)",
+                    "(?!scala\\.(?!concurrent).*)").mkString("", "", ".*");
     }
 }
