@@ -55,18 +55,11 @@ public class Logger {
     private Logger(){}
 
     public static void debug(final Supplier<String> msg) { org.pmw.tinylog.Logger.debug(msg.get());}
-
     public static void trace(final Supplier<String> msg) { org.pmw.tinylog.Logger.trace(msg.get());}
-
     public static void info(final Supplier<String> msg) { org.pmw.tinylog.Logger.info(msg.get()); }
-
     public static void info(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.info(t, msg.get());}
-
     public static void warn(final Supplier<String> msg) { org.pmw.tinylog.Logger.warn(msg.get());}
-
     public static void warn(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(t, msg.get());}
-
     public static void error(final Supplier<String> msg) { org.pmw.tinylog.Logger.error(msg.get()); }
-
     public static void error(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.error(t, msg.get());}
 }
