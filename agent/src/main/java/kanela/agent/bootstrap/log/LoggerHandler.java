@@ -19,7 +19,7 @@ package kanela.agent.bootstrap.log;
 /**
  * {@code LoggerHandler} provides methods in order call the logger inside of instrumented bytecode.
  *
- * <p>{@code MetricsHandler} avoids tight coupling with the concrete trace API through the {@link
+ * <p>{@code LoggerHandler} avoids tight coupling with the concrete trace API through the {@link
  * LoggerHandler} interface.
  *
  * <p>Both {@link LoggerHandler} and {@link LoggerProvider} are loaded by the bootstrap classloader
