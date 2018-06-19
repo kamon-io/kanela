@@ -140,7 +140,7 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
         URL url = getResource(name);
         try {
             return url != null ? url.openStream() : null;
-        } catch (IOException e) {}
+        } catch (IOException ignored) {}
         return null;
     }
 
