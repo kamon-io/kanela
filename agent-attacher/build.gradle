@@ -38,7 +38,7 @@ shadowJar {
     relocate 'net.bytebuddy', 'kanela.agent.attacher.libs.net.bytebuddy'
 
     dependencies {
-        exclude('org.projectlombok:lombok:1.16.20')
+        exclude('org.projectlombok:lombok:1.18.0')
     }
 }
 

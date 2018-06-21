@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public final class MetricsHandler {
 
-    private volatile static MetricsProvider metricsProvider = MetricsProvider.NoOp.INSTANCE;
+    private static MetricsProvider metricsProvider = MetricsProvider.NoOp.INSTANCE;
 
     private MetricsHandler() {}
 

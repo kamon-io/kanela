@@ -38,7 +38,7 @@ import java.util.concurrent.Callable;
 
 public final class ContextHandler {
 
-    private volatile static ContextProvider contexProvider = ContextProvider.NoOp.INSTANCE;
+    private static ContextProvider contexProvider = ContextProvider.NoOp.INSTANCE;
 
     private ContextHandler() {}
 

@@ -16,10 +16,12 @@
 
 package kanela.agent.util.classloader;
 
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.matcher.ElementMatcher;
 
 @Value
+@EqualsAndHashCode(callSuper = false)
 public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase<ClassLoader> {
 
     String name;

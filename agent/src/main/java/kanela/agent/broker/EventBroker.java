@@ -56,8 +56,7 @@ public class EventBroker {
             val parameterTypes = method.getParameterTypes();
             if (method.getAnnotation(Subscribe.class) == null || parameterTypes.length != 1) continue;
             val subscribeTo = parameterTypes[0];
-            List<SubscriberInfo> subscribers = map.get(subscribeTo);
-            if (subscribers == null) map.put(subscribeTo, subscribers = new ArrayList<>());
+            val subscribers = map.computeIfAbsent(subscribeTo, k -> new ArrayList<>());
             subscribers.add(new SubscriberInfo(method, o));
         }
     }

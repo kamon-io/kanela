@@ -14,21 +14,24 @@
  * =========================================================================================
  */
 
-package kanela.agent.api.advisor;
+package kanela.agent.bootstrap.log;
 
-import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+/**
+ * Interface for accessing and manipulating the logger.
+ *
+ * @since 0.12
+ */
+public interface LoggerProvider {
+    void error(String msg, Throwable t);
+    void info(String msg);
 
-@Value(staticConstructor = "of")
-public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> advisorClass;
+    enum NoOp implements LoggerProvider {
 
-    public AgentBuilder.Transformer makeTransformer() {
-        return new AgentBuilder.Transformer.ForAdvice()
-                .advice(this.methodMatcher, advisorClass.getName())
-                .withExceptionHandler(AdviceExceptionHandler.instance());
+        INSTANCE;
+
+        public void error(String msg, Throwable t) {}
+        public void info(String msg) {}
     }
 }
+
+

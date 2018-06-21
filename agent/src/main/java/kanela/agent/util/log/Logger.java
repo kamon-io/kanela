@@ -17,6 +17,8 @@
 package kanela.agent.util.log;
 
 import io.vavr.control.Try;
+import kanela.agent.bootstrap.log.LoggerHandler;
+import kanela.agent.bootstrap.log.LoggerProvider;
 import kanela.agent.util.conf.KanelaConfiguration;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.labelers.TimestampLabeler;
@@ -39,24 +41,25 @@ public class Logger {
                 .level(KanelaConfiguration.instance().getLogLevel())
                 .addWriter(new RollingFileWriter("kanela-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
                 .activate())
-                .getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
+                .andThen(() -> {
+                    //sets the logger provider in order to be able to access from advisors/interceptors
+                    LoggerHandler.setLoggerProvider(new LoggerProvider() {
+                        public void error(String msg, Throwable t) { Logger.error(() -> msg, t); }
+                        public void info(String msg) {
+                            Logger.info(() -> msg);
+                        }
+                    });
+                }).getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
     }
 
     private Logger(){}
 
     public static void debug(final Supplier<String> msg) { org.pmw.tinylog.Logger.debug(msg.get());}
-
     public static void trace(final Supplier<String> msg) { org.pmw.tinylog.Logger.trace(msg.get());}
-
     public static void info(final Supplier<String> msg) { org.pmw.tinylog.Logger.info(msg.get()); }
-
-    public static void info(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.info(msg.get(),t);}
-
+    public static void info(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.info(t, msg.get());}
     public static void warn(final Supplier<String> msg) { org.pmw.tinylog.Logger.warn(msg.get());}
-
-    public static void warn(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(msg.get(), t);}
-
+    public static void warn(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(t, msg.get());}
     public static void error(final Supplier<String> msg) { org.pmw.tinylog.Logger.error(msg.get()); }
-
-    public static void error(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.warn(msg.get(),t);}
+    public static void error(final Supplier<String> msg, final Throwable t) { org.pmw.tinylog.Logger.error(t, msg.get());}
 }

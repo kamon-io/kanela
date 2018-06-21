@@ -74,7 +74,7 @@ public abstract class KanelaInstrumentation {
         if (moduleConfiguration.shouldInjectInBootstrap()) {
             val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
             val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
-            val advisorClasses = advisors.stream().map(AdvisorDescription::getInterceptorClass).collect(Collectors.toList());
+            val advisorClasses = advisors.stream().map(AdvisorDescription::getAdvisorClass).collect(Collectors.toList());
 
             val allClasses = new ArrayList<Class<?>>();
             allClasses.addAll(bridgeClasses);
