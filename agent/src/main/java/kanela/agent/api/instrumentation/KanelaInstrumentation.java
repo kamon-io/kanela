@@ -131,6 +131,8 @@ public abstract class KanelaInstrumentation {
 
     public ElementMatcher.Junction<MethodDescription> takesArguments(Integer quantity) { return ElementMatchers.takesArguments(quantity);}
 
+    public ElementMatcher.Junction<MethodDescription> takesOneArgumentOf(String type) { return ElementMatchers.takesArgument(0, named(type));}
+
     public ElementMatcher.Junction<MethodDescription> withArgument(Integer index, Class<?> type) { return ElementMatchers.takesArgument(index, type);}
 
     public ElementMatcher.Junction<MethodDescription> withArgument(Class<?> type) { return withArgument(0, type);}

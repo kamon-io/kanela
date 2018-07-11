@@ -30,7 +30,7 @@ dependencies {
         transitive = false
     }
 
-    implementation('io.kamon:kamon-jdbc_2.12:1.0.5') {
+    implementation('io.kamon:kamon-jdbc_2.12:1.0.6') {
         transitive = false
     }
 
@@ -55,6 +55,10 @@ dependencies {
     }
 
     implementation('io.kamon:kamon-cassandra-client_2.12:1.0.5') {
+        transitive = false
+    }
+
+    implementation('io.kamon:kamon-okhttp3_2.12:1.0.0') {
         transitive = false
     }
 

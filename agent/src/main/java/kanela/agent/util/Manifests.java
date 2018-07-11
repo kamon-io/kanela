@@ -45,6 +45,7 @@ public class Manifests {
     private static Predicate<Map.Entry<Object, Object>> buildPredicate() {
         List<Predicate<Map.Entry<Object, Object>>> allPredicates = Arrays.asList(
                 entry -> entry.getKey().toString().equalsIgnoreCase("Implementation-Title"),
+                entry -> entry.getKey().toString().equalsIgnoreCase("Automatic-Module-Name"),
                 entry -> entry.getKey().toString().equalsIgnoreCase("Bundle-Name")
         );
         return allPredicates.stream().reduce(w -> true, Predicate::or);
