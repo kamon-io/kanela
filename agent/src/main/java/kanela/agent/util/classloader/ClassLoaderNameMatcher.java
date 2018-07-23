@@ -19,7 +19,7 @@ package kanela.agent.util.classloader;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
-import kanela.agent.api.instrumentation.classloader.ClassRefiner;
+import kanela.agent.util.classloader.Main.AnalyzedClass;
 import kanela.agent.util.collection.ConcurrentReferenceHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -31,8 +31,6 @@ import net.bytebuddy.jar.asm.tree.ClassNode;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -173,32 +171,14 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         @SneakyThrows
         public boolean matches(final ClassLoader target) {
             if (target == null) return false;
-            return cache.computeIfAbsent(target, (key) -> Try.of(() -> {
-                return refiner.map(r -> {
-                     return io.vavr.collection.List.ofAll(r.refiners()).map(rr -> {
-                        Main.AnalyzedClass analyzedClass = Main.AnalyzedClass.from(rr.getTarget(), target);
-
-                         Predicate<Boolean> booleanPredicate = analyzedClass.buildPredicate(rr.getTarget(), rr.getFields(), rr.getMethods());
-                         System.out.println("predicate => " + booleanPredicate.test(true));
-                         return booleanPredicate.test(true);
-                    }).getOrElse(false);
+            return refiner.map(r -> {
+                return io.vavr.collection.List.ofAll(r.refiners()).map(rr -> {
+                    val analyzedClass = AnalyzedClass.from(rr.getTarget(), target);
+                    val booleanPredicate = analyzedClass.buildPredicate(rr.getTarget(), rr.getFields(), rr.getMethods()).test(true);
+                    System.out.println("predicate => " + booleanPredicate);
+                    return booleanPredicate;
                 }).getOrElse(false);
-            }).getOrElse(false));
+            }).getOrElse(false);
         }
     }
 }
-
-//                return refiner.map(r -> {
-//                    val refiners = r.refiners().forEach(rr -> {
-//                        Main.AnalyzedClass analyzedClass = Main.AnalyzedClass.from(rr.getTarget(), target);
-//                        analyzedClass.containsFields(rr.getFields().toArray(new String[rr.getFields().size()]));
-////                    analyzedClass.containsMethod()
-//                    });
-//                    return false;
-//                }).getOrElse(true);
-//            })).getOrElse(false);
-//        }
-//    }
-//        }
-
-
