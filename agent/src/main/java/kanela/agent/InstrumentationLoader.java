@@ -42,12 +42,12 @@ public class InstrumentationLoader {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
-                                    .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
-                                    .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
-                                    .sortBy(KanelaInstrumentation::order)
-                                    .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
-                                    .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)
-                                    .install();
+                    .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
+                    .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
+                    .sortBy(KanelaInstrumentation::order)
+                    .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
+                    .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)
+                    .install();
         });
     }
 

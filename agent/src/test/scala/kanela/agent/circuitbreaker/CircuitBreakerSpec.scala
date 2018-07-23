@@ -26,7 +26,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class CircuitBreakerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The CircuitBreaker" should {
-    "should trip when the thresholds are exceeded" in {
+    "trip when the thresholds are exceeded" in {
       val circuitBreakerConfig = spy(KanelaConfiguration.instance().getCircuitBreakerConfig)
       when(circuitBreakerConfig.getFreeMemoryThreshold).thenReturn(20.0)
       when(circuitBreakerConfig.getGcProcessCPUThreshold).thenReturn(20.0)

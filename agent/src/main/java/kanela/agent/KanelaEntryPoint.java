@@ -42,10 +42,11 @@ public class KanelaEntryPoint {
     private static void start(final String arguments, final Instrumentation instrumentation) {
         runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
+                BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
                 val configuration = KanelaConfiguration.instance();
                 KanelaBanner.show(configuration);
 
-                BootstrapInjector.injectJar(instrumentation, "bootstrap");
                 ExtensionLoader.attach(arguments, instrumentation);
 
                 val transformers = InstrumentationLoader.load(instrumentation, kanelaClassLoader, configuration);
