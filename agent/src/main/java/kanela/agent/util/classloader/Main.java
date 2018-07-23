@@ -45,9 +45,7 @@ public class Main {
         }
 
         public Boolean containsFields(String... fields) {
-            boolean b = this.fields.containsAll(Arrays.asList(fields));
-            System.out.println("containsFields " + b);
-            return b;
+            return this.fields.containsAll(Arrays.asList(fields));
         }
 
         public Boolean containsMethod(String methodName, String... parameters) {

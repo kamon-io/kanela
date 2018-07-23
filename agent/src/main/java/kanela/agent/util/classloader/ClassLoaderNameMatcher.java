@@ -175,21 +175,12 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
             if (target == null) return false;
             return cache.computeIfAbsent(target, (key) -> Try.of(() -> {
                 return refiner.map(r -> {
-                    System.out.println(r.refiners().size());
                      return io.vavr.collection.List.ofAll(r.refiners()).map(rr -> {
                         Main.AnalyzedClass analyzedClass = Main.AnalyzedClass.from(rr.getTarget(), target);
 
-                         String[] fields = rr.getFields().toArray(new String[rr.getFields().size()]);
-                         Boolean x = analyzedClass.containsFields(fields);
-                         Boolean x1 = analyzedClass.containsMethodWithParameters(rr.getMethods());
-
                          Predicate<Boolean> booleanPredicate = analyzedClass.buildPredicate(rr.getTarget(), rr.getFields(), rr.getMethods());
-                         System.out.println(x);
-                         System.out.println(x1);
                          System.out.println("predicate => " + booleanPredicate.test(true));
-
-                         return x | x1;
-//                        return false;
+                         return booleanPredicate.test(true);
                     }).getOrElse(false);
                 }).getOrElse(false);
             }).getOrElse(false));

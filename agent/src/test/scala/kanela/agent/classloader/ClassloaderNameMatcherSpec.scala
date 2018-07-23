@@ -16,40 +16,28 @@
 
 package kanela.agent.classloader
 
-import java.util
-
+import io.vavr.control.Option
 import kanela.agent.api.instrumentation.KanelaInstrumentation
 import kanela.agent.api.instrumentation.classloader.{ClassLoaderRefiner, ClassRefiner}
-import kanela.agent.util.classloader.ClassLoaderNameMatcher
+import kanela.agent.util.classloader.ClassLoaderNameMatcher.RefinedClassLoaderMatcher
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The ClassloaderNameMatcher" should {
     "" in {
 
-      val refiner = ClassRefiner.builder()
-        .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
-        .withFields("instrumentationDescriptions", "notDeclaredByObject")
-        .withMethod("buildTransformations", "kanela.agent.api.instrumentation.InstrumentationDescription", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
-        .build()
+      val refiners = Array[ClassRefiner](
+        ClassRefiner.builder()
+          .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
+          .withFields("instrumentationDescriptions", "notDeclaredByObject")
+          .withMethod("buildTransformations", "kanela.agent.api.instrumentation.InstrumentationDescription", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
+          .build(),
+        ClassRefiner.builder()
+          .mustContains("kanela.agent.api.instrumentation.InstrumentationDescription")
+          .withFields("classLoaderRefiner")
+          .build())
 
-      val refiner2 = ClassRefiner.builder()
-        .mustContains("kanela.agent.api.instrumentation.InstrumentationDescription")
-        .withFields("classLoaderRefiner")
-        .build()
-
-
-      val classLoaderMatcher = ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(io.vavr.control.Option.of(
-        new ClassLoaderRefiner {
-          override def refiners(): util.List[ClassRefiner] = {
-            val refiners = new util.ArrayList[ClassRefiner]()
-            refiners.add(refiner)
-            refiners.add(refiner2)
-            refiners
-          }
-      }))
-
-      classLoaderMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe true
+      val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiners :_*)))
 
       classLoaderMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe true
     }

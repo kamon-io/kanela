@@ -16,8 +16,17 @@
 
 package kanela.agent.api.instrumentation.classloader;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface ClassLoaderRefiner {
     List<ClassRefiner> refiners();
+
+    static ClassLoaderRefiner from(ClassRefiner... refiners) {
+        return () -> Arrays.asList(refiners);
+    }
+
+    static ClassLoaderRefiner mustContains(String... classes) {
+        return from(io.vavr.collection.List.of(classes).map(clazz -> ClassRefiner.builder().mustContains(clazz).build()).toJavaArray(ClassRefiner.class));
+    }
 }
