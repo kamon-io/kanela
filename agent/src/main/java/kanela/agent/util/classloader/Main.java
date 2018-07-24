@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String... args) throws IOException {
@@ -69,10 +68,9 @@ public class Main {
         public Boolean containsMethodWithParameters(Map<String, Set<String>> methods) {
             if (methods.isEmpty()) return true;
             return methods.entrySet()
-                   .stream()
-                   .map((entry) -> containsMethod(entry.getKey(), entry.getValue().toArray(new String[0])))
-                   .collect(Collectors.toSet())
-                   .contains(true);
+                    .stream()
+                    .map((entry) -> containsMethod(entry.getKey(), entry.getValue().toArray(new String[0])))
+                    .noneMatch(p -> false);
         }
 
         private static Set<String> extractFields(ClassNode classNode) {

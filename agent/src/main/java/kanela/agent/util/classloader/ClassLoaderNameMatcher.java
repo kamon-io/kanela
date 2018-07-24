@@ -172,12 +172,12 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         public boolean matches(final ClassLoader target) {
             if (target == null) return false;
             return refiner.map(r -> {
-                return io.vavr.collection.List.ofAll(r.refiners()).map(rr -> {
+                return r.refiners().stream().map(rr -> {
                     val analyzedClass = AnalyzedClass.from(rr.getTarget(), target);
                     val booleanPredicate = analyzedClass.buildPredicate(rr.getTarget(), rr.getFields(), rr.getMethods()).test(true);
                     System.out.println("predicate => " + booleanPredicate);
                     return booleanPredicate;
-                }).getOrElse(false);
+                }).noneMatch(p -> false);
             }).getOrElse(false);
         }
     }
