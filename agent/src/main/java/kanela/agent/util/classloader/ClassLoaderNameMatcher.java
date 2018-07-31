@@ -52,19 +52,6 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         return new ClassLoaderNameMatcher(ChildFirstURLClassLoader.class.getName());
     }
 
-//    public static ElementMatcher.Junction.AbstractBase<ClassLoader> containsClasses(final String... names) {
-//        return ClassLoaderHasClassMatcher.from(names);
-//    }
-
-//    public static ElementMatcher.Junction.AbstractBase<ClassLoader> hasClassWithField(final String className, final String fieldName) {
-//        return ClassLoaderHasClassWithFieldMatcher.from(className, fieldName);
-//    }
-
-//    public static ElementMatcher.Junction.AbstractBase<ClassLoader> hasClassWithMethod(final String className, final String methodName, final String... methodArgs) {
-//        return ClassLoaderHasClassWithMethodMatcher.from(className, methodName, methodArgs);
-//    }
-
-
     @Override
     public boolean matches(ClassLoader target) {
         return target != null && name.equals(target.getClass().getName());

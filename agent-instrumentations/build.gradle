@@ -58,7 +58,7 @@ dependencies {
         transitive = false
     }
 
-    implementation('io.kamon:kamon-okhttp3_2.12:1.0.1       ') {
+    implementation('io.kamon:kamon-okhttp3_2.12:1.0.1') {
         transitive = false
     }
 
