@@ -67,7 +67,7 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
 
         public static ElementMatcher<? super ClassLoader> from(Option<ClassLoaderRefiner> classLoaderRefiner){
             return classLoaderRefiner
-                    .map(x -> (ElementMatcher<? super ClassLoader>) new RefinedClassLoaderMatcher(x))
+                    .map(refiner -> (ElementMatcher<? super ClassLoader>) new RefinedClassLoaderMatcher(refiner))
                     .getOrElse(ElementMatchers::any);
         }
 

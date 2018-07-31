@@ -63,7 +63,9 @@ public class AnalyzedClass implements ClassMatcher {
     }
 
     public Boolean match() {
-        return buildClassRefinerPredicate(this.classRefiner).test(true);
+        val evaluated = buildClassRefinerPredicate(this.classRefiner).test(true);
+        if(!evaluated) Logger.debug(() -> "The Class: " + this.classRefiner.getTarget() + " was filtered because not match with the provided ClassRefined: " + this.classRefiner);
+        return evaluated;
     }
 
     private Boolean containsFields(String... fields) {
