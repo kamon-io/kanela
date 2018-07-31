@@ -27,6 +27,8 @@ public interface ClassLoaderRefiner {
     }
 
     static ClassLoaderRefiner mustContains(String... classes) {
-        return from(io.vavr.collection.List.of(classes).map(clazz -> ClassRefiner.builder().mustContains(clazz).build()).toJavaArray(ClassRefiner.class));
+        return from(io.vavr.collection.List.of(classes)
+                .map(clazz -> ClassRefiner.builder().mustContains(clazz).build())
+                .toJavaArray(ClassRefiner.class));
     }
 }
