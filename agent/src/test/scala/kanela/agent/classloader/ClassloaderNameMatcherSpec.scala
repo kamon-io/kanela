@@ -24,8 +24,19 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
   "The ClassloaderNameMatcher" should {
-    "" in {
+    "refine the search of a class in an classloader through a ClassRefiner" in {
+      val refiner = ClassRefiner.builder()
+        .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
+        .withFields("instrumentationDescriptions", "notDeclaredByObject")
+        .withMethod("buildTransformations", "kanela.agent.api.instrumentation.InstrumentationDescription", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
+        .build()
 
+      val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiner)))
+
+      classLoaderMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe true
+    }
+
+    "refine the search of a class in an classloader through a list of ClassRefiners" in {
       val refiners = Array[ClassRefiner](
         ClassRefiner.builder()
           .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
@@ -40,6 +51,30 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
       val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiners :_*)))
 
       classLoaderMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe true
+    }
+
+    "not match if some of the properties to refine the search not exists" in {
+      val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.mustContains("kanela.agent.api.instrumentation.CanelaInstrumentation")))
+
+      classLoaderMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe false
+
+      val fieldRefiner = ClassRefiner.builder()
+        .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
+        .withFields("instrumentationDescriptions", "declaredByObject")
+        .build()
+
+      val fieldMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(fieldRefiner)))
+      fieldMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe false
+
+
+      val methodRefiner = ClassRefiner.builder()
+        .mustContains("kanela.agent.api.instrumentation.KanelaInstrumentation")
+        .withFields("instrumentationDescriptions", "notDeclaredByObject")
+        .withMethod("buildTransformations", "kanela.agent.api.instrumentation.Instrumentation", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
+        .build()
+
+      val methodMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(methodRefiner)))
+      methodMatcher.matches(classOf[KanelaInstrumentation].getClassLoader) shouldBe false
     }
   }
 }

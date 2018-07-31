@@ -64,7 +64,7 @@ public class ClassRefiner {
         }
 
         public ClassRefiner build() {
-            if(target == null) throw new RuntimeException("we must provide a target class.");
+            if(target == null) throw new RuntimeException("We must provide a target class.");
             return new ClassRefiner(this);
         }
     }
