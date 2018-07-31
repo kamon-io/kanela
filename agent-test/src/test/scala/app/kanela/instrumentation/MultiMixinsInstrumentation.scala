@@ -16,6 +16,7 @@
 
 package app.kanela.instrumentation
 
+import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner
 import kanela.agent.scala.KanelaInstrumentation
 
 
@@ -24,6 +25,7 @@ class MultiMixinsInstrumentation extends KanelaInstrumentation {
 
   forTargetType("app.kanela.cases.multimixins.WithMultiMixinsClass") { builder ⇒
     builder
+      .withClassLoaderRefiner(ClassLoaderRefiner.mustContains("kanela.agent.scala.KanelaInstrumentation"))
       .withMixin(classOf[MixinOverMixin1])
       .withMixin(classOf[MixinOverMixin2])
       .withMixin(classOf[MixinOverMixin3])

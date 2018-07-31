@@ -20,29 +20,34 @@ import kanela.agent.broker.{EventBroker, Subscribe}
 import kanela.agent.util.conf.KanelaConfiguration
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
+import scala.concurrent.duration._
+
+class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll with Eventually{
   "The OldGarbageCollectorListener" should {
     "receive a event when the GC is triggered" in {
-      val oldGarbageCollectorConfig = spy(KanelaConfiguration.instance().getOldGarbageCollectorConfig)
-      when(oldGarbageCollectorConfig.isCircuitBreakerRunning).thenReturn(true)
-      when(oldGarbageCollectorConfig.isShouldLogAfterGc).thenReturn(false)
+      eventually(timeout(10 seconds)) {
+        val oldGarbageCollectorConfig = spy(KanelaConfiguration.instance().getOldGarbageCollectorConfig)
+        when(oldGarbageCollectorConfig.isCircuitBreakerRunning).thenReturn(true)
+        when(oldGarbageCollectorConfig.isShouldLogAfterGc).thenReturn(false)
 
-      val gcListener = spy(classOf[GCEventListener])
-      val argumentCaptor = ArgumentCaptor.forClass(classOf[GcEvent])
+        val gcListener = spy(classOf[GCEventListener])
+        val argumentCaptor = ArgumentCaptor.forClass(classOf[GcEvent])
 
-      OldGarbageCollectorListener.attach(oldGarbageCollectorConfig)
+        OldGarbageCollectorListener.attach(oldGarbageCollectorConfig)
 
-      System.gc()
+        System.gc()
 
-      Thread.sleep(1000) // the event is async, we need wait..
+        Thread.sleep(1000) // the event is async, we need wait..
 
-      verify(gcListener, times(2)).onGCEvent(argumentCaptor.capture())
+        verify(gcListener, times(2)).onGCEvent(argumentCaptor.capture())
 
-      argumentCaptor.getValue.asInstanceOf[GcEvent].getInfo should not be null
-      argumentCaptor.getValue.asInstanceOf[GcEvent].getPercentageFreeMemoryAfterGc shouldBe >(0.0)
-      argumentCaptor.getValue.asInstanceOf[GcEvent].getStartTime shouldBe >(0L)
+        argumentCaptor.getValue.asInstanceOf[GcEvent].getInfo should not be null
+        argumentCaptor.getValue.asInstanceOf[GcEvent].getPercentageFreeMemoryAfterGc shouldBe >(0.0)
+        argumentCaptor.getValue.asInstanceOf[GcEvent].getStartTime shouldBe >(0L)
+      }
     }
   }
 }
