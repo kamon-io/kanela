@@ -16,9 +16,15 @@
 
 package kanela.agent.util.classloader;
 
+import io.vavr.control.Option;
+import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
+import kanela.agent.util.collection.ConcurrentReferenceHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
+
+import java.util.stream.Collectors;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -32,7 +38,6 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
 
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> withName(String name) {
         return new ClassLoaderNameMatcher(name);
-
     }
 
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> isReflectionClassLoader() {
@@ -50,5 +55,35 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
     @Override
     public boolean matches(ClassLoader target) {
         return target != null && name.equals(target.getClass().getName());
+    }
+
+
+    @Value
+    @EqualsAndHashCode(callSuper = false)
+    public static class RefinedClassLoaderMatcher extends ElementMatcher.Junction.AbstractBase<ClassLoader> {
+
+        ConcurrentReferenceHashMap<ClassLoader, Boolean> cache = new ConcurrentReferenceHashMap<>();
+        ClassLoaderRefiner refiner;
+
+        public static ElementMatcher<? super ClassLoader> from(Option<ClassLoaderRefiner> classLoaderRefiner){
+            return classLoaderRefiner
+                    .map(refiner -> (ElementMatcher<? super ClassLoader>) new RefinedClassLoaderMatcher(refiner))
+                    .getOrElse(ElementMatchers::any);
+        }
+
+        @Override
+        public boolean matches(final ClassLoader classLoader) {
+            if (classLoader == null) return false;
+            return cache.computeIfAbsent(classLoader, (key) -> compute(refiner, classLoader));
+        }
+
+        private boolean compute(ClassLoaderRefiner classRefiner, ClassLoader classLoader) {
+            return !classRefiner
+                    .refiners()
+                    .stream()
+                    .map(refiner -> AnalyzedClass.from(refiner, classLoader).match())
+                    .collect(Collectors.toList())
+                    .contains(false);
+        }
     }
 }

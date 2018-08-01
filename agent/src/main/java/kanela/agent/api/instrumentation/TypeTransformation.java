@@ -17,6 +17,7 @@
 package kanela.agent.api.instrumentation;
 
 import io.vavr.control.Option;
+import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -32,12 +33,14 @@ import java.util.stream.Collectors;
 public class TypeTransformation {
 
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
+    Option<ClassLoaderRefiner> classLoaderRefiner;
     List<AgentBuilder.Transformer> bridges;
     List<AgentBuilder.Transformer> mixins;
     List<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
     static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher,
+                                 Option<ClassLoaderRefiner> classLoaderRefiner,
                                  List<AgentBuilder.Transformer> bridges,
                                  List<AgentBuilder.Transformer> mixins,
                                  List<AgentBuilder.Transformer>... transformers) {
@@ -46,7 +49,7 @@ public class TypeTransformation {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        return new TypeTransformation(elementMatcher, bridges, mixins, transformations);
+        return new TypeTransformation(elementMatcher, classLoaderRefiner, bridges, mixins, transformations);
     }
 
     public Boolean isActive() {

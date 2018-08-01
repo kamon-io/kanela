@@ -14,21 +14,21 @@
  * =========================================================================================
  */
 
-package app.kanela.instrumentation
+package kanela.agent.api.instrumentation.classloader;
 
-import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner
-import kanela.agent.scala.KanelaInstrumentation
+import java.util.Arrays;
+import java.util.List;
 
+public interface ClassLoaderRefiner {
+    List<ClassRefiner> refiners();
 
-class MultiMixinsInstrumentation extends KanelaInstrumentation {
-  import app.kanela.instrumentation.mixin.MixinOverMixin._
+    static ClassLoaderRefiner from(ClassRefiner... refiners) {
+        return () -> Arrays.asList(refiners);
+    }
 
-  forTargetType("app.kanela.cases.multimixins.WithMultiMixinsClass") { builder ⇒
-    builder
-      .withClassLoaderRefiner(ClassLoaderRefiner.mustContains("kanela.agent.scala.KanelaInstrumentation"))
-      .withMixin(classOf[MixinOverMixin1])
-      .withMixin(classOf[MixinOverMixin2])
-      .withMixin(classOf[MixinOverMixin3])
-      .build()
-  }
+    static ClassLoaderRefiner mustContains(String... classes) {
+        return from(io.vavr.collection.List.of(classes)
+                .map(clazz -> ClassRefiner.builder().mustContains(clazz).build())
+                .toJavaArray(ClassRefiner.class));
+    }
 }

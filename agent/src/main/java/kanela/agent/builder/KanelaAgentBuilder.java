@@ -26,7 +26,7 @@ import kanela.agent.util.ListBuilder;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
-import lombok.experimental.var;
+import lombok.var;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -66,7 +66,7 @@ class KanelaAgentBuilder {
 
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent
-                        .type(typeTransformation.getElementMatcher().get())
+                        .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
                         .transform(transformer)
                         .asDecorator();
              }

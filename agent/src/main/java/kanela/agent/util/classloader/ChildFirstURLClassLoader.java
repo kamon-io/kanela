@@ -56,9 +56,7 @@ public class ChildFirstURLClassLoader extends URLClassLoader {
                 try {
                     // checking system: jvm classes, endorsed, cmd classpath, etc.
                     c = system.loadClass(name);
-                }
-                catch (ClassNotFoundException ignored) {
-                }
+                }catch (ClassNotFoundException ignored) {}
             }
             if (c == null) {
                 try {

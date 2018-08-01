@@ -86,6 +86,7 @@ public abstract class KanelaInstrumentation {
 
         return TypeTransformation.of(
                 instrumentationDescription.getElementMatcher(),
+                instrumentationDescription.getClassLoaderRefiner(),
                 collect(bridges, BridgeDescription::makeTransformer),
                 collect(mixins, MixinDescription::makeTransformer),
                 collect(advisors, AdvisorDescription::makeTransformer),

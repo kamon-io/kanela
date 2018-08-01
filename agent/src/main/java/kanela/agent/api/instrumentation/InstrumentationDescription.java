@@ -20,7 +20,9 @@ import io.vavr.Function4;
 import io.vavr.control.Option;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
+import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
+import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -35,11 +37,10 @@ import java.util.function.Supplier;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-import lombok.Value;
-
 @Value
 public class InstrumentationDescription {
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
+    Option<ClassLoaderRefiner> classLoaderRefiner;
     List<MixinDescription> mixins;
     List<BridgeDescription> bridges;
     List<AdvisorDescription> advisors;
@@ -47,6 +48,7 @@ public class InstrumentationDescription {
 
     private InstrumentationDescription(Builder builder) {
         this.elementMatcher  = builder.elementMatcher;
+        this.classLoaderRefiner = builder.classLoaderRefiner;
         this.mixins = builder.mixins;
         this.bridges = builder.bridges;
         this.advisors = builder.advisors;
@@ -55,10 +57,12 @@ public class InstrumentationDescription {
 
     public static class Builder {
         private Option<ElementMatcher<? super TypeDescription>> elementMatcher;
+        private Option<ClassLoaderRefiner> classLoaderRefiner = Option.none();
         private final List<MixinDescription> mixins =  new ArrayList<>();
         private final List<BridgeDescription> bridges =  new ArrayList<>();
         private final List<AdvisorDescription> advisors = new ArrayList<>();
         private final List<AgentBuilder.Transformer> transformers = new ArrayList<>();
+
 
         Builder addElementMatcher(Supplier<ElementMatcher<? super TypeDescription>> f) {
             elementMatcher = Option.of(f.get());
@@ -72,6 +76,11 @@ public class InstrumentationDescription {
 
         public Builder withBridge(Supplier<Class<?>> clazz) {
             bridges.add(BridgeDescription.of(clazz.get()));
+            return this;
+        }
+
+        public Builder withClassLoaderRefiner(Supplier<ClassLoaderRefiner> clazz) {
+            classLoaderRefiner = Option.of(clazz.get());
             return this;
         }
 

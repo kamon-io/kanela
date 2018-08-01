@@ -15,7 +15,7 @@
  */
 package kanela.agent.util;
 
-import lombok.SneakyThrows;
+import io.vavr.control.Try;
 import lombok.val;
 
 import java.util.Properties;
@@ -37,11 +37,12 @@ public class BuildInfo {
         return BuildInfo.timestamp;
     }
 
-    @SneakyThrows
     private static Properties loadProperties() {
-        val properties = new Properties();
-        val is = BuildInfo.class.getResourceAsStream("/build-info.properties");
-        properties.load(is);
-        return properties;
+        return Try.of(() -> {
+            val properties = new Properties();
+            val is = BuildInfo.class.getResourceAsStream("/build-info.properties");
+            properties.load(is);
+            return properties;
+        }).getOrElseThrow((cause) -> new RuntimeException("Error trying to read build-info.properties", cause));
     }
 }
