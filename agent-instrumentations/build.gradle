@@ -50,7 +50,7 @@ dependencies {
         transitive = false
     }
 
-    implementation('io.kamon:kamon-annotation_2.12:1.0.2') {
+    implementation('io.kamon:kamon-annotation_2.12:1.0.3') {
         transitive = false
     }
 
@@ -58,7 +58,7 @@ dependencies {
         transitive = false
     }
 
-    implementation('io.kamon:kamon-okhttp3_2.12:1.0.1') {
+    implementation('io.kamon:kamon-okhttp3_2.12:1.0.2') {
         transitive = false
     }
 
