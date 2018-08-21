@@ -16,9 +16,13 @@
 
 package kanela.agent.api.instrumentation;
 
+import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
+
 import io.vavr.Function0;
 import io.vavr.Function1;
 import io.vavr.Function2;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
@@ -32,6 +36,7 @@ import net.bytebuddy.description.ByteCodeElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
@@ -111,6 +116,12 @@ public abstract class KanelaInstrumentation {
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
+    public void forRawMatching(Supplier<ElementMatcher<? super TypeDescription>> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+        val builder = new InstrumentationDescription.Builder();
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(f.get())));
+        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+    }
+
     public void forTypesAnnnotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(isAnnotatedWith(named(f.get())))));
@@ -129,6 +140,8 @@ public abstract class KanelaInstrumentation {
     public ElementMatcher.Junction<MethodDescription> isConstructor() { return ElementMatchers.isConstructor();}
 
     public ElementMatcher.Junction<MethodDescription> isAbstract() { return ElementMatchers.isAbstract();}
+
+    public Junction<? super TypeDescription> anyTypes(String... names) { return io.vavr.collection.List.of(names).map(ElementMatchers::named).reduce(ElementMatcher.Junction::or); }
 
     public ElementMatcher.Junction<MethodDescription> takesArguments(Integer quantity) { return ElementMatchers.takesArguments(quantity);}
 
