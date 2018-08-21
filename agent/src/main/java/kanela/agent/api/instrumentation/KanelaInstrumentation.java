@@ -116,7 +116,7 @@ public abstract class KanelaInstrumentation {
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
     }
 
-    public void forMatchedTypeBy(Supplier<ElementMatcher<? super TypeDescription>> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public void forRawMatching(Supplier<ElementMatcher<? super TypeDescription>> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
         val builder = new InstrumentationDescription.Builder();
         builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(f.get())));
         instrumentationDescriptions.add(instrumentationFunction.apply(builder));
@@ -141,19 +141,7 @@ public abstract class KanelaInstrumentation {
 
     public ElementMatcher.Junction<MethodDescription> isAbstract() { return ElementMatchers.isAbstract();}
 
-    public Optional<Junction<? super TypeDescription>> anyTypes(String... names) {
-        if (names.length > 0) {
-            val  namesList = io.vavr.collection.List.of(names);
-            val namedMatcher = ElementMatchers.named(namesList.head());
-            val namesMatcher = namesList.tail()
-                .foldLeft(namedMatcher,
-                    (BiFunction<Junction<? super TypeDescription>, String, Junction<? super TypeDescription>>)
-                        (matcher, nextName) -> matcher.or(ElementMatchers.named(nextName)));
-            return Optional.of(namesMatcher);
-        } else {
-            return Optional.empty();
-        }
-    }
+    public Junction<? super TypeDescription> anyTypes(String... names) { return io.vavr.collection.List.of(names).map(ElementMatchers::named).reduce(ElementMatcher.Junction::or); }
 
     public ElementMatcher.Junction<MethodDescription> takesArguments(Integer quantity) { return ElementMatchers.takesArguments(quantity);}
 
