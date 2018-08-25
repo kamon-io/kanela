@@ -20,6 +20,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigResolveOptions;
+import io.vavr.Tuple;
 import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
@@ -34,8 +35,10 @@ import org.pmw.tinylog.Level;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.Function;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -47,6 +50,7 @@ public class KanelaConfiguration {
     DumpConfig dump;
     CircuitBreakerConfig circuitBreakerConfig;
     OldGarbageCollectorConfig oldGarbageCollectorConfig;
+    ClassReplacerConfig classReplacerConfig;
     Boolean showBanner;
     HashMap extraParams;
     Level logLevel;
@@ -70,6 +74,7 @@ public class KanelaConfiguration {
         this.dump = new DumpConfig(config);
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
+        this.classReplacerConfig =  new ClassReplacerConfig(config);
         this.logLevel = getLoggerLevel(config);
         this.manifestProperties = getAllPropertiesFromManifest();
     }
@@ -172,6 +177,26 @@ public class KanelaConfiguration {
 
         public boolean isCircuitBreakerRunning() {
             return (boolean) KanelaConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
+        }
+    }
+
+    @Value
+    public class ClassReplacerConfig {
+        List<String> classesToReplace;
+
+        ClassReplacerConfig(Config config) {
+            this.classesToReplace = List.ofAll(Try.of(() -> config.getStringList("class-replacer.replace")).getOrElse(Collections.emptyList()));
+        }
+
+        public io.vavr.collection.Map<String, String> getClassesToReplace() {
+            return classesToReplace
+                    .map(s -> s.split("=>"))
+                    .map(classes -> Tuple.of(toInternalName(classes[0]), toInternalName(classes[1])))
+                    .toMap(Function.identity());
+        }
+
+        private String toInternalName(String b) {
+            return b.replace('.', '/');
         }
     }
 

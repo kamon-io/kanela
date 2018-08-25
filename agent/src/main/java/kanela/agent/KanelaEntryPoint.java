@@ -16,6 +16,7 @@
 
 package kanela.agent;
 
+import kanela.agent.api.instrumentation.replacer.ClassReplacer;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
@@ -40,11 +41,14 @@ public class KanelaEntryPoint {
      * @param instrumentation {@link Instrumentation}
      */
     private static void start(final String arguments, final Instrumentation instrumentation) {
+        val configuration = KanelaConfiguration.instance();
+
+        ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
+
         runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
                 BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
-                val configuration = KanelaConfiguration.instance();
                 KanelaBanner.show(configuration);
 
                 ExtensionLoader.attach(arguments, instrumentation);
