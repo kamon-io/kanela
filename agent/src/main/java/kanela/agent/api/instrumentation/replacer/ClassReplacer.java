@@ -22,6 +22,7 @@ import kanela.agent.util.annotation.Experimental;
 import kanela.agent.util.conf.KanelaConfiguration.ClassReplacerConfig;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
+import lombok.val;
 import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.jar.asm.commons.ClassRemapper;
@@ -30,24 +31,18 @@ import net.bytebuddy.jar.asm.commons.SimpleRemapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-
-import static java.text.MessageFormat.format;
 
 @Value
 @Experimental
 public class ClassReplacer {
 
-    ClassReplacerConfig classReplacerConfig;
-
     public static void attach(Instrumentation instrumentation, ClassReplacerConfig configuration) {
-        if(configuration.getClassesToReplace().nonEmpty()) {
-            Try.run(() -> instrumentation.addTransformer(new ClassReplacerTransformer(configuration.getClassesToReplace())))
-                    .andThen(() -> Logger.info(() -> format("Class Replacer activated.")))
-                    .onFailure((cause) -> Logger.error(() -> "Error when trying to activate Class Replacer.", cause));
-
+        if(configuration.classesToReplace().nonEmpty()) {
+            Try.run(() -> instrumentation.addTransformer(new ClassReplacerTransformer(configuration.classesToReplace())))
+                    .andThen(() -> Logger.info(() -> "Class Replacer activated."))
+                    .onFailure((cause) -> Logger.warn(() -> "Error when trying to activate Class Replacer.", cause));
         }
     }
 
@@ -56,19 +51,17 @@ public class ClassReplacer {
         io.vavr.collection.Map<String, String> classesToReplace;
 
         @Override
-        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-            return classesToReplace.get(className).map(resource -> {
-                System.out.println("contains " + className);
-                return Try.of(() -> getBytesFromResource(className, resource, loader))
-                        .onFailure(cause -> Logger.error(() -> "Error trying to Replace Class: " + className, cause))
-                        .getOrElse(() -> classfileBuffer);
-            }).getOrElse(classfileBuffer);
+        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+            return classesToReplace.get(className)
+                    .map(resource -> Try.of(() -> remapResource(className, resource, loader))
+                    .onFailure(cause -> Logger.warn(() -> "Error trying to Replace Class: " + className, cause)).getOrElse(() -> classfileBuffer))
+                    .getOrElse(classfileBuffer);
         }
 
-        private static byte[] getBytesFromResource(String classToReplace, String resource, ClassLoader loader) throws IOException {
+        private static byte[] remapResource(String classToReplace, String resource, ClassLoader loader) throws IOException {
             try(InputStream in = loader.getResourceAsStream(resource + ".class")) {
-                ClassReader reader = new ClassReader(in);
-                ClassWriter classWriter = new ClassWriter(0);
+                val reader = new ClassReader(in);
+                val classWriter = new ClassWriter(0);
                 reader.accept(new ClassRemapper(classWriter, new SimpleRemapper(resource, classToReplace)), ClassReader.EXPAND_FRAMES);
                 return classWriter.toByteArray();
             }

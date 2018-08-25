@@ -188,7 +188,7 @@ public class KanelaConfiguration {
             this.classesToReplace = List.ofAll(Try.of(() -> config.getStringList("class-replacer.replace")).getOrElse(Collections.emptyList()));
         }
 
-        public io.vavr.collection.Map<String, String> getClassesToReplace() {
+        public io.vavr.collection.Map<String, String> classesToReplace() {
             return classesToReplace
                     .map(s -> s.split("=>"))
                     .map(classes -> Tuple.of(toInternalName(classes[0]), toInternalName(classes[1])))
