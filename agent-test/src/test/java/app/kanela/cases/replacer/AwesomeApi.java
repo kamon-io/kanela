@@ -14,8 +14,14 @@
  * =========================================================================================
  */
 
-package app.kanela.cases.multimixins
+package app.kanela.cases.replacer;
 
-class WithMultiMixinsClass2 {
-  def process: String = "Hi"
+public interface AwesomeApi {
+    public static String method(){
+        return null;
+    }
+
+    public static int otherMethod() {
+        return 0;
+    }
 }

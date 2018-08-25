@@ -24,7 +24,7 @@ import scala.collection.mutable.ListBuffer
 
 class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "Kamon agent" should "be able to attach in runtime and instrument the loaded classes" in {
+  "Kanela agent" should "be able to attach in runtime and instrument the loaded classes" in {
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
 

@@ -17,5 +17,5 @@
 package app.kanela.cases.multimixins
 
 class WithMultiMixinsClass {
-  def process: String = "HiHi"
+  def process: String = "Hi"
 }

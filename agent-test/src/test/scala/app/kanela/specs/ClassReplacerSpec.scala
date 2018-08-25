@@ -16,18 +16,13 @@
 
 package app.kanela.specs
 
-import app.kanela.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
-import app.kanela.cases.multimixins.WithMultiMixinsClass
+import app.kanela.cases.replacer.AwesomeApi
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
-
-  "Multiple Mixins over a single subType" should
-    "introduce all types appropriately" in {
-      val mixinsClass = new WithMultiMixinsClass()
-      mixinsClass.process shouldBe "Hi"
-      mixinsClass.isInstanceOf[MixinAware1] shouldBe true
-      mixinsClass.isInstanceOf[MixinAware2] shouldBe true
-      mixinsClass.isInstanceOf[MixinAware3] shouldBe true
-    }
+class ClassReplacerSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+  "Class Replacer" should
+    "replace AwesomeAPI with AwesomeApiImplementation" in {
+      AwesomeApi.method shouldBe "method"
+      AwesomeApi.otherMethod shouldBe 1
+  }
 }
