@@ -17,11 +17,10 @@
 package app.kanela.cases.replacer;
 
 public interface AwesomeApi {
-    public static String method(){
+    static String method(){
         return null;
     }
-
-    public static int otherMethod() {
+    static int otherMethod() {
         return 0;
     }
 }
