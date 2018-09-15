@@ -14,20 +14,13 @@
  * =========================================================================================
  */
 
-package app.kanela.specs
+package app.kanela.cases.replacer;
 
-import app.kanela.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
-import app.kanela.cases.multimixins.WithMultiMixinsClass
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
-
-class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
-
-  "Multiple Mixins over a single subType" should
-    "introduce all types appropriately" in {
-      val mixinsClass = new WithMultiMixinsClass()
-      mixinsClass.process shouldBe "Hi"
-      mixinsClass.isInstanceOf[MixinAware1] shouldBe true
-      mixinsClass.isInstanceOf[MixinAware2] shouldBe true
-      mixinsClass.isInstanceOf[MixinAware3] shouldBe true
+public interface AwesomeApi {
+    static String method(){
+        return null;
+    }
+    static int otherMethod() {
+        return 0;
     }
 }
