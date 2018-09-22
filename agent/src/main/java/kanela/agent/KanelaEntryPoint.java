@@ -41,13 +41,10 @@ public class KanelaEntryPoint {
      * @param instrumentation {@link Instrumentation}
      */
     private static void start(final String arguments, final Instrumentation instrumentation) {
-        val configuration = KanelaConfiguration.instance();
-
-        ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
-
         runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
                 BootstrapInjector.injectJar(instrumentation, "bootstrap");
+                val configuration = KanelaConfiguration.instance();
 
                 KanelaBanner.show(configuration);
 
@@ -57,6 +54,7 @@ public class KanelaEntryPoint {
                 Reinstrumenter.attach(instrumentation, configuration, transformers);
                 OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
                 SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+                ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
             });
         });
     }
