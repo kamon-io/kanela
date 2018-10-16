@@ -17,7 +17,5 @@
 rootProject.name = 'kanela'
 
 include 'agent'
-include 'agent-instrumentations'
-include 'agent-attacher'
 include 'agent-test'
 
