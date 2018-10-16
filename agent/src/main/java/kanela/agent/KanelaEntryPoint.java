@@ -40,11 +40,15 @@ public class KanelaEntryPoint {
      * @param arguments Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
-    private static void start(final String arguments, final Instrumentation instrumentation) {
+    private static void start(final String arguments, final Instrumentation instrumentation, boolean isRuntimeAttach) {
         runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
                 BootstrapInjector.injectJar(instrumentation, "bootstrap");
                 val configuration = KanelaConfiguration.instance();
+
+                if(isRuntimeAttach) {
+                    configuration.runtimeAttach();
+                }
 
                 KanelaBanner.show(configuration);
 
@@ -60,11 +64,10 @@ public class KanelaEntryPoint {
     }
 
     public static void premain(final String arguments, final Instrumentation instrumentation) {
-        start(arguments, instrumentation);
+        start(arguments, instrumentation, false);
     }
 
     public static void agentmain(final String arguments, final Instrumentation instrumentation) {
-        KanelaConfiguration.instance().runtimeAttach();
-        premain(arguments, instrumentation);
+        start(arguments, instrumentation, true);
     }
 }
