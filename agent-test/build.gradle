@@ -19,7 +19,7 @@ plugins {
     id 'java'
     id 'application'
     id 'scala'
-    id 'com.github.maiflai.scalatest' version '0.18'
+    id 'com.github.maiflai.scalatest' version '0.23'
 }
 
 mainClassName = 'app.kanela.JavaMainWithAgent'
@@ -30,7 +30,6 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.2.3'
     compile 'ch.qos.logback:logback-classic:1.2.3'
 
-    compile "io.kamon:kanela-agent-attacher:${agent_version}"
     compile "io.kamon:kanela-agent:${agent_version}"
     compile 'io.kamon:kanela-scala-extension_2.12:0.0.10'
 

@@ -37,7 +37,7 @@ import static kanela.agent.attacher.io.Tools.*;
 
 
 @Value
-public class Kanela {
+public class Attacher {
 
     private final static Logger log = Logger.getLogger("Kanela Attacher");
 
@@ -46,20 +46,20 @@ public class Kanela {
      */
     public static void attach()  {
         Try.of(() -> Class.forName("kanela.agent.Kanela"))
-                .flatMapTry(Kanela::kanelaJar)
+                .flatMapTry(Attacher::kanelaJar)
                 .andThen((agentJar) -> ByteBuddyAgent.attach(agentJar, getCurrentPID()))
-                .onFailure((cause) -> log.severe(() -> "Error trying to attach the Kanela Agent to process with Id: "+ getCurrentPID() + " with error: " + cause.getMessage()));
+                .onFailure((cause) -> log.severe(() -> "Error trying to attach the KanelaAttacher Agent to process with Id: "+ getCurrentPID() + " with error: " + cause.getMessage()));
     }
 
     private static Try<File> kanelaJar(Class clazz) {
         return Try.of(() -> getKanelaJar(clazz))
                 .orElse(() -> Try.of(() -> generateKanelaJar(clazz)))
-                .onFailure(cause -> log.severe(() -> "Error trying to obtain the Kanela Agent jar: " + cause.getMessage()));
+                .onFailure(cause -> log.severe(() -> "Error trying to obtain the KanelaAttacher Agent jar: " + cause.getMessage()));
     }
 
 
     /**
-     * Return the Kanela Agent Jar File .
+     * Return the KanelaAttacher Agent Jar File .
      *
      * @return Returns the kanela-agent.jar
      *
