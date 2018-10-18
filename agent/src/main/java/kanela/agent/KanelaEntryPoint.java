@@ -46,9 +46,7 @@ public class KanelaEntryPoint {
                 BootstrapInjector.injectJar(instrumentation, "bootstrap");
                 val configuration = KanelaConfiguration.instance();
 
-                if(isRuntimeAttach) {
-                    configuration.runtimeAttach();
-                }
+                if(isRuntimeAttach) configuration.runtimeAttach();
 
                 KanelaBanner.show(configuration);
 

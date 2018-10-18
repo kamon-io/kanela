@@ -18,7 +18,12 @@ package kanela.agent;
 
 import java.lang.instrument.Instrumentation;
 
+
 public final class Kanela {
+
+    private static volatile Instrumentation instrumentation;
+
+    private Kanela() {}
 
     /**
      * JVM hook to statically load the javaagent at startup.
@@ -30,7 +35,10 @@ public final class Kanela {
      * @param instrumentation {@link Instrumentation}
      */
     public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
-        KanelaEntryPoint.premain(args, instrumentation);
+        if(Kanela.instrumentation == null) {
+            Kanela.instrumentation = instrumentation;
+            KanelaEntryPoint.premain(args, instrumentation);
+        }
     }
 
     /**
@@ -43,6 +51,9 @@ public final class Kanela {
      * @param instrumentation {@link Instrumentation}
      */
     public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
-        KanelaEntryPoint.agentmain(args, instrumentation);
+        if(Kanela.instrumentation == null) {
+            Kanela.instrumentation = instrumentation;
+            KanelaEntryPoint.agentmain(args, instrumentation);
+        }
     }
 }
