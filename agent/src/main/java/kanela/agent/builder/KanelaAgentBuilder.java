@@ -26,8 +26,8 @@ import kanela.agent.util.ListBuilder;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
-import lombok.var;
 import lombok.val;
+import lombok.var;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
@@ -94,6 +94,10 @@ class KanelaAgentBuilder {
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable() || moduleDescription.shouldInjectInBootstrap()) {
             Logger.info(() -> "Retransformation Strategy activated for: " + moduleDescription.getName());
+
+            if(moduleDescription.isDisableClassFormatChanges())
+                agentBuilder = agentBuilder.disableClassFormatChanges(); // enable restrictions imposed by most VMs and also HotSpot.
+
             agentBuilder = agentBuilder
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());

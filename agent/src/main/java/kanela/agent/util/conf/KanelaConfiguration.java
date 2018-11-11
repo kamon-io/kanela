@@ -25,7 +25,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import kanela.agent.util.Manifests;
 import kanela.agent.util.log.Logger;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,7 +36,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.function.Function;
 
 import static io.vavr.API.*;
@@ -56,7 +54,6 @@ public class KanelaConfiguration {
     Level logLevel;
     @Getter(AccessLevel.PRIVATE)
     Config config;
-    Set<String> manifestProperties;
 
     private static class Holder {
         private static final KanelaConfiguration Instance = new KanelaConfiguration();
@@ -76,7 +73,6 @@ public class KanelaConfiguration {
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
         this.classReplacerConfig =  new ClassReplacerConfig(config);
         this.logLevel = getLoggerLevel(config);
-        this.manifestProperties = getAllPropertiesFromManifest();
     }
 
     public List<ModuleConfiguration> getAgentModules() {
@@ -96,13 +92,12 @@ public class KanelaConfiguration {
                     val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                     val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
-                    val bundleName = Try.of(() -> moduleConfig.getString("bundle-name")).getOrElse("unknown");
+                    val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), bundleName);
+                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
-                .filter(this::byPropertyName)
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
     }
@@ -120,7 +115,7 @@ public class KanelaConfiguration {
         @Getter(AccessLevel.NONE)
         boolean legacyBytecodeSupport;
         File tempDir;
-        String bundleName;
+        boolean disableClassFormatChanges;
 
         public boolean shouldInjectInBootstrap() {
             return injectInBootstrap;
@@ -274,20 +269,9 @@ public class KanelaConfiguration {
             );
     }
 
-    private Set<String> getAllPropertiesFromManifest() {
-        return Manifests.getAllPropertiesFromTitleOrBundle();
-    }
-
     private boolean isEnabled(ModuleConfiguration module) {
         if (module.enabled) return true;
         Logger.info(() -> "The Module: " + module.getName() + " is disabled");
-        return false;
-    }
-
-    private boolean byPropertyName(ModuleConfiguration module) {
-        if (module.bundleName.equalsIgnoreCase("unknown")) return true;
-        if(manifestProperties.contains(module.bundleName)) return true;
-        Logger.info(() -> "The Module: " + module.getName() + " is disabled because not found the property in the manifest");
         return false;
     }
 

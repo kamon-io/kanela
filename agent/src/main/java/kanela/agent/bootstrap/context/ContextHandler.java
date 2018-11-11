@@ -38,16 +38,16 @@ import java.util.concurrent.Callable;
 
 public final class ContextHandler {
 
-    private static ContextProvider contexProvider = ContextProvider.NoOp.INSTANCE;
+    private static ContextProvider contextProvider = ContextProvider.NoOp.INSTANCE;
 
     private ContextHandler() {}
 
-    public static void setContexProvider(ContextProvider contextProvider) {
+    public static void setContextProvider(ContextProvider contextProvider) {
         if(contextProvider != ContextProvider.NoOp.INSTANCE) {
-            ContextHandler.contexProvider = contextProvider;
+            ContextHandler.contextProvider = contextProvider;
         }
     }
 
-    public static Runnable wrapInContextAware(Runnable runnable) { return contexProvider.wrapInContextAware(runnable);}
-    public static <A> Callable wrapInContextAware(Callable<A> callable) { return contexProvider.wrapInContextAware(callable);}
+    public static Runnable wrapInContextAware(Runnable runnable) { return contextProvider.wrapInContextAware(runnable);}
+    public static <A> Callable wrapInContextAware(Callable<A> callable) { return contextProvider.wrapInContextAware(callable);}
 }
