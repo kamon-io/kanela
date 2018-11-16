@@ -58,7 +58,7 @@ public class AnalyzedClass implements ClassMatcher {
                 return (ClassMatcher) new AnalyzedClass(refiner, extractFields(classNode), extractMethods(classNode));
             }
         })
-        .onFailure((cause) -> Logger.error(() -> "Error trying to build an AnalyzedClass ", cause))
+        .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
         .getOrElse(new NoOpAnalyzedClass());
     }
 
@@ -130,4 +130,3 @@ public class AnalyzedClass implements ClassMatcher {
         }
     }
 }
-
