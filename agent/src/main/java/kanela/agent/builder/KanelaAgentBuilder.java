@@ -16,7 +16,9 @@
 
 package kanela.agent.builder;
 
+import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.api.instrumentation.TypeTransformation;
+import kanela.agent.api.instrumentation.listener.DamInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.DefaultInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.dumper.ClassDumperListener;
@@ -63,6 +65,8 @@ class KanelaAgentBuilder {
             transformers.addAll(typeTransformation.getBridges());
             transformers.addAll(typeTransformation.getMixins());
             transformers.addAll(typeTransformation.getTransformations());
+
+            DamInstrumentationListener.instance().add(moduleDescription.getName(), typeTransformation);
 
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent
@@ -128,6 +132,7 @@ class KanelaAgentBuilder {
         val listeners = new ArrayList<AgentBuilder.Listener>();
         if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
+        listeners.add(DamInstrumentationListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }
 
