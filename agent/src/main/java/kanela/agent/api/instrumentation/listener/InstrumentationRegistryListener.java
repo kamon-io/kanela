@@ -37,9 +37,14 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
     private static InstrumentationRegistryListener _instance;
 
     private Map<String, List<Tuple2<TypeTransformation, Boolean>>> moduleTransformers = HashMap.empty();
+    private Map<String, List<Throwable>> errors = HashMap.empty();
 
     public Map<String, Map<String, Boolean>> getRecorded() {
         return moduleTransformers.mapValues(value -> value.toMap((t) -> Tuple.of(t._1.getInstrumentationName(), t._2)));
+    }
+
+    public Map<String, List<Throwable>> getErrors() {
+        return errors;
     }
 
     public void register(String moduleName, TypeTransformation typeTransformation) {
@@ -69,18 +74,11 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
 
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-        moduleTransformers.map(
+        moduleTransformers = moduleTransformers.map(
                 (moduleName, transformations) -> Tuple.of(moduleName, transformations.map(transformation -> {
                     if (transformation._1.getElementMatcher().map(em -> em.matches(typeDescription)).getOrElse(false) &&
                         ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(transformation._1.getClassLoaderRefiner()).matches(classLoader)
                     ) {
-                        Logger.info(() -> format("++++++++++++++++> ({3} - {4} - {5}) Transformed => {0} and loaded from {1} and {2}",
-                                typeDescription,
-                                (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName(),
-                                dynamicType.toString(),
-                                moduleName,
-                                transformation._1.getInstrumentationName(),
-                                transformation._1.getTransformations().size() + transformation._1.getBridges().size() + transformation._1.getMixins().size()));
                         return transformation.update2(true);
                     } else {
                         return transformation;
@@ -90,6 +88,7 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
 
     @Override
     public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-        Logger.error(() -> format("!!!!!!!!!!!!!!!!> Error for: {0}", typeName), throwable);
+        errors = errors.computeIfPresent(typeName, (tn, errs) -> errs.append(throwable))._2;
+        errors = errors.computeIfAbsent(typeName, (tn) -> List.of(throwable))._2;
     }
 }
