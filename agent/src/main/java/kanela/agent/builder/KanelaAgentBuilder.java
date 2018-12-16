@@ -55,6 +55,7 @@ class KanelaAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
+            DamInstrumentationListener.instance().add(moduleDescription.getName(), typeTransformation);
             typeTransformations.add(typeTransformation);
         }
     }
@@ -65,8 +66,6 @@ class KanelaAgentBuilder {
             transformers.addAll(typeTransformation.getBridges());
             transformers.addAll(typeTransformation.getMixins());
             transformers.addAll(typeTransformation.getTransformations());
-
-            DamInstrumentationListener.instance().add(moduleDescription.getName(), typeTransformation);
 
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent

@@ -16,18 +16,18 @@
 
 package kanela.agent.api.instrumentation.listener;
 
-import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
 import kanela.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static java.text.MessageFormat.format;
@@ -37,10 +37,19 @@ public class DamInstrumentationListener extends AgentBuilder.Listener.Adapter {
 
     private static DamInstrumentationListener _instance;
 
-    private Map<String, TypeTransformation> moduleTransformers = new HashMap<>();
+    private Map<String, List<TypeTransformation>> moduleTransformers = new HashMap<>();
 
     public void add(String moduleName, TypeTransformation typeTransformation) {
-        moduleTransformers.put(moduleName, typeTransformation);
+        moduleTransformers.getOrDefault(moduleName, new LinkedList<>()).add(typeTransformation);
+        moduleTransformers.computeIfPresent(moduleName, (mn, tts) -> {
+            tts.add(typeTransformation);
+            return tts;
+        });
+        moduleTransformers.computeIfAbsent(moduleName, (m) -> {
+            List<TypeTransformation> l = new LinkedList<>();
+            l.add(typeTransformation);
+            return l;
+        });
     }
 
     // needed for a single instance between classloaders
@@ -69,13 +78,23 @@ public class DamInstrumentationListener extends AgentBuilder.Listener.Adapter {
 
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-        for (Map.Entry<String, TypeTransformation> e : moduleTransformers.entrySet()) {
-            if (
-                    e.getValue().getElementMatcher().map(em -> em.matches(typeDescription)).getOrElse(false) &&
-                            ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(e.getValue().getClassLoaderRefiner()).matches(classLoader)
-            ) {
-                Logger.info(() -> format("++++++++++++++++> ({3}) Transformed => {0} and loaded from {1} and {2}", typeDescription, (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName(), dynamicType.toString(), e.getKey()));
+        for (Map.Entry<String, List<TypeTransformation>> e : moduleTransformers.entrySet()) {
+            for (TypeTransformation t : e.getValue()) {
+                if (
+                        t.getElementMatcher().map(em -> em.matches(typeDescription)).getOrElse(false) &&
+                        ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(t.getClassLoaderRefiner()).matches(classLoader)
+                ) {
+                    Logger.info(() -> format("++++++++++++++++> ({3} - {4} - {5}) Transformed => {0} and loaded from {1} and {2}",
+                            typeDescription,
+                            (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName(),
+                            dynamicType.toString(),
+                            e.getKey(),
+                            t.getInstrumentationName(),
+                            t.getTransformations().size() + t.getBridges().size() + t.getMixins().size()));
 
+                } else {
+                    Logger.warn(() -> "WTF???! " + typeDescription.toString());
+                }
             }
         }
     }

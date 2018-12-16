@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Value
 public class TypeTransformation {
-
+    String instrumentationName;
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     Option<ClassLoaderRefiner> classLoaderRefiner;
     List<AgentBuilder.Transformer> bridges;
@@ -39,7 +39,8 @@ public class TypeTransformation {
     List<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
-    static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher,
+    static TypeTransformation of(String instrumentationName,
+                                 Option<ElementMatcher<? super TypeDescription>> elementMatcher,
                                  Option<ClassLoaderRefiner> classLoaderRefiner,
                                  List<AgentBuilder.Transformer> bridges,
                                  List<AgentBuilder.Transformer> mixins,
@@ -49,7 +50,7 @@ public class TypeTransformation {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        return new TypeTransformation(elementMatcher, classLoaderRefiner, bridges, mixins, transformations);
+        return new TypeTransformation(instrumentationName ,elementMatcher, classLoaderRefiner, bridges, mixins, transformations);
     }
 
     public Boolean isActive() {
