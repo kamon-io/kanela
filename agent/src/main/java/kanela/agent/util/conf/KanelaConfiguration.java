@@ -45,6 +45,7 @@ import static java.text.MessageFormat.format;
 @Value
 public class KanelaConfiguration {
     Boolean debugMode;
+    Boolean instrumentationRegistryEnabled;
     DumpConfig dump;
     CircuitBreakerConfig circuitBreakerConfig;
     OldGarbageCollectorConfig oldGarbageCollectorConfig;
@@ -66,6 +67,7 @@ public class KanelaConfiguration {
     private KanelaConfiguration() {
         this.config = loadConfig();
         this.debugMode = getDebugMode(config);
+        this.instrumentationRegistryEnabled = getInstrumentationRegistryEnabled(config);
         this.showBanner = getShowBanner(config);
         this.extraParams = new HashMap();
         this.dump = new DumpConfig(config);
@@ -238,6 +240,10 @@ public class KanelaConfiguration {
 
     private Boolean getDebugMode(Config config) {
         return Try.of(() -> config.getBoolean("debug-mode")).getOrElse(false);
+    }
+
+    private Boolean getInstrumentationRegistryEnabled(Config config) {
+        return Try.of(() -> config.getBoolean("instrumentation-registry-enabled")).getOrElse(false);
     }
 
     private Boolean getShowBanner(Config config) {
