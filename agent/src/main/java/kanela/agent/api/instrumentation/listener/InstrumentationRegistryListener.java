@@ -36,11 +36,11 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
 
     private static InstrumentationRegistryListener _instance;
 
-    private Map<String, List<Tuple2<TypeTransformation, Boolean>>> moduleTransformers = HashMap.empty();
+    private Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> moduleTransformers = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
-    public Map<String, Map<String, Boolean>> getRecorded() {
-        return moduleTransformers.mapValues(value -> value.toMap((t) -> Tuple.of(t._1.getInstrumentationName(), t._2)));
+    public Map<String, Map<String, List<String>>> getRecorded() {
+        return moduleTransformers.mapValues(value -> value.toMap((t) -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName))));
     }
 
     public Map<String, List<Throwable>> getErrors() {
@@ -48,8 +48,8 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
     }
 
     public void register(String moduleName, TypeTransformation typeTransformation) {
-        moduleTransformers = moduleTransformers.computeIfPresent(moduleName, (mn, tts) -> tts.append(Tuple.of(typeTransformation, false)))._2;
-        moduleTransformers = moduleTransformers.computeIfAbsent(moduleName, (m) -> List.of(Tuple.of(typeTransformation, false)))._2;
+        moduleTransformers = moduleTransformers.computeIfPresent(moduleName, (mn, tts) -> tts.append(Tuple.of(typeTransformation, List.empty())))._2;
+        moduleTransformers = moduleTransformers.computeIfAbsent(moduleName, (m) -> List.of(Tuple.of(typeTransformation, List.empty())))._2;
     }
 
     // needed for a single instance between classloaders
@@ -79,7 +79,7 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
                     if (transformation._1.getElementMatcher().map(em -> em.matches(typeDescription)).getOrElse(false) &&
                         ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(transformation._1.getClassLoaderRefiner()).matches(classLoader)
                     ) {
-                        return transformation.update2(true);
+                        return transformation.update2(transformation._2.append(typeDescription));
                     } else {
                         return transformation;
                     }
