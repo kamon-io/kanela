@@ -55,7 +55,7 @@ class KanelaAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
-            if (config.getInstrumentationRegistryEnabled()) {
+            if (config.getInstrumentationRegistryConfig().isEnabled()) {
                 InstrumentationRegistryListener.instance().register(moduleDescription.getName(), typeTransformation);
             }
             typeTransformations.add(typeTransformation);
@@ -133,7 +133,7 @@ class KanelaAgentBuilder {
         val listeners = new ArrayList<AgentBuilder.Listener>();
         if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
-        if (config.getInstrumentationRegistryEnabled()) listeners.add(InstrumentationRegistryListener.instance());
+        if (config.getInstrumentationRegistryConfig().isEnabled()) listeners.add(InstrumentationRegistryListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }
 

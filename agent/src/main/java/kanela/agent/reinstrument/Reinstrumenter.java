@@ -19,6 +19,7 @@ package kanela.agent.reinstrument;
 
 import io.vavr.collection.List;
 import io.vavr.control.Try;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.broker.EventBroker;
 import kanela.agent.broker.Subscribe;
 import kanela.agent.builder.KanelaFileTransformer;
@@ -51,6 +52,7 @@ public class Reinstrumenter {
 
     @Subscribe
     public void onStopModules(ReinstrumentationProtocol.StopModules stopEvent) {
+        InstrumentationRegistryListener.instance().stop();
         Logger.warn(() -> "Trying to stop modules.....");
         val stoppables = this.transformers.filter(KanelaFileTransformer::isStoppable)
                                           .map(KanelaFileTransformer::getClassFileTransformer)
