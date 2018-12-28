@@ -23,6 +23,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import kanela.agent.api.instrumentation.TypeTransformation;
+import kanela.agent.bootstrap.dispatcher.Dispatcher;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
 import kanela.agent.util.conf.KanelaConfiguration;
 import lombok.val;
@@ -33,9 +34,11 @@ import net.bytebuddy.utility.JavaModule;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
 
+    private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
     private static InstrumentationRegistryListener _instance;
     private Optional<EmbeddedHttpServer> embeddedHttpServer = Optional.empty();
 
@@ -63,24 +66,11 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         moduleTransformers = moduleTransformers.computeIfAbsent(moduleName, (m) -> List.of(Tuple.of(typeTransformation, List.empty())))._2;
     }
 
-    // needed for a single instance between classloaders
-    private static Class getClass(String classname)
-            throws ClassNotFoundException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if(classLoader == null)
-            classLoader = InstrumentationRegistryListener.class.getClassLoader();
-        return (classLoader.loadClass(classname));
-    }
-
     public static InstrumentationRegistryListener instance() {
-        if(_instance == null) {
-            try {
-                _instance = (InstrumentationRegistryListener) getClass("kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener").newInstance();
-            } catch (InstantiationException | ClassNotFoundException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return _instance;
+        return Dispatcher.computeIfAbsent(
+                InstrumentationRegistryListener.DISPATCHER_KEY,
+                k -> new InstrumentationRegistryListener()
+        );
     }
 
     @Override
@@ -125,6 +115,41 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         return sb.toString();
     }
 
+    public String scrapeDataJson() {
+        StringJoiner sj = new StringJoiner(",", "{", "}");
+        this.getRecorded().forEach(
+                (s, m) -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("\"");
+                    sb.append(s);
+                    sb.append("\":[");
+                    StringJoiner sjj = new StringJoiner(",");
+                    m.forEach(
+                            (ss, mm) -> {
+                                StringBuilder sbb = new StringBuilder();
+                                sbb.append("{");
+                                sbb.append("\"");
+                                sbb.append(ss);
+                                sbb.append("\":[");
+                                StringJoiner sjjj = new StringJoiner(",");
+                                mm.forEach(i -> {
+                                    StringBuilder sbbb = new StringBuilder();
+                                    sbbb.append("\"");
+                                    sbbb.append(i);
+                                    sbbb.append("\"");
+                                    sjjj.add(sbbb.toString());
+                                });
+                                sbb.append(sjjj.toString());
+                                sbb.append("]}");
+                                sjj.add(sbb.toString());
+                            });
+                    sb.append(sjj.toString());
+                    sb.append("]");
+                    sj.add(sb.toString());
+                });
+        return sj.toString();
+    }
+
     public void stop() {
         stopEmbeddedServer();
     }
@@ -135,7 +160,11 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         }
 
         public NanoHTTPD.Response serve(NanoHTTPD.IHTTPSession session) {
-            return newFixedLengthResponse(Response.Status.OK, "text/plain; version=0.0.4; charset=utf-8", scrapeData());
+            if(session.getUri().endsWith("json")) {
+                return newFixedLengthResponse(Response.Status.OK, "application/json", scrapeDataJson());
+            } else {
+                return newFixedLengthResponse(Response.Status.OK, "text/plain; version=0.0.4; charset=utf-8", scrapeData());
+            }
         }
     }
 
