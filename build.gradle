@@ -54,7 +54,6 @@ allprojects {
 
     dependencies {
         compile 'io.vavr:vavr:0.9.2'
-        compile 'org.nanohttpd:nanohttpd:2.3.1'
         compileOnly 'org.projectlombok:lombok:1.18.2'
 
         agent(kamon_agent_dep)

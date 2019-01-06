@@ -16,7 +16,6 @@
 
 package kanela.agent.api.instrumentation.listener;
 
-import fi.iki.elonen.NanoHTTPD;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
@@ -25,36 +24,29 @@ import io.vavr.collection.Map;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.bootstrap.dispatcher.Dispatcher;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
-import kanela.agent.util.conf.KanelaConfiguration;
-import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.StringJoiner;
-
 public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
 
     private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
-    private static InstrumentationRegistryListener _instance;
-    private Optional<EmbeddedHttpServer> embeddedHttpServer = Optional.empty();
+    private final InstrumentationRegistryListenerServer server;
 
     private Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> moduleTransformers = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
     InstrumentationRegistryListener() {
-        try {
-            startEmbeddedServer(KanelaConfiguration.instance());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        server = new InstrumentationRegistryListenerServer();
     }
 
     public Map<String, Map<String, List<String>>> getRecorded() {
-        return moduleTransformers.mapValues(value -> value.toMap((t) -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName))));
+        return moduleTransformers.mapValues(
+                value -> value.toMap(
+                        t -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName))
+                )
+        );
     }
 
     public Map<String, List<Throwable>> getErrors() {
@@ -93,93 +85,8 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         errors = errors.computeIfAbsent(typeName, (tn) -> List.of(throwable))._2;
     }
 
-    public String scrapeData() {
-        StringBuilder sb = new StringBuilder();
-        this.getRecorded().forEach(
-                (s, m) -> {
-                    sb.append("*─ ");
-                    sb.append(s);
-                    sb.append("\n");
-                    m.forEach(
-                            (ss, mm) -> {
-                                sb.append(" ├─ ");
-                                sb.append(ss);
-                                sb.append("\n");
-                                mm.forEach(i -> {
-                                    sb.append(" │└─ ");
-                                    sb.append(i);
-                                    sb.append("\n");
-                                });
-                            });
-                });
-        return sb.toString();
-    }
-
-    public String scrapeDataJson() {
-        StringJoiner sj = new StringJoiner(",", "{", "}");
-        this.getRecorded().forEach(
-                (s, m) -> {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("\"");
-                    sb.append(s);
-                    sb.append("\":[");
-                    StringJoiner sjj = new StringJoiner(",");
-                    m.forEach(
-                            (ss, mm) -> {
-                                StringBuilder sbb = new StringBuilder();
-                                sbb.append("{");
-                                sbb.append("\"");
-                                sbb.append(ss);
-                                sbb.append("\":[");
-                                StringJoiner sjjj = new StringJoiner(",");
-                                mm.forEach(i -> {
-                                    StringBuilder sbbb = new StringBuilder();
-                                    sbbb.append("\"");
-                                    sbbb.append(i);
-                                    sbbb.append("\"");
-                                    sjjj.add(sbbb.toString());
-                                });
-                                sbb.append(sjjj.toString());
-                                sbb.append("]}");
-                                sjj.add(sbb.toString());
-                            });
-                    sb.append(sjj.toString());
-                    sb.append("]");
-                    sj.add(sb.toString());
-                });
-        return sj.toString();
-    }
-
     public void stop() {
-        stopEmbeddedServer();
-    }
-
-    private class EmbeddedHttpServer extends NanoHTTPD {
-        public EmbeddedHttpServer(String hostname, int port) {
-            super(hostname, port);
-        }
-
-        public NanoHTTPD.Response serve(NanoHTTPD.IHTTPSession session) {
-            if(session.getUri().endsWith("json")) {
-                return newFixedLengthResponse(Response.Status.OK, "application/json", scrapeDataJson());
-            } else {
-                return newFixedLengthResponse(Response.Status.OK, "text/plain; version=0.0.4; charset=utf-8", scrapeData());
-            }
-        }
-    }
-
-
-    private void startEmbeddedServer(KanelaConfiguration config) throws IOException {
-        val server = new EmbeddedHttpServer(
-                config.getInstrumentationRegistryConfig().getHostname(),
-                config.getInstrumentationRegistryConfig().getPort());
-
-        server.start();
-        embeddedHttpServer = Optional.of(server);
-    }
-
-    private void stopEmbeddedServer() {
-        embeddedHttpServer.ifPresent(NanoHTTPD::stop);
+        server.stop();
     }
 }
 
