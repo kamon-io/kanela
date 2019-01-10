@@ -18,6 +18,7 @@ package kanela.agent.api.instrumentation.listener;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import io.vavr.Value;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -32,25 +33,20 @@ import net.bytebuddy.utility.JavaModule;
 public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
 
     private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
-    private final InstrumentationRegistryListenerServer server;
 
     private Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> moduleTransformers = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
-    InstrumentationRegistryListener() {
-        server = new InstrumentationRegistryListenerServer();
-    }
-
-    public Map<String, Map<String, List<String>>> getRecorded() {
+    public java.util.Map<String, java.util.Map<String, java.util.List<String>>> getRecorded() {
         return moduleTransformers.mapValues(
                 value -> value.toMap(
-                        t -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName))
-                )
-        );
+                        t -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName).toJavaList())
+                ).toJavaMap()
+        ).toJavaMap();
     }
 
-    public Map<String, List<Throwable>> getErrors() {
-        return errors;
+    public java.util.Map<String, java.util.List<Throwable>> getErrors() {
+        return errors.mapValues(Value::toJavaList).toJavaMap();
     }
 
     public void register(String moduleName, TypeTransformation typeTransformation) {
@@ -86,7 +82,6 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
     }
 
     public void stop() {
-        server.stop();
     }
 }
 
