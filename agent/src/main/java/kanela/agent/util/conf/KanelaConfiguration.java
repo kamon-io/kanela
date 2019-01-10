@@ -167,13 +167,9 @@ public class KanelaConfiguration {
     @Value
     public class InstrumentationRegistryConfig {
         boolean enabled;
-        String hostname;
-        Integer port;
 
         InstrumentationRegistryConfig(Config config) {
             this.enabled = Try.of(() -> config.getBoolean("instrumentation-registry.enabled")).getOrElse(false);
-            this.hostname = Try.of(() -> config.getString("instrumentation-registry.hostname")).getOrElse("localhost");
-            this.port = Try.of(() -> config.getInt("instrumentation-registry.port")).getOrElse(8888);
         }
     }
 
