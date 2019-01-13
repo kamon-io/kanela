@@ -52,7 +52,6 @@ public class Reinstrumenter {
 
     @Subscribe
     public void onStopModules(ReinstrumentationProtocol.StopModules stopEvent) {
-        InstrumentationRegistryListener.instance().stop();
         Logger.warn(() -> "Trying to stop modules.....");
         val stoppables = this.transformers.filter(KanelaFileTransformer::isStoppable)
                                           .map(KanelaFileTransformer::getClassFileTransformer)

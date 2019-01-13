@@ -80,8 +80,5 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         errors = errors.computeIfPresent(typeName, (tn, errs) -> errs.append(throwable))._2;
         errors = errors.computeIfAbsent(typeName, (tn) -> List.of(throwable))._2;
     }
-
-    public void stop() {
-    }
 }
 
