@@ -96,7 +96,7 @@ public class KanelaConfiguration {
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                     val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
+                    return ModuleConfiguration.from(moduleName, name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
@@ -106,6 +106,7 @@ public class KanelaConfiguration {
 
     @Value(staticConstructor = "from")
     public static class ModuleConfiguration {
+        String key;
         String name;
         List<String> instrumentations;
         String withinPackage;

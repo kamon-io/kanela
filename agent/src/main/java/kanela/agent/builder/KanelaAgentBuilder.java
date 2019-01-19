@@ -56,7 +56,7 @@ class KanelaAgentBuilder {
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
             if (config.getInstrumentationRegistryConfig().isEnabled()) {
-                InstrumentationRegistryListener.instance().register(moduleDescription.getName(), typeTransformation);
+                InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
             }
             typeTransformations.add(typeTransformation);
         }

@@ -18,13 +18,13 @@ package kanela.agent.api.instrumentation.listener;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.Value;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.bootstrap.dispatcher.Dispatcher;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
+import kanela.agent.util.conf.KanelaConfiguration;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
@@ -35,23 +35,26 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
     private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
 
     private Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> moduleTransformers = HashMap.empty();
+    private Map<String, KanelaConfiguration.ModuleConfiguration> modulesConfiguration = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
-    public java.util.Map<String, java.util.Map<String, java.util.List<String>>> getRecorded() {
-        return moduleTransformers.mapValues(
-                value -> value.toMap(
-                        t -> Tuple.of(t._1.getInstrumentationName(), t._2.map(TypeDescription::getCanonicalName).toJavaList())
-                ).toJavaMap()
-        ).toJavaMap();
+    public Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> getModuleTransformers() {
+        return moduleTransformers;
     }
 
-    public java.util.Map<String, java.util.List<Throwable>> getErrors() {
-        return errors.mapValues(Value::toJavaList).toJavaMap();
+    public Map<String, KanelaConfiguration.ModuleConfiguration> getModulesConfiguration() {
+        return modulesConfiguration;
     }
 
-    public void register(String moduleName, TypeTransformation typeTransformation) {
-        moduleTransformers = moduleTransformers.computeIfPresent(moduleName, (mn, tts) -> tts.append(Tuple.of(typeTransformation, List.empty())))._2;
-        moduleTransformers = moduleTransformers.computeIfAbsent(moduleName, (m) -> List.of(Tuple.of(typeTransformation, List.empty())))._2;
+    public Map<String, List<Throwable>> getErrors() {
+        return errors;
+    }
+
+
+    public void register(KanelaConfiguration.ModuleConfiguration moduleDescription, TypeTransformation typeTransformation) {
+        moduleTransformers = moduleTransformers.computeIfPresent(moduleDescription.getKey(), (mn, tts) -> tts.append(Tuple.of(typeTransformation, List.empty())))._2;
+        moduleTransformers = moduleTransformers.computeIfAbsent(moduleDescription.getKey(), (m) -> List.of(Tuple.of(typeTransformation, List.empty())))._2;
+        modulesConfiguration = modulesConfiguration.computeIfAbsent(moduleDescription.getKey(), (m) -> moduleDescription)._2;
     }
 
     public static InstrumentationRegistryListener instance() {
