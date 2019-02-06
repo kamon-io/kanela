@@ -18,6 +18,7 @@ package kanela.agent.api.instrumentation;
 
 import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -29,9 +30,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Value
 public class TypeTransformation {
-    String instrumentationName;
+    @EqualsAndHashCode.Include String instrumentationName;
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     Option<ClassLoaderRefiner> classLoaderRefiner;
     List<AgentBuilder.Transformer> bridges;

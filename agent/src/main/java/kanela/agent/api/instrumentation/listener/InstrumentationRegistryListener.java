@@ -17,7 +17,6 @@
 package kanela.agent.api.instrumentation.listener;
 
 import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -34,12 +33,16 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
 
     private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
 
-    private Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> moduleTransformers = HashMap.empty();
+    private Map<String, Map<TypeTransformation, List<TypeDescription>>> moduleTransformers = HashMap.empty();
     private Map<String, KanelaConfiguration.ModuleConfiguration> modulesConfiguration = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
-    public Map<String, List<Tuple2<TypeTransformation, List<TypeDescription>>>> getModuleTransformers() {
+    public Map<String, Map<TypeTransformation, List<TypeDescription>>> getModuleTransformers() {
         return moduleTransformers;
+    }
+
+    public boolean isModuleActive(String moduleKey) {
+        return moduleTransformers.getOrElse(moduleKey, HashMap.empty()).exists(t -> t._2.nonEmpty());
     }
 
     public Map<String, KanelaConfiguration.ModuleConfiguration> getModulesConfiguration() {
@@ -50,10 +53,11 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         return errors;
     }
 
-
     public void register(KanelaConfiguration.ModuleConfiguration moduleDescription, TypeTransformation typeTransformation) {
-        moduleTransformers = moduleTransformers.computeIfPresent(moduleDescription.getKey(), (mn, tts) -> tts.append(Tuple.of(typeTransformation, List.empty())))._2;
-        moduleTransformers = moduleTransformers.computeIfAbsent(moduleDescription.getKey(), (m) -> List.of(Tuple.of(typeTransformation, List.empty())))._2;
+        moduleTransformers = moduleTransformers.computeIfPresent(moduleDescription.getKey(),
+                (mn, tts) -> tts.computeIfAbsent(typeTransformation, (k) -> List.empty())._2
+        )._2;
+        moduleTransformers = moduleTransformers.computeIfAbsent(moduleDescription.getKey(), (m) -> HashMap.of(typeTransformation, List.empty()))._2;
         modulesConfiguration = modulesConfiguration.computeIfAbsent(moduleDescription.getKey(), (m) -> moduleDescription)._2;
     }
 
@@ -64,16 +68,19 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         );
     }
 
+    public boolean applies(TypeTransformation tt, TypeDescription td, ClassLoader classLoader) {
+        return tt.getElementMatcher().map(em -> em.matches(td)).getOrElse(false) &&
+                ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(tt.getClassLoaderRefiner()).matches(classLoader);
+    }
+
     @Override
     public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
         moduleTransformers = moduleTransformers.map(
-                (moduleName, transformations) -> Tuple.of(moduleName, transformations.map(transformation -> {
-                    if (transformation._1.getElementMatcher().map(em -> em.matches(typeDescription)).getOrElse(false) &&
-                        ClassLoaderNameMatcher.RefinedClassLoaderMatcher.from(transformation._1.getClassLoaderRefiner()).matches(classLoader)
-                    ) {
-                        return transformation.update2(transformation._2.append(typeDescription));
+                (moduleName, transformations) -> Tuple.of(moduleName, transformations.map((transformation, typeDescriptions) -> {
+                    if (applies(transformation, typeDescription, classLoader)) {
+                        return Tuple.of(transformation, typeDescriptions.append(typeDescription));
                     } else {
-                        return transformation;
+                        return Tuple.of(transformation, typeDescriptions);
                     }
                 })));
     }
