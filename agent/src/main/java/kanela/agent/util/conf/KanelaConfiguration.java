@@ -47,6 +47,7 @@ public class KanelaConfiguration {
     Boolean debugMode;
     DumpConfig dump;
     CircuitBreakerConfig circuitBreakerConfig;
+    InstrumentationRegistryConfig instrumentationRegistryConfig;
     OldGarbageCollectorConfig oldGarbageCollectorConfig;
     ClassReplacerConfig classReplacerConfig;
     Boolean showBanner;
@@ -70,6 +71,7 @@ public class KanelaConfiguration {
         this.extraParams = new HashMap();
         this.dump = new DumpConfig(config);
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
+        this.instrumentationRegistryConfig = new InstrumentationRegistryConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
         this.classReplacerConfig =  new ClassReplacerConfig(config);
         this.logLevel = getLoggerLevel(config);
@@ -94,7 +96,7 @@ public class KanelaConfiguration {
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                     val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
+                    return ModuleConfiguration.from(moduleName, name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
@@ -104,6 +106,7 @@ public class KanelaConfiguration {
 
     @Value(staticConstructor = "from")
     public static class ModuleConfiguration {
+        String key;
         String name;
         List<String> instrumentations;
         String withinPackage;
@@ -159,6 +162,15 @@ public class KanelaConfiguration {
 
         public void circuitBreakerRunning() {
             KanelaConfiguration.this.addExtraParameter("circuit-breaker-running", true);
+        }
+    }
+
+    @Value
+    public class InstrumentationRegistryConfig {
+        boolean enabled;
+
+        InstrumentationRegistryConfig(Config config) {
+            this.enabled = Try.of(() -> config.getBoolean("instrumentation-registry.enabled")).getOrElse(false);
         }
     }
 

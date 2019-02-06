@@ -20,6 +20,7 @@ import lombok.Value;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 /**
  * <p> This class is injected into the bootstrap classpath and is used to share objects between classloaders.</p>
@@ -56,6 +57,10 @@ public class Dispatcher {
         return (T) values.get(key);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T computeIfAbsent(String key, Function<String, T> value) {
+        return (T) values.computeIfAbsent(key, value);
+    }
 
     /**
      * Gets a shared value by it's key

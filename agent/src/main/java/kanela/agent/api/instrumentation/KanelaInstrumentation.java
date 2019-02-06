@@ -90,6 +90,7 @@ public abstract class KanelaInstrumentation {
         }
 
         return TypeTransformation.of(
+                this.getClass().getName(),
                 instrumentationDescription.getElementMatcher(),
                 instrumentationDescription.getClassLoaderRefiner(),
                 collect(bridges, BridgeDescription::makeTransformer),
