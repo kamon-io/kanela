@@ -19,12 +19,15 @@ package kanela.agent;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.KanelaInstrumentation;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
+import java.util.jar.Manifest;
 
 import static java.text.MessageFormat.format;
 
@@ -42,7 +45,7 @@ public class InstrumentationLoader {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
-                    .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
+                    .flatMap(instrumentationClassName -> loadInstrumentation(configuration, moduleConfiguration, instrumentationClassName, ctxClassloader))
                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                     .sortBy(KanelaInstrumentation::order)
                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
@@ -51,10 +54,31 @@ public class InstrumentationLoader {
         });
     }
 
-    private static Option<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
+    private static <T> Option<String> getModuleVersion(Class<T> clazz) {
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (!classPath.startsWith("jar")) { // Class not from JAR
+            return Option.none();
+        } else {
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+            Manifest m = null;
+            try {
+                m = new Manifest(new URL(manifestPath).openStream());
+                return Option.some(m.getMainAttributes().getValue("Implementation-Version"));
+            } catch (Exception e) {
+                return Option.none();
+            }
+        }
+    }
+
+    private static Option<KanelaInstrumentation> loadInstrumentation(KanelaConfiguration configuration, KanelaConfiguration.ModuleConfiguration moduleConfiguration, String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         try {
-            return Option.some((KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance());
+            Class<?> instrumentationClass = Class.forName(instrumentationClassName, true, classLoader);
+            if (configuration.getInstrumentationRegistryConfig().isEnabled()) {
+                InstrumentationRegistryListener.instance().registerModuleVersion(moduleConfiguration.getKey(), getModuleVersion(instrumentationClass));
+            }
+            return Option.some((KanelaInstrumentation) instrumentationClass.newInstance());
         } catch (Throwable cause) {
             Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
             return Option.none();

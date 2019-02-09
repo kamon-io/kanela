@@ -20,6 +20,7 @@ import io.vavr.Tuple;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.bootstrap.dispatcher.Dispatcher;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
@@ -35,12 +36,16 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
 
     private Map<String, Map<TypeTransformation, List<TypeDescription>>> moduleTransformers = HashMap.empty();
     private Map<String, KanelaConfiguration.ModuleConfiguration> modulesConfiguration = HashMap.empty();
+    private Map<String, String> modulesVersion = HashMap.empty();
     private Map<String, List<Throwable>> errors = HashMap.empty();
 
     public Map<String, Map<TypeTransformation, List<TypeDescription>>> getModuleTransformers() {
         return moduleTransformers;
     }
 
+    public String modeuleVersion(String moduleKey) {
+        return modulesVersion.get(moduleKey).getOrNull();
+    }
     public boolean isModuleActive(String moduleKey) {
         return moduleTransformers.getOrElse(moduleKey, HashMap.empty()).exists(t -> t._2.nonEmpty());
     }
@@ -89,6 +94,10 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
     public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
         errors = errors.computeIfPresent(typeName, (tn, errs) -> errs.append(throwable))._2;
         errors = errors.computeIfAbsent(typeName, (tn) -> List.of(throwable))._2;
+    }
+
+    public void registerModuleVersion(String moduleKey, Option<String> moduleVersion) {
+        moduleVersion.forEach(version -> this.modulesVersion = this.modulesVersion.computeIfAbsent(moduleKey, k -> version)._2);
     }
 }
 
