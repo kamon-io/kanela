@@ -60,10 +60,9 @@ public class InstrumentationLoader {
         if (!classPath.startsWith("jar")) { // Class not from JAR
             return Option.none();
         } else {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-            Manifest m = null;
             try {
-                m = new Manifest(new URL(manifestPath).openStream());
+                String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+                Manifest m = new Manifest(new URL(manifestPath).openStream());
                 return Option.some(m.getMainAttributes().getValue("Implementation-Version"));
             } catch (Exception e) {
                 return Option.none();
