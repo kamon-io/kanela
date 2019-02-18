@@ -32,7 +32,7 @@ public class KanelaInformationProvider {
                 .value("description", module.getName())
                 .value("enabled", module.isEnabled())
                 .value("active", registryListener.isModuleActive(module.getKey()))
-                .value("version", registryListener.modeuleVersion(module.getKey()))
+                .value("version", registryListener.moduleVersion(module.getKey()))
                 .value("order", module.getOrder())
                 .array("instrumentations");
         return InstrumentationRegistryListener.instance().getModuleTransformers()
