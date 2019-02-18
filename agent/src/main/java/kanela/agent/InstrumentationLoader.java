@@ -22,6 +22,7 @@ import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
+import kanela.agent.util.Manifests;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 
@@ -54,28 +55,12 @@ public class InstrumentationLoader {
         });
     }
 
-    private static <T> Option<String> getModuleVersion(Class<T> clazz) {
-        String className = clazz.getSimpleName() + ".class";
-        String classPath = clazz.getResource(className).toString();
-        if (!classPath.startsWith("jar")) { // Class not from JAR
-            return Option.none();
-        } else {
-            try {
-                String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-                Manifest m = new Manifest(new URL(manifestPath).openStream());
-                return Option.some(m.getMainAttributes().getValue("Implementation-Version"));
-            } catch (Exception e) {
-                return Option.none();
-            }
-        }
-    }
-
     private static Option<KanelaInstrumentation> loadInstrumentation(KanelaConfiguration configuration, KanelaConfiguration.ModuleConfiguration moduleConfiguration, String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         try {
             Class<?> instrumentationClass = Class.forName(instrumentationClassName, true, classLoader);
             if (configuration.getInstrumentationRegistryConfig().isEnabled()) {
-                InstrumentationRegistryListener.instance().registerModuleVersion(moduleConfiguration.getKey(), getModuleVersion(instrumentationClass));
+                InstrumentationRegistryListener.instance().registerModuleVersion(moduleConfiguration.getKey(), Manifests.getJarVersion(instrumentationClass));
             }
             return Option.some((KanelaInstrumentation) instrumentationClass.newInstance());
         } catch (Throwable cause) {

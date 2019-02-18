@@ -16,11 +16,13 @@
 
 package kanela.agent.util;
 
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Value;
 import lombok.val;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.jar.Manifest;
@@ -28,6 +30,22 @@ import java.util.stream.Collectors;
 
 @Value
 public class Manifests {
+
+    public static <T> Option<String> getJarVersion(Class<T> clazz) {
+            String className = clazz.getSimpleName() + ".class";
+            String classPath = clazz.getResource(className).toString();
+            if (!classPath.startsWith("jar")) { // Class not from JAR
+                return Option.none();
+            } else {
+                try {
+                    String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+                    Manifest m = new Manifest(new URL(manifestPath).openStream());
+                    return Option.some(m.getMainAttributes().getValue("Implementation-Version"));
+                } catch (Exception e) {
+                    return Option.none();
+                }
+            }
+    }
 
     public static Set<String> getAllPropertiesFromTitleOrBundle() {
         return io.vavr.collection.List.ofAll(getAll())
