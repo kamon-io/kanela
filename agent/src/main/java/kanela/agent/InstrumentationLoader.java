@@ -47,6 +47,7 @@ public class InstrumentationLoader {
             Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
                     .flatMap(instrumentationClassName -> loadInstrumentation(configuration, moduleConfiguration, instrumentationClassName, ctxClassloader))
+                    .map(kanelaInstrumentation -> InstrumentationLoader.registerOnRegistry(configuration, moduleConfiguration, kanelaInstrumentation))
                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
                     .sortBy(KanelaInstrumentation::order)
                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
@@ -55,13 +56,20 @@ public class InstrumentationLoader {
         });
     }
 
+    private static KanelaInstrumentation registerOnRegistry(KanelaConfiguration configuration, KanelaConfiguration.ModuleConfiguration moduleConfiguration, KanelaInstrumentation kanelaInstrumentation) {
+        if (configuration.getInstrumentationRegistryConfig().isEnabled()) {
+            InstrumentationRegistryListener.instance().registerModuleVersion(
+                    moduleConfiguration.getKey(),
+                    Manifests.getJarVersion(kanelaInstrumentation.getClass())
+            );
+        }
+        return kanelaInstrumentation;
+    }
+
     private static Option<KanelaInstrumentation> loadInstrumentation(KanelaConfiguration configuration, KanelaConfiguration.ModuleConfiguration moduleConfiguration, String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         try {
             Class<?> instrumentationClass = Class.forName(instrumentationClassName, true, classLoader);
-            if (configuration.getInstrumentationRegistryConfig().isEnabled()) {
-                InstrumentationRegistryListener.instance().registerModuleVersion(moduleConfiguration.getKey(), Manifests.getJarVersion(instrumentationClass));
-            }
             return Option.some((KanelaInstrumentation) instrumentationClass.newInstance());
         } catch (Throwable cause) {
             Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));

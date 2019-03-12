@@ -43,8 +43,8 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         return moduleTransformers;
     }
 
-    public String moduleVersion(String moduleKey) {
-        return modulesVersion.get(moduleKey).getOrNull();
+    public Option<String> moduleVersion(String moduleKey) {
+        return modulesVersion.get(moduleKey);
     }
     public boolean isModuleActive(String moduleKey) {
         return moduleTransformers.getOrElse(moduleKey, HashMap.empty()).exists(t -> t._2.nonEmpty());

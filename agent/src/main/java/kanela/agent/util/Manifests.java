@@ -32,19 +32,18 @@ import java.util.stream.Collectors;
 public class Manifests {
 
     public static <T> Option<String> getJarVersion(Class<T> clazz) {
-            String className = clazz.getSimpleName() + ".class";
-            String classPath = clazz.getResource(className).toString();
-            if (!classPath.startsWith("jar")) { // Class not from JAR
-                return Option.none();
-            } else {
-                try {
-                    String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-                    Manifest m = new Manifest(new URL(manifestPath).openStream());
-                    return Option.some(m.getMainAttributes().getValue("Implementation-Version"));
-                } catch (Exception e) {
-                    return Option.none();
-                }
-            }
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (!classPath.startsWith("jar")) { // Class not from JAR
+            return Option.none();
+        } else {
+            return Try.of(() -> {
+                        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+                        Manifest m = new Manifest(new URL(manifestPath).openStream());
+                        return m.getMainAttributes().getValue("Implementation-Version");
+                    }
+            ).toOption();
+        }
     }
 
     public static Set<String> getAllPropertiesFromTitleOrBundle() {
