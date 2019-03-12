@@ -3,7 +3,7 @@ package kanela.agent.util;
 import com.grack.nanojson.JsonWriter;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
-import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistry;
 import kanela.agent.util.conf.KanelaConfiguration;
 import lombok.val;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class KanelaInformationProvider {
 
     public static final KanelaInformationProvider MODULE$ = new KanelaInformationProvider();
-    private static final InstrumentationRegistryListener registryListener = InstrumentationRegistryListener.instance();
+    private static final InstrumentationRegistry registryListener = InstrumentationRegistry.instance();
 
     public Boolean isActive() {
         return true;
@@ -35,7 +35,7 @@ public class KanelaInformationProvider {
                 .value("version", registryListener.moduleVersion(module.getKey()).getOrNull())
                 .value("order", module.getOrder())
                 .array("instrumentations");
-        return InstrumentationRegistryListener.instance().getModuleTransformers()
+        return InstrumentationRegistry.instance().getModuleTransformers()
                 .getOrElse(module.getKey(), HashMap.empty()).keySet()
                 .foldLeft(instrumentations, (inst, i) -> inst.value(i.getInstrumentationName())).end().end().done();
     }

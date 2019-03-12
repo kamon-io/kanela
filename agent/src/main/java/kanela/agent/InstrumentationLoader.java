@@ -19,7 +19,7 @@ package kanela.agent;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.KanelaInstrumentation;
-import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistry;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.util.Manifests;
@@ -27,8 +27,6 @@ import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 
 import java.lang.instrument.Instrumentation;
-import java.net.URL;
-import java.util.jar.Manifest;
 
 import static java.text.MessageFormat.format;
 
@@ -58,7 +56,7 @@ public class InstrumentationLoader {
 
     private static KanelaInstrumentation registerOnRegistry(KanelaConfiguration configuration, KanelaConfiguration.ModuleConfiguration moduleConfiguration, KanelaInstrumentation kanelaInstrumentation) {
         if (configuration.getInstrumentationRegistryConfig().isEnabled()) {
-            InstrumentationRegistryListener.instance().registerModuleVersion(
+            InstrumentationRegistry.instance().registerModuleVersion(
                     moduleConfiguration.getKey(),
                     Manifests.getJarVersion(kanelaInstrumentation.getClass())
             );

@@ -30,9 +30,9 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
-public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
+public class InstrumentationRegistry extends AgentBuilder.Listener.Adapter {
 
-    private final static String DISPATCHER_KEY = "InstrumentationRegistryListener";
+    private final static String DISPATCHER_KEY = "InstrumentationRegistry";
 
     private Map<String, Map<TypeTransformation, List<TypeDescription>>> moduleTransformers = HashMap.empty();
     private Map<String, KanelaConfiguration.ModuleConfiguration> modulesConfiguration = HashMap.empty();
@@ -66,10 +66,10 @@ public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapt
         modulesConfiguration = modulesConfiguration.computeIfAbsent(moduleDescription.getKey(), (m) -> moduleDescription)._2;
     }
 
-    public static InstrumentationRegistryListener instance() {
+    public static InstrumentationRegistry instance() {
         return Dispatcher.computeIfAbsent(
-                InstrumentationRegistryListener.DISPATCHER_KEY,
-                k -> new InstrumentationRegistryListener()
+                InstrumentationRegistry.DISPATCHER_KEY,
+                k -> new InstrumentationRegistry()
         );
     }
 
