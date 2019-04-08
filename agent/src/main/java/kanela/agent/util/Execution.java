@@ -16,8 +16,11 @@
 
 package kanela.agent.util;
 
+import io.vavr.control.Try;
 import kanela.agent.util.log.Logger;
 import lombok.val;
+
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -40,6 +43,7 @@ public class Execution {
             timed(thunk);
         } catch (Throwable cause) {
             Logger.error(() -> "Unable to start Kanela Agent. Please remove -javaagent from your startup arguments and contact Kanela support." + cause);
+            Try.run(() -> Thread.sleep(100)); //sleep before exit;
             System.exit(1);
         }
     }
