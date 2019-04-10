@@ -19,12 +19,10 @@ package kanela.agent.api.instrumentation;
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 
 import io.vavr.Function0;
-import io.vavr.Function1;
-import io.vavr.Function2;
-import java.util.Optional;
-import java.util.function.BiFunction;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
+import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
+import kanela.agent.api.instrumentation.classloader.ClassRefiner;
 import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.BootstrapInjector;
@@ -44,13 +42,12 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-public abstract class KanelaInstrumentation {
-    private final ListBuilder<InstrumentationDescription> instrumentationDescriptions = ListBuilder.builder();
+public abstract class InstrumentationBuilder {
+    private final ListBuilder<Target> targets = ListBuilder.builder();
 
     protected final ElementMatcher.Junction<ByteCodeElement> notDeclaredByObject = not(isDeclaredBy(Object.class));
     protected final ElementMatcher.Junction<MethodDescription> notTakesArguments = not(takesArguments(0));
@@ -59,9 +56,9 @@ public abstract class KanelaInstrumentation {
             Function0.of(() -> not(isInterface()).and(not(isSynthetic()))).memoized();
 
     public List<TypeTransformation> collectTransformations(ModuleConfiguration moduleConfiguration, Instrumentation instrumentation) {
-        return instrumentationDescriptions
+        return targets
                 .build()
-                .map(instrumentationDescription -> buildTransformations(instrumentationDescription, moduleConfiguration, instrumentation))
+                .map(t -> buildTransformations(t.instrumentationDescription(), moduleConfiguration, instrumentation))
                 .toJavaList();
     }
 
@@ -105,35 +102,53 @@ public abstract class KanelaInstrumentation {
                 .collect(Collectors.toList());
     }
 
-    public void forTargetType(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public Target onType(String typeName) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> failSafe(named(f.get())));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+        val target = new Target(builder);
+        builder.addElementMatcher(() -> failSafe(named(typeName)));
+        targets.add(target);
+        return target;
     }
 
-    public void forSubtypeOf(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public Target onTypes(String... typeName) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(hasSuperType(named(f.get())))));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+        val target = new Target(builder);
+        builder.addElementMatcher(() -> failSafe(anyTypes(typeName)));
+        targets.add(target);
+        return target;
     }
 
-    public void forRawMatching(Supplier<ElementMatcher<? super TypeDescription>> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public Target onSubTypesOf(String... typeName) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(f.get())));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+        val target = new Target(builder);
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(hasSuperType(anyTypes(typeName)))));
+        targets.add(target);
+        return target;
     }
 
-    public void forTypesAnnnotatedWith(Supplier<String> f, Function1<InstrumentationDescription.Builder, InstrumentationDescription> instrumentationFunction) {
+    public Target onTypesAnnotatedWith(String annotationName) {
         val builder = new InstrumentationDescription.Builder();
-        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(isAnnotatedWith(named(f.get())))));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder));
+        val target = new Target(builder);
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(isAnnotatedWith(named(annotationName)))));
+        targets.add(target);
+        return target;
     }
 
-    public void forTypesWithMethodsAnnotatedWith(Supplier<String> f, Function2<InstrumentationDescription.Builder, ElementMatcher.Junction<MethodDescription>, InstrumentationDescription> instrumentationFunction) {
+    public Target onTypesWithMethodsAnnotatedWith(String annotationName) {
         val builder = new InstrumentationDescription.Builder();
-        final ElementMatcher.Junction<MethodDescription>  methodMatcher = isAnnotatedWith(named(f.get()));
+        val target = new Target(builder);
+        final ElementMatcher.Junction<MethodDescription>  methodMatcher = isAnnotatedWith(named(annotationName));
         builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(hasSuperType(declaresMethod(methodMatcher)))));
-        instrumentationDescriptions.add(instrumentationFunction.apply(builder, methodMatcher));
+        targets.add(target);
+        return target;
+    }
+
+    public Target onTypesMatching(ElementMatcher<? super TypeDescription> typeMatcher) {
+        val builder = new InstrumentationDescription.Builder();
+        val target = new Target(builder);
+        builder.addElementMatcher(() -> defaultTypeMatcher.apply().and(failSafe(typeMatcher)));
+        targets.add(target);
+        return target;
     }
 
     public ElementMatcher.Junction<MethodDescription> method(String name){ return named(name);}
@@ -166,5 +181,52 @@ public abstract class KanelaInstrumentation {
 
     public int order() {
         return 1;
+    }
+
+    public ClassRefiner.Builder classIsPresent(String className) {
+        return ClassRefiner.builder().mustContains(className);
+    }
+
+    public static class Target {
+        private final InstrumentationDescription.Builder builder;
+
+        Target(InstrumentationDescription.Builder builder) {
+            this.builder = builder;
+        }
+
+        public Target mixin(Class<?> implementation) {
+            builder.withMixin(() -> implementation);
+            return this;
+        }
+
+        public Target bridge(Class<?> implementation) {
+            builder.withBridge(() -> implementation);
+            return this;
+        }
+
+        public Target advise(ElementMatcher.Junction<MethodDescription> method, Class<?> implementation) {
+            builder.withAdvisorFor(method, () -> implementation);
+            return this;
+        }
+
+        public Target intercept(ElementMatcher.Junction<MethodDescription> method, Class<?> implementation) {
+            builder.withInterceptorFor(method, () -> implementation);
+            return this;
+        }
+
+        public Target when(ClassRefiner.Builder... refinerBuilders) {
+            val refiners = io.vavr.collection.List.of(refinerBuilders).map(b -> b.build()).toJavaArray(ClassRefiner.class);
+            builder.withClassLoaderRefiner(() -> ClassLoaderRefiner.from(refiners));
+            return this;
+        }
+
+        public Target when(ClassRefiner... refiners) {
+            builder.withClassLoaderRefiner(() -> ClassLoaderRefiner.from(refiners));
+            return this;
+        }
+
+        private InstrumentationDescription instrumentationDescription() {
+            return builder.build();
+        }
     }
 }

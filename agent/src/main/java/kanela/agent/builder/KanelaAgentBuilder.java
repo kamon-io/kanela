@@ -16,7 +16,6 @@
 
 package kanela.agent.builder;
 
-import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.api.instrumentation.listener.DebugInstrumentationListener;
