@@ -16,19 +16,15 @@
 
 package app.kanela.instrumentation
 
-import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner
-import kanela.agent.scala.KanelaInstrumentation
+import kanela.agent.api.instrumentation.InstrumentationBuilder
 
 
-class MultiMixinsInstrumentation extends KanelaInstrumentation {
+class MultiMixinsInstrumentation extends InstrumentationBuilder {
   import app.kanela.instrumentation.mixin.MixinOverMixin._
 
-  forTargetType("app.kanela.cases.multimixins.WithMultiMixinsClass") { builder ⇒
-    builder
-      .withClassLoaderRefiner(ClassLoaderRefiner.mustContains("kanela.agent.scala.KanelaInstrumentation"))
-      .withMixin(classOf[MixinOverMixin1])
-      .withMixin(classOf[MixinOverMixin2])
-      .withMixin(classOf[MixinOverMixin3])
-      .build()
-  }
+  onType("app.kanela.cases.multimixins.WithMultiMixinsClass")
+    .when(classIsPresent("kanela.agent.scala.KanelaInstrumentation"))
+    .mixin(classOf[MixinOverMixin1])
+    .mixin(classOf[MixinOverMixin2])
+    .mixin(classOf[MixinOverMixin3])
 }

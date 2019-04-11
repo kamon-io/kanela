@@ -18,7 +18,7 @@ package kanela.agent;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;
-import kanela.agent.api.instrumentation.KanelaInstrumentation;
+import kanela.agent.api.instrumentation.InstrumentationBuilder;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.util.conf.KanelaConfiguration;
@@ -31,7 +31,7 @@ import static java.text.MessageFormat.format;
 public class InstrumentationLoader {
 
     /**
-     * Load from the current classpath all defined instrumentations {@link KanelaInstrumentation}.
+     * Load from the current classpath all defined instrumentations {@link InstrumentationBuilder}.
      *
      * @param instrumentation {@link Instrumentation}
      * @param ctxClassloader {@link ClassLoader}
@@ -44,17 +44,17 @@ public class InstrumentationLoader {
             return moduleConfiguration.getInstrumentations()
                     .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
-                    .sortBy(KanelaInstrumentation::order)
+                    .sortBy(InstrumentationBuilder::order)
                     .flatMap(kanelaInstrumentation -> kanelaInstrumentation.collectTransformations(moduleConfiguration, instrumentation))
                     .foldLeft(AgentInstaller.from(configuration, moduleConfiguration, instrumentation), AgentInstaller::addTypeTransformation)
                     .install();
         });
     }
 
-    private static Option<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
+    private static Option<InstrumentationBuilder> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
         Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
         try {
-            return Option.some((KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance());
+            return Option.some((InstrumentationBuilder) Class.forName(instrumentationClassName, true, classLoader).newInstance());
         } catch (Throwable cause) {
             Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
             return Option.none();

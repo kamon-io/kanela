@@ -79,7 +79,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     when(dumpConfigMock.getDumpEnabled).thenReturn(false)
 
-    when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kanela.agent.instrumentation.KamonFakeInstrumentation"))
+    when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kanela.agent.instrumentation.KamonFakeInstrumentationBuilder"))
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 

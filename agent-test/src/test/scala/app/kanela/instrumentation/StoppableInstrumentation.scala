@@ -17,14 +17,11 @@
 package app.kanela.instrumentation
 
 import app.kanela.instrumentation.advisor.TestMethodAdvisor
-import kanela.agent.scala.KanelaInstrumentation
+import kanela.agent.api.instrumentation.InstrumentationBuilder
 
-class StoppableInstrumentation extends KanelaInstrumentation {
+class StoppableInstrumentation extends InstrumentationBuilder {
   val methodName = method("addValue")
 
-  forTargetType("app.kanela.cases.simple.TestClass") { builder ⇒
-    builder
-      .withAdvisorFor(methodName, classOf[TestMethodAdvisor])
-      .build()
-  }
+  onType("app.kanela.cases.simple.TestClass")
+    .advise(methodName, classOf[TestMethodAdvisor])
 }
