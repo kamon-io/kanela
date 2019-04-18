@@ -106,6 +106,7 @@ jar {
         attributes 'Build-Jdk': System.getProperty("java.version")
         attributes 'Premain-Class': "kanela.agent.Kanela"
         attributes 'Agent-Class': "kanela.agent.Kanela"
+        attributes 'Main-Class': "kanela.agent.attacher.Attacher"
         attributes 'Can-Redefine-Classes': "true"
         attributes 'Can-Set-Native-Method-Prefix': "true"
         attributes 'Can-Retransform-Classes': "true"

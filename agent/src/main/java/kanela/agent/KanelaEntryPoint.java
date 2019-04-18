@@ -20,7 +20,6 @@ import kanela.agent.api.instrumentation.replacer.ClassReplacer;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
-import kanela.agent.util.ExtensionLoader;
 import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.KanelaClassLoader;
 import kanela.agent.util.conf.KanelaConfiguration;
@@ -49,8 +48,6 @@ public class KanelaEntryPoint {
                 if(isRuntimeAttach) configuration.runtimeAttach();
 
                 KanelaBanner.show(configuration);
-
-                ExtensionLoader.attach(arguments, instrumentation);
 
                 val transformers = InstrumentationLoader.load(instrumentation, kanelaClassLoader, configuration);
                 Reinstrumenter.attach(instrumentation, configuration, transformers);
