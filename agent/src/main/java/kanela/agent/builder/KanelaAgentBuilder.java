@@ -17,6 +17,7 @@
 package kanela.agent.builder;
 
 import kanela.agent.api.instrumentation.TypeTransformation;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.DefaultInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.dumper.ClassDumperListener;
@@ -53,6 +54,9 @@ class KanelaAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
+            if (config.getInstrumentationRegistryConfig().isEnabled()) {
+                InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
+            }
             typeTransformations.add(typeTransformation);
         }
     }
@@ -127,6 +131,7 @@ class KanelaAgentBuilder {
         val listeners = new ArrayList<AgentBuilder.Listener>();
         if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
         if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
+        if (config.getInstrumentationRegistryConfig().isEnabled()) listeners.add(InstrumentationRegistryListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }
 

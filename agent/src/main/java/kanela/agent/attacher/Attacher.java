@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -44,11 +45,13 @@ public class Attacher {
     /**
      * Try to Attach Kanela to the current process.
      */
-    public static void attach()  {
+    public static void attach()  { attachTo(getCurrentPID()); }
+
+    private static void attachTo(String pid) {
         Try.of(() -> Class.forName("kanela.agent.Kanela"))
                 .flatMapTry(Attacher::kanelaJar)
-                .andThen((agentJar) -> ByteBuddyAgent.attach(agentJar, getCurrentPID()))
-                .onFailure((cause) -> log.severe(() -> "Error trying to attach the KanelaAttacher Agent to process with Id: "+ getCurrentPID() + " with error: " + cause.getMessage()));
+                .andThen((agentJar) -> ByteBuddyAgent.attach(agentJar, pid))
+                .onFailure((cause) -> log.severe(() -> "Error trying to attach the KanelaAttacher Agent to process with Id: "+ pid + " with error: " + cause.getMessage()));
     }
 
     private static Try<File> kanelaJar(Class clazz) {
@@ -89,6 +92,7 @@ public class Attacher {
         // Create manifest stating that agent is allowed to transform classes
         mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
         mainAttributes.put(new Attributes.Name("Agent-Class"), agent.getName());
+        mainAttributes.put(new Attributes.Name("Main-Class"), "kanela.agent.attacher.Attacher");
         mainAttributes.put(new Attributes.Name("Can-Retransform-Classes"), "true");
         mainAttributes.put(new Attributes.Name("Can-Redefine-Classes"), "true");
         mainAttributes.put(new Attributes.Name("Can-Set-Native-Method-Prefix"), "true");
@@ -97,13 +101,13 @@ public class Attacher {
 
         jos.putNextEntry(new JarEntry(agent.getName().replace('.', '/') + ".class"));
 
-        jos.write(getBytesFromStream(agent.getClassLoader().getResourceAsStream(unqualify(agent))));
+        jos.write(getBytesFromStream(Objects.requireNonNull(agent.getClassLoader().getResourceAsStream(unqualify(agent)))));
         jos.closeEntry();
 
         for (Class clazz : resources) {
             val name = unqualify(clazz);
             jos.putNextEntry(new JarEntry(name));
-            jos.write(getBytesFromStream(clazz.getClassLoader().getResourceAsStream(name)));
+            jos.write(getBytesFromStream(Objects.requireNonNull(clazz.getClassLoader().getResourceAsStream(name))));
             jos.closeEntry();
         }
 
@@ -119,17 +123,11 @@ public class Attacher {
      */
     public static void main(String... args) {
         try {
-
-            if(args.length < 3) {
-                log.info("Proper Usage is: java -jar kanela-agent-attacher-[version].jar <pid> <path-to-kanela-agent.jar> <kanela-agent-arguments>");
+            if(args.length < 1) {
+                log.info("Proper Usage is: java -jar kanela-agent.jar <pid>");
                 System.exit(0);
             }
-
-            val pid = args[0];
-            val agentJar = args[1];
-            val agentArguments = args[2];
-
-            ByteBuddyAgent.attach(new File(agentJar), pid, agentArguments);
+            attachTo(args[0]);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

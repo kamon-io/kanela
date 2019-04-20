@@ -18,6 +18,7 @@ package kanela.agent.api.instrumentation;
 
 import io.vavr.control.Option;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -29,9 +30,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Value
 public class TypeTransformation {
-
+    @EqualsAndHashCode.Include String instrumentationName;
     Option<ElementMatcher<? super TypeDescription>> elementMatcher;
     Option<ClassLoaderRefiner> classLoaderRefiner;
     List<AgentBuilder.Transformer> bridges;
@@ -39,7 +41,8 @@ public class TypeTransformation {
     List<AgentBuilder.Transformer> transformations;
 
     @SafeVarargs
-    static TypeTransformation of(Option<ElementMatcher<? super TypeDescription>> elementMatcher,
+    static TypeTransformation of(String instrumentationName,
+                                 Option<ElementMatcher<? super TypeDescription>> elementMatcher,
                                  Option<ClassLoaderRefiner> classLoaderRefiner,
                                  List<AgentBuilder.Transformer> bridges,
                                  List<AgentBuilder.Transformer> mixins,
@@ -49,7 +52,7 @@ public class TypeTransformation {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        return new TypeTransformation(elementMatcher, classLoaderRefiner, bridges, mixins, transformations);
+        return new TypeTransformation(instrumentationName ,elementMatcher, classLoaderRefiner, bridges, mixins, transformations);
     }
 
     public Boolean isActive() {

@@ -33,6 +33,7 @@ dependencies {
     compile 'org.tinylog:tinylog:1.3.4'
     compile 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
     compile 'net.bytebuddy:byte-buddy-agent:1.9.4'
+    compile 'com.grack:nanojson:1.1'
 
     compile files('libs/byte-buddy-1.9.4.jar')
 
@@ -76,12 +77,14 @@ shadowJar {
     relocate 'com.typesafe.config', 'kanela.agent.libs.com.typesafe.config'
     relocate 'org.pmw.tinylog', 'kanela.agent.libs.org.pmw.tinylog'
     relocate 'net.jodah', 'kanela.agent.libs.net.jodah'
+    relocate 'com.grack.nanojson', 'kanela.agent.libs.com.grack.nanojson'
+
     relocate ('com.github.tobiasrm', 'kanela.agent.libs.com.github.tobiasrm') {
         exclude 'com.github.tobiasrm.Main.class'
     }
 
     dependencies {
-        exclude('org.projectlombok:lombok:1.18.0')
+        exclude('org.projectlombok:lombok:1.18.6')
     }
 
     doLast {
@@ -103,6 +106,7 @@ jar {
         attributes 'Build-Jdk': System.getProperty("java.version")
         attributes 'Premain-Class': "kanela.agent.Kanela"
         attributes 'Agent-Class': "kanela.agent.Kanela"
+        attributes 'Main-Class': "kanela.agent.attacher.Attacher"
         attributes 'Can-Redefine-Classes': "true"
         attributes 'Can-Set-Native-Method-Prefix': "true"
         attributes 'Can-Retransform-Classes': "true"

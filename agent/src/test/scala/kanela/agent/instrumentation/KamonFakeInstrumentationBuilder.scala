@@ -16,6 +16,6 @@
 
 package kanela.agent.instrumentation
 
-import kanela.agent.api.instrumentation.KanelaInstrumentation
+import kanela.agent.api.instrumentation.InstrumentationBuilder
 
-class KamonFakeInstrumentation extends KanelaInstrumentation
+class KamonFakeInstrumentationBuilder extends InstrumentationBuilder

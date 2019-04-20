@@ -18,18 +18,16 @@ package app.kanela.instrumentation;
 
 import app.kanela.instrumentation.advisor.FakeWorkerAdvisor;
 import app.kanela.instrumentation.mixin.MonitorMixin;
-import kanela.agent.api.instrumentation.KanelaInstrumentation;
+import kanela.agent.api.instrumentation.InstrumentationBuilder;
 
 import static kanela.agent.libs.net.bytebuddy.matcher.ElementMatchers.named;
 
-public class MonitorInstrumentation extends KanelaInstrumentation {
+public class MonitorInstrumentation extends InstrumentationBuilder {
     public MonitorInstrumentation() {
-        forTargetType(() -> "app.kanela.FakeWorker", builder ->
-            builder.withMixin(() -> MonitorMixin.class)
-                   .withAdvisorFor(named("heavyTask"), () -> FakeWorkerAdvisor.class)
-                   .withAdvisorFor(named("lightTask"), () -> FakeWorkerAdvisor.class)
-                   .build()
-        );
+        onType("app.kanela.FakeWorker")
+            .mixin(MonitorMixin.class)
+            .advise(named("heavyTask"), FakeWorkerAdvisor.class)
+            .advise(named("lightTask"), FakeWorkerAdvisor.class);
     }
 
 }
