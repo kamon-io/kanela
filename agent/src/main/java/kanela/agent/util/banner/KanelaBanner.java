@@ -19,7 +19,7 @@ package kanela.agent.util.banner;
 import kanela.agent.util.AnsiColor;
 import kanela.agent.util.BuildInfo;
 import kanela.agent.util.conf.KanelaConfiguration;
-import lombok.experimental.var;
+import lombok.var;
 import lombok.val;
 
 public class KanelaBanner {
