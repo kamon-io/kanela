@@ -94,6 +94,11 @@ public class InstrumentationDescription {
             return this;
         }
 
+        public Builder withInterceptorFor(ElementMatcher.Junction<MethodDescription> method, Object delegate) {
+            withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate)));
+            return this;
+        }
+
         public Builder withTransformation(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) {
             transformers.add(withTransformer(f));
             return this;

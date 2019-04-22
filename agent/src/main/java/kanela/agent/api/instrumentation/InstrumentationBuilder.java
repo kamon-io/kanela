@@ -214,6 +214,11 @@ public abstract class InstrumentationBuilder {
             return this;
         }
 
+        public Target intercept(ElementMatcher.Junction<MethodDescription> method, Object implementation) {
+            builder.withInterceptorFor(method, implementation);
+            return this;
+        }
+
         public Target when(ClassRefiner.Builder... refinerBuilders) {
             val refiners = io.vavr.collection.List.of(refinerBuilders).map(b -> b.build()).toJavaArray(ClassRefiner.class);
             builder.withClassLoaderRefiner(() -> ClassLoaderRefiner.from(refiners));
