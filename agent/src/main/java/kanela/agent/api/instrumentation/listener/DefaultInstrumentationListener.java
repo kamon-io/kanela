@@ -33,7 +33,7 @@ public class DefaultInstrumentationListener extends Listener.Adapter {
 
     @Override
     public void onError(String error, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-        Logger.info(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
+        Logger.error(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
     }
 
     public static DefaultInstrumentationListener instance() {
