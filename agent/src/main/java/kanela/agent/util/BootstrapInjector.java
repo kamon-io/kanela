@@ -49,6 +49,6 @@ public class BootstrapInjector {
     private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
         return allClasses
                 .stream()
-                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> ClassFileLocator.ForClassLoader.read(value).resolve()));
+                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, ClassFileLocator.ForClassLoader::read));
     }
 }

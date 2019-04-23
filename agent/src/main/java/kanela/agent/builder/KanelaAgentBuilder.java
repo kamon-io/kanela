@@ -71,8 +71,7 @@ class KanelaAgentBuilder {
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent
                         .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
-                        .transform(transformer)
-                        .asDecorator();
+                        .transform(transformer);
              }
              return agent;
         });

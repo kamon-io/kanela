@@ -62,7 +62,7 @@ public class Manifests {
                 }
             }
             return manifests;
-        }).getOrElse(Collections::<Manifest>emptyList);
+        }).getOrElse(Collections::emptyList);
     }
 }
 

@@ -34,7 +34,7 @@ public final class Kanela {
      * @param args Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
-    public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
+    public static void premain(final String args, final Instrumentation instrumentation) {
         if(Kanela.instrumentation == null) {
             Kanela.instrumentation = instrumentation;
             KanelaEntryPoint.premain(args, instrumentation);
@@ -50,7 +50,7 @@ public final class Kanela {
      * @param args Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
-    public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
+    public static void agentmain(final String args, final Instrumentation instrumentation) {
         if(Kanela.instrumentation == null) {
             Kanela.instrumentation = instrumentation;
             KanelaEntryPoint.agentmain(args, instrumentation);
