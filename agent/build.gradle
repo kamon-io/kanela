@@ -77,7 +77,6 @@ shadowJar {
     relocate 'com.typesafe.config', 'kanela.agent.libs.com.typesafe.config'
     relocate 'org.pmw.tinylog', 'kanela.agent.libs.org.pmw.tinylog'
     relocate 'net.jodah', 'kanela.agent.libs.net.jodah'
-    relocate 'com.grack.nanojson', 'kanela.agent.libs.com.grack.nanojson'
 
     relocate ('com.github.tobiasrm', 'kanela.agent.libs.com.github.tobiasrm') {
         exclude 'com.github.tobiasrm.Main.class'
