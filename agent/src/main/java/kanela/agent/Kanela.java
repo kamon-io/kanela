@@ -16,44 +16,98 @@
 
 package kanela.agent;
 
+import io.vavr.collection.List;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
+import kanela.agent.api.instrumentation.replacer.ClassReplacer;
+import kanela.agent.builder.KanelaFileTransformer;
+import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
+import kanela.agent.reinstrument.Reinstrumenter;
+import kanela.agent.util.BootstrapInjector;
+import kanela.agent.util.banner.KanelaBanner;
+import kanela.agent.util.classloader.InstrumentationClassPath;
+import kanela.agent.util.conf.KanelaConfiguration;
+import kanela.agent.util.jvm.OldGarbageCollectorListener;
+import lombok.val;
+
 import java.lang.instrument.Instrumentation;
 
+import static kanela.agent.util.Execution.runWithTimeSpent;
 
-public final class Kanela {
+final public class Kanela {
 
-    private static volatile Instrumentation instrumentation;
+  private static String loadedPropertyName = "kanela.loaded";
+  private static volatile Instrumentation instrumentation;
+  private static volatile List<KanelaFileTransformer> installedTransformers = List.empty();
 
-    private Kanela() {}
+  /**
+   * Entry point when the Kanela agent is added with the -javaagent command line option.
+   */
+  public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
+      Kanela.start(args, instrumentation, false);
+  }
 
-    /**
-     * JVM hook to statically load the javaagent at startup.
-     *
-     * After the Java Virtual Machine (JVM) has initialized, the premain method
-     * will be called. Then the real application main method will be called.
-     *
-     * @param args Agent argument list
-     * @param instrumentation {@link Instrumentation}
-     */
-    public static void premain(final String args, final Instrumentation instrumentation) {
-        if(Kanela.instrumentation == null) {
-            Kanela.instrumentation = instrumentation;
-            KanelaEntryPoint.premain(args, instrumentation);
-        }
+  /**
+   * Entry point when the Kanela agent is attached at runtime.
+   */
+  public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
+      Kanela.start(args, instrumentation, true);
+  }
+
+  /**
+   * Scans the instrumentation class path for modules and installs them on the JVM.
+   */
+  public static void start(final String arguments, final Instrumentation instrumentation, boolean isRuntimeAttach) {
+
+      // This ensures that we will not load Kanela more than once on the same JVM.
+      if(Kanela.instrumentation == null) {
+
+          // We keep the reference in case we will need to reload the agent.
+          Kanela.instrumentation = instrumentation;
+
+          runWithTimeSpent(() -> {
+              InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+                  BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
+                  val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+                  if (isRuntimeAttach) configuration.runtimeAttach();
+                  KanelaBanner.show(configuration);
+
+                  installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
+                  Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
+                  OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+                  SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+                  ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
+                  updateLoadedSystemProperty();
+              });
+          });
+      }
+  }
+
+  /**
+   * Removes all instrumentation modules already applied by Kanela and re-scans the instrumentation class path for
+   * modules to apply them on the current JVM.
+   */
+  public static void reload() {
+
+    // We will only proceed to reload if Kanela was properly started already.
+    if(Kanela.instrumentation != null) {
+        InstrumentationRegistryListener.instance().clear();
+
+        InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+            installedTransformers.forEach(transformer -> instrumentation.removeTransformer(transformer.getClassFileTransformer()));
+            installedTransformers = List.empty();
+
+            val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+            installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
+        });
     }
+  }
 
-    /**
-     * JVM hook to dynamically load javaagent at runtime.
-     *
-     * The agent class may have an agentmain method for use when the agent is
-     * started after VM startup.
-     *
-     * @param args Agent argument list
-     * @param instrumentation {@link Instrumentation}
-     */
-    public static void agentmain(final String args, final Instrumentation instrumentation) {
-        if(Kanela.instrumentation == null) {
-            Kanela.instrumentation = instrumentation;
-            KanelaEntryPoint.agentmain(args, instrumentation);
-        }
-    }
+  /**
+   * Sets a System property indicating that Kanela has been loaded. That property is meant to be used by external
+   * libraries that might want to check whether Kanela was loaded or not.
+   */
+  private static void updateLoadedSystemProperty() {
+    System.setProperty(loadedPropertyName, "true");
+  }
 }

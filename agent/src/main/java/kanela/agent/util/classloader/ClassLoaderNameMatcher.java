@@ -48,6 +48,10 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         return new ClassLoaderNameMatcher("org.codehaus.groovy.runtime.callsite.CallSiteClassLoader");
     }
 
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isSBTClassLoader() {
+        return new ClassLoaderNameMatcher("xsbt.boot.LibraryClassLoader");
+    }
+
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> isKanelaClassLoader() {
         return new ClassLoaderNameMatcher(ChildFirstURLClassLoader.class.getName());
     }

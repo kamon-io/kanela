@@ -21,6 +21,7 @@ import kanela.agent.bootstrap.log.LoggerHandler;
 import kanela.agent.bootstrap.log.LoggerProvider;
 import kanela.agent.util.conf.KanelaConfiguration;
 import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.labelers.TimestampLabeler;
 import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;

@@ -20,7 +20,6 @@ import kanela.agent.util.log.Logger;
 import lombok.Value;
 
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -31,19 +30,19 @@ public class BuiltInModuleLoader {
     private static final Pattern instrumentationPattern = Pattern.compile("kanela/agent/instrumentations/(.*).jar");
     private static final Pattern filterScalaPattern = Pattern.compile(".*_[0-9]\\.[0-9]+\\.jar");
 
-    public static List<URL> getUrlModules() {
+    public static URL[] findModules() {
         return Jar.searchWith(instrumentationPattern)
                 .map(BuiltInModuleLoader::collectAll)
                 .map(BuiltInModuleLoader::urlsToJars)
                 .onFailure((cause) -> Logger.error(() -> "Error when trying to Load build-in instrumentation modules.", cause))
-                .getOrElse(Collections.emptyList());
+                .getOrElse(new URL[]{});
     }
 
-    private static List<URL> urlsToJars(List<String> urls) {
+    private static URL[] urlsToJars(List<String> urls) {
         return io.vavr.collection.List.ofAll(urls)
                 .map(url -> Jar.getEmbeddedFile("/" + url))
                 .flatMap(Function.identity())
-                .toJavaList();
+                .toJavaArray(URL.class);
     }
 
     private static List<String> collectAll(List<String> modules) {

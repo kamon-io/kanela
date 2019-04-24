@@ -68,12 +68,22 @@ public class MixinClassVisitor extends ClassVisitor {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void visitEnd() {
-        val cr = new ClassReader(mixin.getMixinClass());
+
+        // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
+        // that all classes are loaded with Kanela's ClassLoader (which some times might be the System ClassLoader and
+        // some others will be an Attach ClassLoader).
+        val classLoader = Thread.currentThread().getContextClassLoader();
+        val mixinClassFileName = mixin.getMixinClass().replace('.', '/') + ".class";
+        val classStream = classLoader.getResourceAsStream(mixinClassFileName);
+
+        val cr = new ClassReader(classStream);
+        classStream.close();
+
         val cn = new ClassNode();
         cr.accept(cn, ClassReader.EXPAND_FRAMES);
 
-        ((List<FieldNode>) cn.fields).forEach(fieldNode -> fieldNode.accept(this));
-        ((List<MethodNode>) cn.methods).stream().filter(isConstructor()).forEach(mn -> {
+        cn.fields.forEach(fieldNode -> fieldNode.accept(this));
+        cn.methods.stream().filter(isConstructor()).forEach(mn -> {
             String[] exceptions = new String[mn.exceptions.size()];
             MethodVisitor mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions);
             mn.accept(new MethodRemapper(mv, new SimpleRemapper(cn.name, type.getInternalName())));
