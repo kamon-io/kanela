@@ -17,10 +17,12 @@
 package kanela.agent.api.instrumentation.listener;
 
 import kanela.agent.util.log.Logger;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder.Listener;
 import net.bytebuddy.utility.JavaModule;
 
 import static java.text.MessageFormat.format;
+import static kanela.agent.util.classloader.ScalaCompilerClassLoaderFilter.isScalaCompilerClassLoader;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -33,7 +35,10 @@ public class DefaultInstrumentationListener extends Listener.Adapter {
 
     @Override
     public void onError(String error, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-        Logger.error(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
+        if(!isScalaCompilerClassLoader(classLoader)) {
+            val classLoaderLabel = (classLoader == null) ? "Bootstrap ClassLoader" : classLoader.toString();
+            Logger.error(() -> format("Error => {0} with message {1}. Class loader: {2}", error, throwable.getMessage(), classLoaderLabel), throwable);
+        }
     }
 
     public static DefaultInstrumentationListener instance() {

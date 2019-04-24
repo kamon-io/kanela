@@ -54,9 +54,7 @@ class KanelaAgentBuilder {
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
         if (typeTransformation.isActive()) {
-            if (config.getInstrumentationRegistryConfig().isEnabled()) {
-                InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
-            }
+            InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
             typeTransformations.add(typeTransformation);
         }
     }
@@ -121,6 +119,7 @@ class KanelaAgentBuilder {
                 .or(any(), isExtensionClassLoader())
                 .or(any(), isKanelaClassLoader())
                 .or(any(), isGroovyClassLoader())
+                .or(any(), isSBTClassLoader())
                 .or(any(), isReflectionClassLoader());
 
         if (moduleDescription.shouldInjectInBootstrap()) return builder;

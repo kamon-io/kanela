@@ -56,16 +56,21 @@ public class KanelaConfiguration {
     @Getter(AccessLevel.PRIVATE)
     Config config;
 
-    private static class Holder {
-        private static final KanelaConfiguration Instance = new KanelaConfiguration();
+    public static KanelaConfiguration from(ClassLoader classLoader) {
+        val config = new KanelaConfiguration(loadConfig(classLoader));
+        latestInstance = config;
+        return config;
     }
 
+    private static KanelaConfiguration latestInstance = null;
+
+    // TODO: Remove any access to this member.
     public static KanelaConfiguration instance() {
-        return Holder.Instance;
+        return latestInstance;
     }
 
-    private KanelaConfiguration() {
-        this.config = loadConfig();
+    private KanelaConfiguration(Config config) {
+        this.config = config;
         this.debugMode = getDebugMode(config);
         this.showBanner = getShowBanner(config);
         this.extraParams = new HashMap();
@@ -83,9 +88,10 @@ public class KanelaConfiguration {
         return List.ofAll(config.entrySet())
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
-                .map(moduleName -> {
-                    val moduleConfig = config.getConfig(moduleName);
+                .map(configPath -> {
+                    val moduleConfig = config.getConfig(configPath);
                     val name = moduleConfig.getString("name");
+                    val description = Try.of(() -> moduleConfig.getString("description")).getOrElse("");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
                     val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
@@ -96,7 +102,7 @@ public class KanelaConfiguration {
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                     val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(moduleName, name, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
+                    return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
@@ -106,8 +112,9 @@ public class KanelaConfiguration {
 
     @Value(staticConstructor = "from")
     public static class ModuleConfiguration {
-        String key;
+        String configPath;
         String name;
+        String description;
         List<String> instrumentations;
         String withinPackage;
         boolean enabled;
@@ -139,7 +146,7 @@ public class KanelaConfiguration {
         DumpConfig(Config config) {
             this.dumpEnabled = Try.of(() -> config.getBoolean("class-dumper.enabled")).getOrElse(false);
             this.dumpDir = Try.of(() -> config.getString("class-dumper.dir")).getOrElse( System.getProperty("user.home") + "/kanela-agent/dump");
-            this.createJar = Try.of(() -> config.getBoolean("class-dumper.create-jar")).getOrElse(true);
+            this.createJar = Try.of(() -> config.getBoolean("class-dumper.build-jar")).getOrElse(true);
             this.jarName = Try.of(() -> config.getString("class-dumper.jar-name")).getOrElse("instrumentedClasses");
         }
 
@@ -229,8 +236,8 @@ public class KanelaConfiguration {
         this.addExtraParameter("attached-in-runtime", true);
     }
 
-    private Config loadConfig() {
-        return Try.of(() -> loadDefaultConfig().getConfig("kanela"))
+    private static Config loadConfig(ClassLoader classLoader) {
+        return Try.of(() -> loadDefaultConfig(classLoader).getConfig("kanela"))
                 .onFailure(missing -> Logger.error(() -> "It has not been found any configuration for Kanela Agent.", missing))
                 .get();
     }
@@ -256,16 +263,16 @@ public class KanelaConfiguration {
         return Try.of(() -> config.getBoolean("show-banner")).getOrElse(false);
     }
 
-    private Config loadDefaultConfig() {
+    private static Config loadDefaultConfig(ClassLoader classLoader) {
         return ConfigFactory
-                .load(Thread.currentThread().getContextClassLoader(), ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
+                .load(classLoader, ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
     }
 
     private static File createTempDirectory(String tempDirPrefix) {
         return Try
                 .of(() -> Files.createTempDirectory(tempDirPrefix).toFile())
-                .getOrElseThrow(() -> new RuntimeException(format("Cannot create the temporary directory: {0}", tempDirPrefix)));
+                .getOrElseThrow(() -> new RuntimeException(format("Cannot build the temporary directory: {0}", tempDirPrefix)));
     }
 
 
