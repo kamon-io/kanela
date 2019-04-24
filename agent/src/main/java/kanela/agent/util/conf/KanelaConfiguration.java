@@ -56,7 +56,7 @@ public class KanelaConfiguration {
     @Getter(AccessLevel.PRIVATE)
     Config config;
 
-    public static KanelaConfiguration from(ClassLoader classLoader) {
+    synchronized public static KanelaConfiguration from(ClassLoader classLoader) {
         val config = new KanelaConfiguration(loadConfig(classLoader));
         latestInstance = config;
         return config;
@@ -65,7 +65,11 @@ public class KanelaConfiguration {
     private static KanelaConfiguration latestInstance = null;
 
     // TODO: Remove any access to this member.
-    public static KanelaConfiguration instance() {
+    synchronized public static KanelaConfiguration instance() {
+        if(latestInstance == null) {
+            latestInstance = new KanelaConfiguration(loadConfig(Thread.currentThread().getContextClassLoader()));
+        }
+
         return latestInstance;
     }
 
