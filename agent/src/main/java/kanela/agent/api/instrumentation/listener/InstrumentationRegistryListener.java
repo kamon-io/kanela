@@ -36,11 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * will only expose data using plain Java types which are guaranteed to be loaded by the Bootstrap ClassLoader.
  *
  */
-public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
+final public class InstrumentationRegistryListener extends AgentBuilder.Listener.Adapter {
 
-    private static InstrumentationRegistryListener _instance = new InstrumentationRegistryListener();
+    private static InstrumentationRegistryListener instance = new InstrumentationRegistryListener();
     public static InstrumentationRegistryListener instance() {
-        return _instance;
+        return instance;
     }
 
     private Map<String, Map<TypeTransformation, List<TypeDescription>>> moduleTransformers = new ConcurrentHashMap<>();
