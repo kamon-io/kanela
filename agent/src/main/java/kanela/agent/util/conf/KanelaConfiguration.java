@@ -190,7 +190,7 @@ public class KanelaConfiguration {
         boolean shouldLogAfterGc;
 
         OldGarbageCollectorConfig(Config config) {
-            this.shouldLogAfterGc = Try.of(() -> config.getBoolean("gc-listener.log-after-gc-show")).getOrElse(false);
+            this.shouldLogAfterGc = Try.of(() -> config.getBoolean("gc-listener.log-after-gc-run")).getOrElse(false);
         }
 
         public boolean isCircuitBreakerRunning() {

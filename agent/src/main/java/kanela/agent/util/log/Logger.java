@@ -20,6 +20,7 @@ import io.vavr.control.Try;
 import kanela.agent.bootstrap.log.LoggerHandler;
 import kanela.agent.bootstrap.log.LoggerProvider;
 import kanela.agent.util.conf.KanelaConfiguration;
+import lombok.val;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.labelers.TimestampLabeler;
@@ -36,21 +37,33 @@ import java.util.function.Supplier;
 public class Logger {
 
     static {
-        Try.run(() -> Configurator
+        configureLogger(KanelaConfiguration.instance());
+    }
+
+    public static void configureLogger(KanelaConfiguration config) {
+        Try.run(() -> {
+            val configurator = Configurator
                 .fromResource("kanela-log.properties")
                 .writingThread("main")
-                .level(KanelaConfiguration.instance().getLogLevel())
-                .addWriter(new RollingFileWriter("kanela-agent.log", 2, true, new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)))
-                .activate())
-                .andThen(() -> {
-                    //sets the logger provider in order to be able to access from advisors/interceptors
-                    LoggerHandler.setLoggerProvider(new LoggerProvider() {
-                        public void error(String msg, Throwable t) { Logger.error(() -> msg, t); }
-                        public void info(String msg) {
-                            Logger.info(() -> msg);
-                        }
-                    });
-                }).getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
+                .level(config.getLogLevel());
+
+            if(config.isDebugMode()) {
+                configurator.addWriter(new RollingFileWriter("kanela-agent.log", 2, true,
+                    new TimestampLabeler(), new StartupPolicy(), new SizePolicy(10 * 1024)));
+            }
+
+            configurator.activate();
+
+        }).andThen(() -> {
+
+            //sets the logger provider in order to be able to access from advisors/interceptors
+            LoggerHandler.setLoggerProvider(new LoggerProvider() {
+                public void error(String msg, Throwable t) { Logger.error(() -> msg, t); }
+                public void info(String msg) {
+                    Logger.info(() -> msg);
+                }
+            });
+        }).getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
     }
 
     private Logger(){}

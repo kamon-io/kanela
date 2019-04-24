@@ -27,6 +27,7 @@ import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.InstrumentationClassPath;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
+import kanela.agent.util.log.Logger;
 import lombok.val;
 
 import java.lang.instrument.Instrumentation;
@@ -69,6 +70,8 @@ final public class Kanela {
                   BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
                   val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+                  Logger.configureLogger(configuration);
+
                   if (isRuntimeAttach) configuration.runtimeAttach();
                   KanelaBanner.show(configuration);
 
@@ -98,6 +101,7 @@ final public class Kanela {
             installedTransformers = List.empty();
 
             val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+            Logger.configureLogger(configuration);
             installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
         });
     }
