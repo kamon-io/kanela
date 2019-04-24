@@ -33,7 +33,7 @@ import java.lang.instrument.Instrumentation;
 
 import static kanela.agent.util.Execution.runWithTimeSpent;
 
-public class Kanela {
+final public class Kanela {
 
   private static String loadedPropertyName = "kanela.loaded";
   private static volatile Instrumentation instrumentation;
@@ -43,39 +43,44 @@ public class Kanela {
    * Entry point when the Kanela agent is added with the -javaagent command line option.
    */
   public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
-    Kanela.start(args, instrumentation, false);
+      Kanela.start(args, instrumentation, false);
   }
 
   /**
    * Entry point when the Kanela agent is attached at runtime.
    */
   public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
-    Kanela.start(args, instrumentation, true);
+      Kanela.start(args, instrumentation, true);
   }
 
   /**
    * Scans the instrumentation class path for modules and installs them on the JVM.
    */
   public static void start(final String arguments, final Instrumentation instrumentation, boolean isRuntimeAttach) {
-      // We keep the reference in case we will need to reload the agent.
-      Kanela.instrumentation = instrumentation;
 
-      runWithTimeSpent(() -> {
-        InstrumentationClassPath.build().use(instrumentationClassLoader -> {
-          BootstrapInjector.injectJar(instrumentation, "bootstrap");
+      // This ensures that we will not load Kanela more than once on the same JVM.
+      if(Kanela.instrumentation == null) {
 
-          val configuration = KanelaConfiguration.from(instrumentationClassLoader);
-          if(isRuntimeAttach) configuration.runtimeAttach();
-          KanelaBanner.show(configuration);
+          // We keep the reference in case we will need to reload the agent.
+          Kanela.instrumentation = instrumentation;
 
-          installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
-          Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
-          OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-          SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-          ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
-          updateLoadedSystemProperty();
-        });
-      });
+          runWithTimeSpent(() -> {
+              InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+                  BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
+                  val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+                  if (isRuntimeAttach) configuration.runtimeAttach();
+                  KanelaBanner.show(configuration);
+
+                  installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
+                  Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
+                  OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+                  SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+                  ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
+                  updateLoadedSystemProperty();
+              });
+          });
+      }
   }
 
   /**
@@ -83,15 +88,19 @@ public class Kanela {
    * modules to apply them on the current JVM.
    */
   public static void reload() {
-    InstrumentationRegistryListener.instance().clear();
 
-    InstrumentationClassPath.build().use(instrumentationClassLoader -> {
-      installedTransformers.forEach(transformer -> instrumentation.removeTransformer(transformer.getClassFileTransformer()));
-      installedTransformers = List.empty();
+    // We will only proceed to reload if Kanela was properly started already.
+    if(Kanela.instrumentation != null) {
+        InstrumentationRegistryListener.instance().clear();
 
-      val configuration = KanelaConfiguration.from(instrumentationClassLoader);
-      installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
-    });
+        InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+            installedTransformers.forEach(transformer -> instrumentation.removeTransformer(transformer.getClassFileTransformer()));
+            installedTransformers = List.empty();
+
+            val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+            installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
+        });
+    }
   }
 
   /**
