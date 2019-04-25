@@ -34,7 +34,7 @@ public class KanelaBanner {
             "                              ",
             "==============================" };
 
-    private static final String KANELA = ":: The Kamon Agent ::";
+    private static final String KANELA = "::Running with Kanela, the Kamon Instrumentation Agent ::";
 
     private static final int STRAP_LINE_SIZE = 10;
 
