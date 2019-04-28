@@ -98,6 +98,7 @@ public class KanelaConfiguration {
                     val description = Try.of(() -> moduleConfig.getString("description")).getOrElse("");
                     val instrumentations = getInstrumentations(moduleConfig);
                     val within = getWithinConfiguration(moduleConfig);
+                    val exclude = getExcludeConfiguration(moduleConfig);
                     val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
                     val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                     val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
@@ -106,7 +107,7 @@ public class KanelaConfiguration {
                     val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                     val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges);
+                    return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges, exclude);
                     })
                 .filter(module -> module.getInstrumentations().nonEmpty())
                 .filter(this::isEnabled)
@@ -130,6 +131,7 @@ public class KanelaConfiguration {
         boolean legacyBytecodeSupport;
         File tempDir;
         boolean disableClassFormatChanges;
+        String excludePackage;
 
         public boolean shouldInjectInBootstrap() {
             return injectInBootstrap;
@@ -253,11 +255,21 @@ public class KanelaConfiguration {
     }
 
     private String getWithinConfiguration(Config config) {
-        return Try
-                .of(() -> List.ofAll(config.getStringList("within")).mkString("|"))
-                .getOrElse(DefaultConfiguration.withinPackage);
+        return getTypeListPattern(config, "within").getOrElse(DefaultConfiguration.withinPackage);
     }
 
+    private String getExcludeConfiguration(Config config) {
+        if(config.hasPath("exclude")) {
+            return getTypeListPattern(config, "exclude").getOrElse("");
+        } else {
+            return "";
+        }
+
+    }
+
+    private Try<String> getTypeListPattern(Config config, String path) {
+        return Try.of(() -> List.ofAll(config.getStringList(path)).mkString("|"));
+    }
 
     private Boolean getDebugMode(Config config) {
         return Try.of(() -> config.getBoolean("debug-mode")).getOrElse(false);
