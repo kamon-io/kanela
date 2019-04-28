@@ -116,6 +116,7 @@ class KanelaAgentBuilder {
 
     private AgentBuilder withIgnore(AgentBuilder agentBuilder) {
         var builder = agentBuilder.ignore(ignoreMatches())
+                .or(moduleExcludes())
                 .or(any(), isExtensionClassLoader())
                 .or(any(), isKanelaClassLoader())
                 .or(any(), isGroovyClassLoader())
@@ -136,5 +137,9 @@ class KanelaAgentBuilder {
 
     private ElementMatcher.Junction<NamedElement> ignoreMatches() {
         return not(nameMatches(moduleDescription.getWithinPackage()));
+    }
+
+    private ElementMatcher.Junction<NamedElement> moduleExcludes() {
+        return nameMatches(moduleDescription.getExcludePackage());
     }
 }
