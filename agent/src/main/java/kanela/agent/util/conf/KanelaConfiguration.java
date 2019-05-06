@@ -93,24 +93,34 @@ public class KanelaConfiguration {
                 .foldLeft(List.<String>empty(), (moduleList, moduleName) -> moduleList.append(moduleName.getKey().split("\\.")[0]))
                 .toSet()
                 .map(configPath -> {
-                    val moduleConfig = config.getConfig(configPath);
-                    val name = moduleConfig.getString("name");
-                    val description = Try.of(() -> moduleConfig.getString("description")).getOrElse("");
-                    val instrumentations = getInstrumentations(moduleConfig);
-                    val within = getWithinConfiguration(moduleConfig);
-                    val exclude = getExcludeConfiguration(moduleConfig);
-                    val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
-                    val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
-                    val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
-                    val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
-                    val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
-                    val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
-                    val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
+                    Try<ModuleConfiguration> moduleSettings = Try.of(() -> {
+                        val moduleConfig = config.getConfig(configPath);
+                        val name = moduleConfig.getString("name");
+                        val description = Try.of(() -> moduleConfig.getString("description")).getOrElse("");
+                        val instrumentations = getInstrumentations(moduleConfig);
+                        val within = getWithinConfiguration(moduleConfig);
+                        val exclude = getExcludeConfiguration(moduleConfig);
+                        val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
+                        val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
+                        val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
+                        val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
+                        val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
+                        val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
+                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
-                    return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges, exclude);
-                    })
-                .filter(module -> module.getInstrumentations().nonEmpty())
-                .filter(this::isEnabled)
+                        return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges, exclude);
+                    });
+
+                    moduleSettings.failed().forEach(t -> {
+                        Logger.warn(() -> "Malformed configuration for module on path: " + configPath + ". The module will be ignored.");
+                    });
+
+                    return moduleSettings;
+
+                })
+                .filter(t -> t.isSuccess())
+                .map(t -> t.get())
+                .filter(module -> module.getInstrumentations().nonEmpty() && isEnabled(module))
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
     }
