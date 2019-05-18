@@ -90,7 +90,7 @@ public class InstrumentationDescription {
         }
 
         public Builder withInterceptorFor(ElementMatcher.Junction<MethodDescription> method, Supplier<Class<?>> delegate) {
-            withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate)));
+            withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate.get())));
             return this;
         }
 
