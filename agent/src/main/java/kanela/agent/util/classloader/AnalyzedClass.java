@@ -117,7 +117,7 @@ public class AnalyzedClass implements ClassMatcher {
     }
 
     private static ClassNode convertToClassNode(InputStream classBytes) throws IOException {
-        val result = new ClassNode(Opcodes.ASM7);
+        val result = new ClassNode(Opcodes.ASM6);
         val reader =  new ClassReader(classBytes);
         reader.accept(result, ClassReader.SKIP_FRAMES);
         return result;

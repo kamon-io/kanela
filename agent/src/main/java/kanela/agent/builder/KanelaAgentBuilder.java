@@ -70,6 +70,7 @@ class KanelaAgentBuilder {
                 agent  = agent
                         .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
                         .transform(transformer);
+//                        .asDecorator();
              }
              return agent;
         });

@@ -24,7 +24,9 @@ import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,12 +45,31 @@ public class BootstrapInjector {
     public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
         ClassInjector.UsingInstrumentation
                 .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-                .inject(getCollect(allClasses));
+                .injectRaw(ClassFileLocator.ForClassLoader.readToNames(allClasses));
+
+
+        for (Class<?> clazz : allClasses) {
+            try {
+                Class<?> aClass = Class.forName(clazz.getName(), false, null);
+
+
+                System.out.println("KLADJFKLAKLDFLKJDKFLKAJKFALDKFLKADLKF" + Arrays.toString(ClassFileLocator.ForClassLoader.read(clazz)));
+
+
+                if(aClass.getClassLoader() == null) System.out.println("yeeeeeeeeee!!! " + clazz.getName());
+                else System.out.println("fuuuuuckkkk");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+            }
+        }
     }
 
-    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
-        return allClasses
-                .stream()
-                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, ClassFileLocator.ForClassLoader::read));
-    }
+//    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
+//        return allClasses 
+//                .stream()
+//                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> ClassFileLocator.ForClassLoader.ofBootLoader().locate(value));
+//
+//    }
 }
