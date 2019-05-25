@@ -16,6 +16,7 @@
 
 package kanela.agent.api.instrumentation.bridge;
 
+import kanela.agent.util.asm.ClassWriterFlags;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.asm.AsmVisitorWrapper;
@@ -25,7 +26,6 @@ import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassVisitor;
-import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.pool.TypePool;
 
 @Value(staticConstructor = "of")
@@ -33,10 +33,12 @@ import net.bytebuddy.pool.TypePool;
 public class BridgeClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
     BridgeDescription bridge;
+    TypeDescription typeDescription;
+    ClassLoader classLoader;
 
     @Override
     public int mergeWriter(int flags) {
-        return flags | ClassWriter.COMPUTE_MAXS;
+        return flags | ClassWriterFlags.from(typeDescription, classLoader);
     }
 
     @Override

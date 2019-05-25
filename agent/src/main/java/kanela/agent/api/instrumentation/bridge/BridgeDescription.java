@@ -42,6 +42,6 @@ public class BridgeDescription {
     public AgentBuilder.Transformer makeTransformer() {
         return (builder, typeDescription, classLoader, module) ->
                 builder.implement(new TypeDescription.ForLoadedType(this.iface))
-                       .visit(BridgeClassVisitorWrapper.of(this));
+                       .visit(BridgeClassVisitorWrapper.of(this, typeDescription, classLoader));
     }
 }
