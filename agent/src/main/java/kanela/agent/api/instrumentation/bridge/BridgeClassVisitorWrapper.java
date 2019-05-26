@@ -38,7 +38,7 @@ public class BridgeClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
     @Override
     public int mergeWriter(int flags) {
-        return flags | ClassWriterFlags.from(typeDescription, classLoader);
+        return flags | ClassWriterFlags.resolve(typeDescription, classLoader);
     }
 
     @Override
