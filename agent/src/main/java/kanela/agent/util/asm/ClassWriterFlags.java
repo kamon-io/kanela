@@ -8,7 +8,7 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator.ForClassLoader;
 import net.bytebuddy.jar.asm.ClassWriter;
 
-//@Value
+@Value
 public class ClassWriterFlags {
 
     /**
