@@ -16,6 +16,7 @@
 
 package kanela.agent.api.instrumentation.mixin;
 
+import kanela.agent.util.asm.ClassWriterFlags;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import net.bytebuddy.asm.AsmVisitorWrapper;
@@ -24,6 +25,7 @@ import net.bytebuddy.description.field.FieldList;
 import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
+import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.pool.TypePool;
 
@@ -32,6 +34,18 @@ import net.bytebuddy.pool.TypePool;
 public class MixinClassVisitorWrapper extends AsmVisitorWrapper.AbstractBase {
 
     MixinDescription mixin;
+    TypeDescription typeDescription;
+    ClassLoader classLoader;
+
+    @Override
+    public int mergeWriter(int flags) {
+        return flags | ClassWriterFlags.resolve(typeDescription, classLoader);
+    }
+
+    @Override
+    public int mergeReader(int flags) {
+        return flags | ClassReader.EXPAND_FRAMES;
+    }
 
     @Override
     public ClassVisitor wrap(TypeDescription instrumentedType,
