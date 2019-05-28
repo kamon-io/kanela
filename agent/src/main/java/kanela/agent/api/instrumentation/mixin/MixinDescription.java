@@ -49,6 +49,6 @@ public class MixinDescription {
         val interfaces = List.ofAll(this.interfaces).map(TypeDescription.ForLoadedType::new).toJavaList();
         return (builder, typeDescription, classLoader, module) ->
                 builder.implement(interfaces)
-                       .visit(MixinClassVisitorWrapper.of(this));
+                       .visit(MixinClassVisitorWrapper.of(this, typeDescription, classLoader));
     }
 }

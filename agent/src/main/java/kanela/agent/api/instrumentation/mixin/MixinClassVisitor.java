@@ -68,7 +68,6 @@ public class MixinClassVisitor extends ClassVisitor {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void visitEnd() {
-
         // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
         // that all classes are loaded with Kanela's ClassLoader (which some times might be the System ClassLoader and
         // some others will be an Attach ClassLoader).
