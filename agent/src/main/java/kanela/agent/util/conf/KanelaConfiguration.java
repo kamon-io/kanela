@@ -106,7 +106,7 @@ public class KanelaConfiguration {
                         val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                         val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
                         val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
-                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
+                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(true);
 
                         return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges, exclude);
                     });

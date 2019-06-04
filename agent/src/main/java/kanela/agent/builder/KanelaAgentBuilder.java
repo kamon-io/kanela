@@ -68,7 +68,8 @@ class KanelaAgentBuilder {
 
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent
-                        .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
+//                        .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
+                        .type(typeTransformation.getElementMatcher().get())
                         .transform(transformer);
 //                        .asDecorator();
              }
@@ -82,7 +83,8 @@ class KanelaAgentBuilder {
             .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
         var agentBuilder = new AgentBuilder.Default(byteBuddy)
-            .with(poolStrategyCache);
+                .with(poolStrategyCache);
+
 
         agentBuilder = withRetransformationForRuntime(agentBuilder);
         agentBuilder = withBootstrapAttaching(agentBuilder);

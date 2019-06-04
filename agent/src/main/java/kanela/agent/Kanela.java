@@ -30,7 +30,10 @@ import kanela.agent.util.jvm.OldGarbageCollectorListener;
 import kanela.agent.util.log.Logger;
 import lombok.val;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.util.jar.JarFile;
 
 import static kanela.agent.util.Execution.runWithTimeSpent;
 
@@ -61,12 +64,23 @@ final public class Kanela {
 
       // This ensures that we will not load Kanela more than once on the same JVM.
       if(Kanela.instrumentation == null) {
-
           // We keep the reference in case we will need to reload the agent.
           Kanela.instrumentation = instrumentation;
 
           runWithTimeSpent(() -> {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+
+
+//                  try {
+//                      instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(new File("/home/diego/cacacac/1.jar")));
+//                      instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(new File("/home/diego/cacacac/2.jar")));
+//                      Class.forName("kamon.executors.instrumentation.ExecutorsInstrumentationAdvisors$RunnableWrapperAdvisor", false, null);
+//                  } catch (IOException e) {
+//                      e.printStackTrace();
+//                  } catch (ClassNotFoundException e) {
+//                      e.printStackTrace();
+//                  }
+
                   BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
                   val configuration = KanelaConfiguration.from(instrumentationClassLoader);
@@ -76,10 +90,10 @@ final public class Kanela {
                   KanelaBanner.show(configuration);
 
                   installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
-                  Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
-                  OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-                  SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-                  ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
+//                  Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
+//                  OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
+//                  SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+//                  ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
                   updateLoadedSystemProperty();
               });
           });

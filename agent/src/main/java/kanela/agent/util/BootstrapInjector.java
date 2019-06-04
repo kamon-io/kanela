@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,28 +49,51 @@ public class BootstrapInjector {
                 .injectRaw(ClassFileLocator.ForClassLoader.readToNames(allClasses));
 
 
-        for (Class<?> clazz : allClasses) {
-            try {
-                Class<?> aClass = Class.forName(clazz.getName(), false, null);
+//        ClassInjector.UsingInstrumentation
+//                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
+//                .inject(getCollect(allClasses));
+
+//        for (Class<?> clazz : allClasses) {
+//            try {
+//                Class<?> aClass = Class.forName(clazz.getName(), false, null);
 
 
-                System.out.println("KLADJFKLAKLDFLKJDKFLKAJKFALDKFLKADLKF" + Arrays.toString(ClassFileLocator.ForClassLoader.read(clazz)));
+//                System.out.println("KLADJFKLAKLDFLKJDKFLKAJKFALDKFLKADLKF" + Arrays.toString(ClassFileLocator.ForClassLoader.read(clazz)));
 
 
-                if(aClass.getClassLoader() == null) System.out.println("yeeeeeeeeee!!! " + clazz.getName());
-                else System.out.println("fuuuuuckkkk");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+//                if(aClass.getClassLoader() == null) System.out.println("yeeeeeeeeee!!! " + clazz.getName());
+//                else System.out.println("fuuuuuckkkk");
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
 //            } catch (IOException e) {
 //                e.printStackTrace();
-            }
-        }
+//            }
+//        }
     }
 
-//    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
-//        return allClasses 
-//                .stream()
-//                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> ClassFileLocator.ForClassLoader.ofBootLoader().locate(value));
-//
+    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
+        return allClasses
+                .stream()
+                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> getAgentClassBytes(value.getName())));
+
+    }
+
+//    private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames) throws IOException {
+//        Map<String, byte[]> typeDefinitions = new HashMap<>();
+//        for (final String helperName : helperClassNames) {
+//            final byte[] classBytes = getAgentClassBytes(helperName);
+//            typeDefinitions.put(helperName, classBytes);
+//        }
+//        return typeDefinitions;
 //    }
+
+    private static byte[] getAgentClassBytes(String className)  {
+        final ClassFileLocator locator = ClassFileLocator.ForClassLoader.of(ClassLoader.getSystemClassLoader());
+        try {
+            return locator.locate(className).resolve();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
