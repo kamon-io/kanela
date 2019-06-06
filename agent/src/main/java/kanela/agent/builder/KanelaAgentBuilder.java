@@ -66,10 +66,11 @@ class KanelaAgentBuilder {
             transformers.addAll(typeTransformation.getMixins());
             transformers.addAll(typeTransformation.getTransformations());
 
+            System.out.println("Thread " + Thread.currentThread().getName() + " Class " + this.getClass().getName());
+
             for (AgentBuilder.Transformer transformer : transformers) {
                 agent  = agent
-//                        .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
-                        .type(typeTransformation.getElementMatcher().get())
+                        .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
                         .transform(transformer);
 //                        .asDecorator();
              }

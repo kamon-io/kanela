@@ -19,6 +19,7 @@ package kanela.agent.api.instrumentation;
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 
 import io.vavr.Function0;
+import io.vavr.Function1;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
@@ -42,6 +43,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -85,6 +87,9 @@ public abstract class InstrumentationBuilder {
 
             BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, allClasses);
         }
+
+
+        System.out.println("Thread " + Thread.currentThread().getName() + " Class " + BootstrapInjector.class.getName());
 
         return TypeTransformation.of(
                 this.getClass().getName(),
