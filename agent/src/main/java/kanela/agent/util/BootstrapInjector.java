@@ -44,7 +44,7 @@ public class BootstrapInjector {
     }
 
     public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
-        System.out.println("Thread " + Thread.currentThread().getName() + " Class " + BootstrapInjector.class.getName());
+//        System.out.println("Thread " + Thread.currentThread().getName() + " Class " + BootstrapInjector.class.getName());
         ClassInjector.UsingInstrumentation
                 .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
                 .injectRaw(ClassFileLocator.ForClassLoader.readToNames(allClasses));

@@ -33,6 +33,7 @@ import lombok.val;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
 import java.util.jar.JarFile;
 
 import static kanela.agent.util.Execution.runWithTimeSpent;
@@ -46,14 +47,14 @@ final public class Kanela {
   /**
    * Entry point when the Kanela agent is added with the -javaagent command line option.
    */
-  public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
+  public static void premain(final String args, final Instrumentation instrumentation) {
       Kanela.start(args, instrumentation, false);
   }
 
   /**
    * Entry point when the Kanela agent is attached at runtime.
    */
-  public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
+  public static void agentmain(final String args, final Instrumentation instrumentation) {
       Kanela.start(args, instrumentation, true);
   }
 
@@ -74,7 +75,7 @@ final public class Kanela {
 //                  try {
 //                      instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(new File("/home/diego/cacacac/1.jar")));
 //                      instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(new File("/home/diego/cacacac/2.jar")));
-//                      Class.forName("kamon.executors.instrumentation.ExecutorsInstrumentationAdvisors$RunnableWrapperAdvisor", false, null);
+//                      Class.forName("kamon.executors.instrumentation.ExecutorsInstrumentationAdvisors$RunnableWrapperAdvisor", true, null);
 //                  } catch (IOException e) {
 //                      e.printStackTrace();
 //                  } catch (ClassNotFoundException e) {
