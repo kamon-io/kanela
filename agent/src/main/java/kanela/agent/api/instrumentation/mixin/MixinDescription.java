@@ -31,24 +31,30 @@ import java.util.Set;
 @Value
 public class MixinDescription {
 
-    Set<Class<?>> interfaces;
-    String mixinClass;
-    Option<String> mixinInit;
+    Class<?> mixinClass;
 
     public static MixinDescription of(Class<?> clazz) {
-        val interfaces = List.ofAll(Arrays.asList(clazz.getInterfaces())).toJavaSet();
-        val mixinInit = Option.ofOptional(Arrays.stream(clazz.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(Initializer.class))
-                .findFirst()
-                .map(Method::getName));
-
-        return new MixinDescription(interfaces, clazz.getName(), mixinInit);
+        return new MixinDescription(clazz);
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        val interfaces = List.ofAll(this.interfaces).map(TypeDescription.ForLoadedType::new).toJavaList();
-        return (builder, typeDescription, classLoader, module) ->
-                builder.implement(interfaces)
-                       .visit(MixinClassVisitorWrapper.of(this, typeDescription, classLoader));
+        return (builder, typeDescription, classLoader, module) -> {
+            val interfaces = List.ofAll(Arrays.asList(mixinClass.getInterfaces()))
+                .toSet()
+                .map(TypeDescription.ForLoadedType::new)
+                .toJavaList();
+
+            return builder
+                .implement(interfaces)
+                .visit(MixinClassVisitorWrapper.of(this, typeDescription, classLoader));
+        };
+
+    }
+
+    public Option<String> getInitializerMethod() {
+        return Option.ofOptional(Arrays.stream(mixinClass.getDeclaredMethods())
+            .filter(method -> method.isAnnotationPresent(Initializer.class))
+            .findFirst()
+            .map(Method::getName));
     }
 }

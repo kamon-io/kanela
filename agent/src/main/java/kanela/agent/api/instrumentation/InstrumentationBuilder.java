@@ -74,8 +74,8 @@ public abstract class InstrumentationBuilder {
         }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
-            val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
-            val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
+            val bridgeClasses = bridges.stream().map(BridgeDescription::getBridgeInterface).collect(Collectors.toList());
+            val mixinClasses = mixins.stream().map(mixinDescription -> mixinDescription.getMixinClass()).collect(Collectors.toList());
             val advisorClasses = advisors.stream().map(AdvisorDescription::getAdvisorClass).collect(Collectors.toList());
 
             val allClasses = new ArrayList<Class<?>>();
