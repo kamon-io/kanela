@@ -1,13 +1,29 @@
 language: java
 
+sudo: false
+dist: trusty
+
+before_install:
+  - unset _JAVA_OPTIONS
+
 install:
+  - echo "The default Travis install script is being skipped!"
   - ./gradlew :agent:publishToMavenLocal
   - ./gradlew assemble
+
+matrix:
+  include:
+    # OpenJDK - Java 9
+    - jdk: openjdk9
+    # OpenJDK - Java 10
+    - jdk: openjdk10
+    # OpenJDK - Java 11
+    - jdk: openjdk11
+    # OpenJDK - Java 12
+    - jdk: openjdk12
+    # OpenJDK - Java 13
+    - jdk: openjdk-ea
 
 script:
   - ./travis-test.sh
 
-jdk:
-   - oraclejdk8
-
-sudo: false
