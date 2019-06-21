@@ -8,8 +8,6 @@ before_install:
 
 install:
   - echo "The default Travis install script is being skipped!"
-  - ./gradlew :agent:publishToMavenLocal
-  - ./gradlew assemble
 
 matrix:
   include:
@@ -27,5 +25,7 @@ matrix:
     - jdk: openjdk-ea
 
 script:
+  - ./gradlew :agent:publishToMavenLocal
+  - ./gradlew assemble
   - ./travis-test.sh
 
