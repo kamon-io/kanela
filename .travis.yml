@@ -13,6 +13,8 @@ install:
 
 matrix:
   include:
+    # OpenJDK - Java 8
+    - jdk: openjdk8
     # OpenJDK - Java 9
     - jdk: openjdk9
     # OpenJDK - Java 10
