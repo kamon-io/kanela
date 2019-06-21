@@ -19,7 +19,6 @@ package kanela.agent.api.instrumentation;
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 
 import io.vavr.Function0;
-import io.vavr.Function1;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
@@ -43,7 +42,6 @@ import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -76,20 +74,17 @@ public abstract class InstrumentationBuilder {
         }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
-            val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
-            val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
+//            val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
+//            val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
             val advisorClasses = advisors.stream().map(AdvisorDescription::getAdvisorClass).collect(Collectors.toList());
 
             val allClasses = new ArrayList<Class<?>>();
-            allClasses.addAll(bridgeClasses);
-            allClasses.addAll(mixinClasses);
-            allClasses.addAll(advisorClasses);
-
+//            allClasses.addAll(bridgeClasses);
+//            allClasses.addAll(mixinClasses);
+//            allClasses.addAll(advisorClasses);
+//
             BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, allClasses);
         }
-
-
-        System.out.println("Thread " + Thread.currentThread().getName() + " Class " + BootstrapInjector.class.getName());
 
         return TypeTransformation.of(
                 this.getClass().getName(),

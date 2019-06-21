@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -19,18 +19,11 @@ package kanela.agent.util;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Value
 public class BootstrapInjector {
@@ -44,57 +37,8 @@ public class BootstrapInjector {
     }
 
     public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
-//        System.out.println("Thread " + Thread.currentThread().getName() + " Class " + BootstrapInjector.class.getName());
         ClassInjector.UsingInstrumentation
                 .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
                 .injectRaw(ClassFileLocator.ForClassLoader.readToNames(allClasses));
-
-
-//        ClassInjector.UsingInstrumentation
-//                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-//                .inject(getCollect(allClasses));
-
-//        for (Class<?> clazz : allClasses) {
-//            try {
-//                Class<?> aClass = Class.forName(clazz.getName(), false, null);
-
-
-//                System.out.println("KLADJFKLAKLDFLKJDKFLKAJKFALDKFLKADLKF" + Arrays.toString(ClassFileLocator.ForClassLoader.read(clazz)));
-
-
-//                if(aClass.getClassLoader() == null) System.out.println("yeeeeeeeeee!!! " + clazz.getName());
-//                else System.out.println("fuuuuuckkkk");
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-    }
-
-    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
-        return allClasses
-                .stream()
-                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, value -> getAgentClassBytes(value.getName())));
-
-    }
-
-//    private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames) throws IOException {
-//        Map<String, byte[]> typeDefinitions = new HashMap<>();
-//        for (final String helperName : helperClassNames) {
-//            final byte[] classBytes = getAgentClassBytes(helperName);
-//            typeDefinitions.put(helperName, classBytes);
-//        }
-//        return typeDefinitions;
-//    }
-
-    private static byte[] getAgentClassBytes(String className)  {
-        final ClassFileLocator locator = ClassFileLocator.ForClassLoader.of(ClassLoader.getSystemClassLoader());
-        try {
-            return locator.locate(className).resolve();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

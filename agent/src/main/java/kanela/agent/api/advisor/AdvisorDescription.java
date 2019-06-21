@@ -29,6 +29,7 @@ public class AdvisorDescription {
     public AgentBuilder.Transformer makeTransformer() {
         return new AgentBuilder.Transformer.ForAdvice()
                 .advice(this.methodMatcher, advisorClass.getName())
+                .include(advisorClass.getClassLoader())
                 .withExceptionHandler(AdviceExceptionHandler.instance());
     }
 }

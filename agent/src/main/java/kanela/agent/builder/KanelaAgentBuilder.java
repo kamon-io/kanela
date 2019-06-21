@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 package kanela.agent.builder;
 
 import kanela.agent.api.instrumentation.TypeTransformation;
-import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.api.instrumentation.listener.DebugInstrumentationListener;
 import kanela.agent.api.instrumentation.listener.DefaultInstrumentationListener;
+import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
 import kanela.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kanela.agent.cache.PoolStrategyCache;
 import kanela.agent.resubmitter.PeriodicResubmitter;
@@ -70,7 +70,6 @@ class KanelaAgentBuilder {
                 agent  = agent
                         .type(typeTransformation.getElementMatcher().get(), RefinedClassLoaderMatcher.from(typeTransformation.getClassLoaderRefiner()))
                         .transform(transformer);
-//                        .asDecorator();
              }
              return agent;
         });

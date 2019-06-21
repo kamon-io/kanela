@@ -26,7 +26,7 @@ import scala.collection.mutable.ListBuffer
 
 class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
-  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" ignore {
+  "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
     val testClass = new TestClass()
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
     // attach agent
