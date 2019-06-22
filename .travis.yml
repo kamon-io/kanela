@@ -3,6 +3,13 @@ language: java
 sudo: false
 dist: trusty
 
+before_install:
+  - unset _JAVA_OPTIONS
+
+install:
+  - ./gradlew :agent:publishToMavenLocal
+  - ./gradlew assemble
+
 matrix:
   include:
     # OpenJDK - Java 8
@@ -13,7 +20,5 @@ matrix:
     - jdk: openjdk-ea
 
 script:
-  - ./gradlew :agent:publishToMavenLocal
-  - ./gradlew assemble
   - ./travis-test.sh
 
