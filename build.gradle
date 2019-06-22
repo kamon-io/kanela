@@ -60,14 +60,19 @@ allprojects {
         agent(kamon_agent_dep)
     }
 
+    tasks.withType(Javadoc) {
+        if (JavaVersion.current().isJava11Compatible()) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+
     task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
+        archiveClassifier.set("sources")
         from sourceSets.main.allSource
     }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        javadoc.failOnError = true
+        archiveClassifier.set("javadoc")
         from javadoc.destinationDir
     }
 }
