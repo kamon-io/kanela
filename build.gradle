@@ -67,6 +67,7 @@ allprojects {
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
+        javadoc.failOnError = true
         from javadoc.destinationDir
     }
 }
