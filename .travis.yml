@@ -8,6 +8,7 @@ before_install:
 
 install:
   - echo "The default Travis install script is being skipped!"
+  - gradle wrapper --gradle-version 4.6
 
 matrix:
   include:
