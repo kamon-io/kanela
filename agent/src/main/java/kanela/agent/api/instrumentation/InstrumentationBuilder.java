@@ -16,8 +16,6 @@
 
 package kanela.agent.api.instrumentation;
 
-import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
-
 import io.vavr.Function0;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
@@ -39,7 +37,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -74,16 +71,8 @@ public abstract class InstrumentationBuilder {
         }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
-//            val bridgeClasses = bridges.stream().map(BridgeDescription::getIface).collect(Collectors.toList());
-//            val mixinClasses = mixins.stream().flatMap(mixinDescription -> mixinDescription.getInterfaces().stream()).collect(Collectors.toList());
-            val advisorClasses = advisors.stream().map(AdvisorDescription::getAdvisorClass).collect(Collectors.toList());
-
-            val allClasses = new ArrayList<Class<?>>();
-//            allClasses.addAll(bridgeClasses);
-//            allClasses.addAll(mixinClasses);
-//            allClasses.addAll(advisorClasses);
-//
-            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, allClasses);
+            val helperClassNames = moduleConfiguration.getBootstrapInjectionConfig().getHelperClassNames();
+            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, helperClassNames.toJavaList());
         }
 
         return TypeTransformation.of(

@@ -16,6 +16,7 @@
 
 package kanela.agent.util;
 
+import io.vavr.control.Try;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
@@ -24,6 +25,9 @@ import net.bytebuddy.dynamic.loading.ClassInjector;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Value
 public class BootstrapInjector {
@@ -36,9 +40,19 @@ public class BootstrapInjector {
         instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
     }
 
-    public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
+    public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
         ClassInjector.UsingInstrumentation
                 .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-                .injectRaw(ClassFileLocator.ForClassLoader.readToNames(allClasses));
+                .injectRaw(getTypeDefinitions(allClasses));
+    }
+
+    private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames)  {
+        return helperClassNames.stream().collect(Collectors.toMap(k -> k, BootstrapInjector::getClassBytes));
+    }
+
+    private static byte[] getClassBytes(String className)  {
+        return Try.of(() -> ClassFileLocator.ForClassLoader.of(ClassLoader.getSystemClassLoader()).locate(className).resolve())
+                .onFailure(error -> Logger.error(error::getMessage, error))
+                .getOrElseThrow((cause) -> new RuntimeException("Could not locate class: " + className));
     }
 }

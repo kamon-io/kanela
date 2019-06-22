@@ -1,29 +1,27 @@
 language: java
-
 sudo: false
-dist: trusty
+install: true
 
-before_install:
-  - unset _JAVA_OPTIONS
-
-install:
-  - echo "The default Travis install script is being skipped!"
+#dist: trusty
 
 matrix:
   include:
     # OpenJDK - Java 8
     - jdk: openjdk8
-    # OpenJDK - Java 9
-    - jdk: openjdk9
-    # OpenJDK - Java 10
-    - jdk: openjdk10
     # OpenJDK - Java 11
-    - jdk: openjdk11
-    # OpenJDK - Java 12
-    - jdk: openjdk12
+    - jdk: oraclejdk11
     # OpenJDK - Java 13
     - jdk: openjdk-ea
 
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    -
 script:
   - ./gradlew :agent:publishToMavenLocal
   - ./gradlew assemble
