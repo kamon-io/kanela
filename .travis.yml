@@ -3,13 +3,6 @@ language: java
 sudo: false
 dist: trusty
 
-before_install:
-  - unset _JAVA_OPTIONS
-
-install:
-  - echo "The default Travis install script is being skipped!"
-  - gradle wrapper --gradle-version 4.6
-
 matrix:
   include:
     # OpenJDK - Java 8

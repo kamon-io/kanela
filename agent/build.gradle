@@ -19,8 +19,8 @@ plugins {
     id 'java'
     id 'scala'
     id 'maven-publish'
-    id 'com.github.maiflai.scalatest' version '0.23'
-    id 'com.github.johnrengelman.shadow' version '2.0.2'
+    id 'com.github.maiflai.scalatest' version '0.25'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 
 configurations {
@@ -28,13 +28,11 @@ configurations {
 }
 
 dependencies {
-    compile 'com.typesafe:config:1.3.2'
-    compile 'net.jodah:expiringmap:0.5.8'
-    compile 'org.tinylog:tinylog:1.3.4'
+    compile 'com.typesafe:config:1.3.4'
+    compile 'net.jodah:expiringmap:0.5.9'
+    compile 'org.tinylog:tinylog:1.3.6'
     compile 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
     compile 'net.bytebuddy:byte-buddy-agent:1.9.13'
-//    compile 'net.bytebuddy:byte-buddy-agent:1.8.22'
-
 
     compile files('libs/byte-buddy-1.9.13.jar')
 
@@ -187,12 +185,14 @@ publishing {
     }
 }
 
-task createBuildInfoFile(dependsOn: processResources) << {
-    def file = new File("$buildDir/resources/main/build-info.properties")
-    Properties props = new Properties()
-    props.setProperty('version', project.version.toString())
-    props.setProperty('timestamp', new Date().toString())
-    props.store file.newWriter(), null
+task createBuildInfoFile(dependsOn: processResources) {
+    doLast {
+        def file = new File("$buildDir/resources/main/build-info.properties")
+        Properties props = new Properties()
+        props.setProperty('version', project.version.toString())
+        props.setProperty('timestamp', new Date().toString())
+        props.store file.newWriter(), null
+    }
 }
 
 classes {
