@@ -28,7 +28,6 @@ import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
-import lombok.var;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.NamedElement;
@@ -80,7 +79,7 @@ class KanelaAgentBuilder {
             .with(TypeValidation.of(config.isDebugMode()))
             .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE);
 
-        var agentBuilder = new AgentBuilder.Default(byteBuddy)
+        AgentBuilder agentBuilder = new AgentBuilder.Default(byteBuddy)
                 .with(poolStrategyCache);
 
 
@@ -116,7 +115,7 @@ class KanelaAgentBuilder {
     }
 
     private AgentBuilder withIgnore(AgentBuilder agentBuilder) {
-        var builder = agentBuilder.ignore(ignoreMatches())
+        AgentBuilder.Ignored builder = agentBuilder.ignore(ignoreMatches())
                 .or(moduleExcludes())
                 .or(any(), isExtensionClassLoader())
                 .or(any(), isKanelaClassLoader())

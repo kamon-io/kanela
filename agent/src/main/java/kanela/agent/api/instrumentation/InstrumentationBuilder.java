@@ -209,7 +209,7 @@ public abstract class InstrumentationBuilder {
         }
 
         public Target when(ClassRefiner.Builder... refinerBuilders) {
-            val refiners = io.vavr.collection.List.of(refinerBuilders).map(b -> b.build()).toJavaArray(ClassRefiner.class);
+            val refiners = io.vavr.collection.List.of(refinerBuilders).map(ClassRefiner.Builder::build).toJavaArray(ClassRefiner[]::new);
             builder.withClassLoaderRefiner(() -> ClassLoaderRefiner.from(refiners));
             return this;
         }

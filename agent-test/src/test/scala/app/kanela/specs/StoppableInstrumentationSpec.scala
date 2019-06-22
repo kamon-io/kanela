@@ -31,7 +31,7 @@ class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAnd
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
     // attach agent
     Attacher.attach()
-    Thread.sleep(5000) // FIXME: maybe a better solution?
+
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("enter", "body", "exit")
     EventBroker.instance.publish(StopModules.instance)
     testClass.addValue(ListBuffer()) shouldBe ListBuffer("body")
