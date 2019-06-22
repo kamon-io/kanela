@@ -104,9 +104,7 @@ public class KanelaConfiguration {
                         val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                         val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                         val bootstrapInjection = getBootstrapInjectionConfiguration(moduleConfig);
-//                        val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
                         val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
-//                        val helperClassNames = Try.of(() -> List.ofAll(moduleConfig.getStringList("helper-class-names"))).getOrElse(List.empty());
                         val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                         val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(true);
 
@@ -249,6 +247,11 @@ public class KanelaConfiguration {
         boolean enabled;
         List<String> helperClassNames;
 
+        BootstrapInjectionConfig(boolean enabled, List<String> helperClassNames) {
+            this.enabled = enabled;
+            this.helperClassNames = helperClassNames;
+        }
+
         BootstrapInjectionConfig(Config config) {
             this.enabled = Try.of(() -> config.getBoolean("enabled")).getOrElse(false);
             this.helperClassNames = List.ofAll(Try.of(() -> config.getStringList("helper-class-names")).getOrElse(Collections.emptyList()));
@@ -294,16 +297,14 @@ public class KanelaConfiguration {
     }
 
     private String getExcludeConfiguration(Config config) {
-        if(config.hasPath("exclude")) {
+        if(config.hasPath("exclude"))
             return getTypeListPattern(config, "exclude").getOrElse("");
-        } else {
-            return "";
-        }
+        return "";
 
     }
 
     private BootstrapInjectionConfig getBootstrapInjectionConfiguration(Config moduleConfig) {
-        return Try.of(() -> new BootstrapInjectionConfig(moduleConfig.getConfig("bootstrap-injection"))).get();
+        return Try.of(() -> new BootstrapInjectionConfig(moduleConfig.getConfig("bootstrap-injection"))).getOrElse(() -> new BootstrapInjectionConfig(false, List.empty()));
     }
 
 
