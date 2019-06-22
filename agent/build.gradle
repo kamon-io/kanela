@@ -36,7 +36,7 @@ dependencies {
 
     compile files('libs/byte-buddy-1.9.13.jar')
 
-    testCompile 'org.mockito:mockito-core:2.7.22'
+    testCompile 'org.mockito:mockito-core:2.28.2'
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
     testCompile "org.scala-lang:scala-library:${scala_version}"
     testRuntime 'org.pegdown:pegdown:1.4.2'
