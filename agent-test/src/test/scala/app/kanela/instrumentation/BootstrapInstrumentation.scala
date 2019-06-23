@@ -18,25 +18,16 @@ package app.kanela.instrumentation
 
 import java.util.concurrent.Callable
 
-import app.kanela.cases.replacer.app.kanela.instrumentation.MySuperInsterceptor
 import kanela.agent.api.instrumentation.InstrumentationBuilder
-import kanela.agent.libs.net.bytebuddy.asm.Advice.OnMethodEnter
 import kanela.agent.libs.net.bytebuddy.implementation.bind.annotation.SuperCall
 
 class BootstrapInstrumentation extends InstrumentationBuilder {
   onType( "java.net.HttpURLConnection")
-//    .intercept(method("getRequestMethod"), classOf[MySuperInsterceptor])
-    .intercept(method("getRequestMethod"), classOf[MyInterceptor])
+    .intercept(method("getRequestMethod"), classOf[BootstrapInterceptor])
 }
 
-
-class MyInterceptor
-object MyInterceptor {
-//  @throws[Exception]
-//  @OnMethodEnter
-//  def onEnter() = {
-  def intercept(@SuperCall zuper: Callable[String]): String = {
-    System.out.println("Intercepted!")
-    zuper.call
-  }
+class BootstrapInterceptor
+object BootstrapInterceptor {
+  def intercept(@SuperCall zuper: Callable[String]): String =
+    "[Intercepted] " + zuper.call
 }

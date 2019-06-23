@@ -22,11 +22,11 @@ import kanela.agent.attacher.Attacher
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class BootstrapInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
-  "Bootr" should
-    "replace AwesomeAPI with AwesomeApiImplementation" in {
-    Attacher.attach()
+  "The Bootstrap Injection feature" should
+    "provide the necessary helper classes when we instrument the bootstrap class loader" in {
+      Attacher.attach()
 
-    val urlConnection = new URL("http://www.google.com").openConnection.asInstanceOf[HttpURLConnection]
-    System.out.println(urlConnection.getRequestMethod)
-  }
+      val urlConnection = new URL("http://www.google.com").openConnection.asInstanceOf[HttpURLConnection]
+      urlConnection.getRequestMethod shouldBe "[Intercepted] GET"
+    }
 }
