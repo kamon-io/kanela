@@ -28,20 +28,24 @@ import java.util.stream.Collectors;
 
 @Value
 public class BridgeDescription {
-    Class<?> iface;
-    Set<Method> methods;
+    Class<?> bridgeInterface;
 
     public static BridgeDescription of(Class<?> clazz) {
-        val methods =  Arrays.stream(clazz.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(Bridge.class))
-                .collect(Collectors.toSet());
-
-        return new BridgeDescription(clazz, methods);
+        return new BridgeDescription(clazz);
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) ->
-                builder.implement(new TypeDescription.ForLoadedType(this.iface))
-                       .visit(BridgeClassVisitorWrapper.of(this));
+        return (builder, typeDescription, classLoader, module) -> {
+            return builder
+                .implement(new TypeDescription.ForLoadedType(this.bridgeInterface))
+                .visit(BridgeClassVisitorWrapper.of(this, typeDescription, classLoader));
+        };
+
+    }
+
+    public Set<Method> getMethods() {
+        return Arrays.stream(bridgeInterface.getDeclaredMethods())
+            .filter(method -> method.isAnnotationPresent(Bridge.class))
+            .collect(Collectors.toSet());
     }
 }

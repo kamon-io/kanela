@@ -24,10 +24,8 @@ import net.bytebuddy.jar.asm.*;
 import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
 import net.bytebuddy.jar.asm.tree.ClassNode;
-import net.bytebuddy.jar.asm.tree.FieldNode;
 import net.bytebuddy.jar.asm.tree.MethodNode;
 
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -57,7 +55,7 @@ public class MixinClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (name.equals(ConstructorDescriptor) && mixin.getMixinInit().isDefined()) {
+        if (name.equals(ConstructorDescriptor) && mixin.getInitializerMethod().isDefined()) {
             val mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new MixinInitializer(mv, access, name, desc, type, mixin);
         }
@@ -68,12 +66,11 @@ public class MixinClassVisitor extends ClassVisitor {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void visitEnd() {
-
         // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
         // that all classes are loaded with Kanela's ClassLoader (which some times might be the System ClassLoader and
         // some others will be an Attach ClassLoader).
         val classLoader = Thread.currentThread().getContextClassLoader();
-        val mixinClassFileName = mixin.getMixinClass().replace('.', '/') + ".class";
+        val mixinClassFileName = mixin.getMixinClass().getName().replace('.', '/') + ".class";
         val classStream = classLoader.getResourceAsStream(mixinClassFileName);
 
         val cr = new ClassReader(classStream);

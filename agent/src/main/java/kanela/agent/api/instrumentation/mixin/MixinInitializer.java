@@ -45,7 +45,7 @@ public class MixinInitializer extends AdviceAdapter {
     @Override
     protected void onMethodExit(int opcode) {
         if (cascadingConstructor) return;
-        mixinDescription.getMixinInit().forEach(methodName -> {
+        mixinDescription.getInitializerMethod().forEach(methodName -> {
             loadThis();
             invokeVirtual(typeClass, new Method(methodName, "()V"));
         });

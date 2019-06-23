@@ -52,6 +52,10 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         return new ClassLoaderNameMatcher("xsbt.boot.LibraryClassLoader");
     }
 
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isSBTPluginClassLoader() {
+        return new ClassLoaderNameMatcher("sbt.internal.PluginManagement$PluginClassLoader");
+    }
+
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> isKanelaClassLoader() {
         return new ClassLoaderNameMatcher(ChildFirstURLClassLoader.class.getName());
     }
