@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,20 +14,18 @@
  * =========================================================================================
  */
 
-
 package kanela.agent.api.instrumentation.legacy;
 
 import lombok.Value;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.TypeConstantAdjustment;
 
 @Value
-public class LegacySupportTransformer {
+public class ClassFileVersionValidatorTransformer {
 
     public static final AgentBuilder.Transformer Instance = makeTransformer();
 
     private static AgentBuilder.Transformer makeTransformer() {
         return (builder, typeDescription, classLoader, module) ->
-                builder.visit(TypeConstantAdjustment.INSTANCE);
+                builder.visit(ClassFileVersionValidatorWrapper.Instance);
     }
 }

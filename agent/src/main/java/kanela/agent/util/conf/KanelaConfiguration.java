@@ -104,7 +104,7 @@ public class KanelaConfiguration {
                         val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                         val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                         val bootstrapInjection = getBootstrapInjectionConfiguration(moduleConfig);
-                        val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
+                        val enableClassFileVersionValidator = Try.of(() -> moduleConfig.getBoolean("enable-class-file-version-validator")).getOrElse(true);
                         val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
                         val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(true);
 
@@ -117,7 +117,7 @@ public class KanelaConfiguration {
                                 order,
                                 stoppable,
                                 bootstrapInjection,
-                                legacyBytecodeSupport,
+                                enableClassFileVersionValidator,
                                 createTempDirectory(tempDirPrefix),
                                 disableClassFormatChanges,
                                 exclude);
@@ -149,7 +149,7 @@ public class KanelaConfiguration {
         boolean stoppable;
         BootstrapInjectionConfig bootstrapInjectionConfig;
         @Getter(AccessLevel.NONE)
-        boolean legacyBytecodeSupport;
+        boolean enableClassFileVersionValidator;
         File tempDir;
         boolean disableClassFormatChanges;
         String excludePackage;
@@ -158,8 +158,8 @@ public class KanelaConfiguration {
             return bootstrapInjectionConfig.enabled;
         }
 
-        public boolean shouldSupportLegacyBytecode() {
-            return legacyBytecodeSupport;
+        public boolean shouldValidateMiniumClassFileVersion() {
+            return enableClassFileVersionValidator;
         }
     }
 

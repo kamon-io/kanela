@@ -21,7 +21,7 @@ import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
-import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
+import kanela.agent.api.instrumentation.legacy.ClassFileVersionValidatorTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.ListBuilder;
@@ -66,8 +66,8 @@ public abstract class InstrumentationBuilder {
         val advisors = instrumentationDescription.getAdvisors();
         val transformers  = instrumentationDescription.getTransformers();
 
-        if (moduleConfiguration.shouldSupportLegacyBytecode()) {
-            transformers.add(LegacySupportTransformer.Instance);
+        if (moduleConfiguration.shouldValidateMiniumClassFileVersion()) {
+            transformers.add(ClassFileVersionValidatorTransformer.Instance);
         }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
