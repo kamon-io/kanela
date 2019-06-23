@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2010 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,22 +14,19 @@
  * =========================================================================================
  */
 
-package kanela.agent.api.advisor;
+package app.kanela.specs
 
-import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import java.net.{HttpURLConnection, URL}
 
-@Value(staticConstructor = "of")
-public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> advisorClass;
+import kanela.agent.attacher.Attacher
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-    public AgentBuilder.Transformer makeTransformer() {
-        return new AgentBuilder.Transformer.ForAdvice()
-                .advice(this.methodMatcher, advisorClass.getName())
-                .include(advisorClass.getClassLoader())
-                .withExceptionHandler(AdviceExceptionHandler.instance());
+class BootstrapInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+  "The Bootstrap Injection feature" should
+    "provide the necessary helper classes when we instrument the bootstrap class loader" in {
+      Attacher.attach()
+
+      val urlConnection = new URL("http://www.google.com").openConnection.asInstanceOf[HttpURLConnection]
+      urlConnection.getRequestMethod shouldBe "[Intercepted] GET"
     }
 }

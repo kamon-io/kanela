@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -43,14 +43,14 @@ final public class Kanela {
   /**
    * Entry point when the Kanela agent is added with the -javaagent command line option.
    */
-  public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
+  public static void premain(final String args, final Instrumentation instrumentation) {
       Kanela.start(args, instrumentation, false);
   }
 
   /**
    * Entry point when the Kanela agent is attached at runtime.
    */
-  public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
+  public static void agentmain(final String args, final Instrumentation instrumentation) {
       Kanela.start(args, instrumentation, true);
   }
 
@@ -61,12 +61,12 @@ final public class Kanela {
 
       // This ensures that we will not load Kanela more than once on the same JVM.
       if(Kanela.instrumentation == null) {
-
           // We keep the reference in case we will need to reload the agent.
           Kanela.instrumentation = instrumentation;
 
           runWithTimeSpent(() -> {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+
                   BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
                   val configuration = KanelaConfiguration.from(instrumentationClassLoader);

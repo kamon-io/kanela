@@ -48,7 +48,7 @@ public class MixinClassVisitor extends ClassVisitor {
     }
 
     private MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
-        super(Opcodes.ASM7, classVisitor);
+        super(Opcodes.ASM6, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);
     }

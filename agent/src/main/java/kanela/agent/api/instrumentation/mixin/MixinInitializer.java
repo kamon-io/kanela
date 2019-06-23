@@ -31,7 +31,7 @@ public class MixinInitializer extends AdviceAdapter {
 
 
     MixinInitializer(MethodVisitor mv, int access, String name, String desc, Type typeClass, MixinDescription mixinDescription) {
-        super(Opcodes.ASM7, mv, access, name, desc);
+        super(Opcodes.ASM6, mv, access, name, desc);
         this.typeClass = typeClass;
         this.mixinDescription = mixinDescription;
     }

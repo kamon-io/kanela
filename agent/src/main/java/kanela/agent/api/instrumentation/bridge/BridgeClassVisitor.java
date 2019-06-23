@@ -36,7 +36,7 @@ public class BridgeClassVisitor extends ClassVisitor {
     }
 
     private BridgeClassVisitor(BridgeDescription bridge, String className, ClassVisitor classVisitor) {
-        super(Opcodes.ASM7, classVisitor);
+        super(Opcodes.ASM6, classVisitor);
         this.bridge = bridge;
         this.type = Type.getObjectType(className);
     }

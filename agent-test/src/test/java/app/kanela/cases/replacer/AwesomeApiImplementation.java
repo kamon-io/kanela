@@ -20,7 +20,6 @@ public class AwesomeApiImplementation {
   public static String method() {
     return "method";
   }
-
   public static int otherMethod() {
     return 1;
   }

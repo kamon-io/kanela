@@ -18,6 +18,9 @@ package kanela.agent.cache;
 
 import kanela.agent.util.NamedThreadFactory;
 import kanela.agent.util.log.Logger;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
 import net.jodah.expiringmap.ExpirationListener;
@@ -26,12 +29,6 @@ import net.jodah.expiringmap.ExpiringMap;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static java.text.MessageFormat.format;
-
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-import lombok.val;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -42,7 +39,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     Map<ClassLoader, TypePool.CacheProvider> cache;
 
     private PoolStrategyCache() {
-        super(TypePool.Default.ReaderMode.EXTENDED);
+        super(TypePool.Default.ReaderMode.FAST);
         ExpiringMap.setThreadFactory(NamedThreadFactory.instance("strategy-cache-listener"));
         this.cache = ExpiringMap
                 .builder()
@@ -60,7 +57,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
     private ExpirationListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value) ->   Logger.debug(() -> format("Expiring key: " + key + "with value" + value));
+        return (key, value) ->   Logger.debug(() -> "Expiring key: " + key + "with value" + value);
     }
 
     public static PoolStrategyCache instance() {
