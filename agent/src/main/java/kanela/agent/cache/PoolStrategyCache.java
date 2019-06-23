@@ -44,7 +44,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
         this.cache = ExpiringMap
                 .builder()
                 .entryLoader((key) -> TypePool.CacheProvider.Simple.withObjectType())
-                .expiration(10, TimeUnit.MINUTES)
+                .expiration(1, TimeUnit.MINUTES)
                 .expirationPolicy(ExpirationPolicy.ACCESSED)
                 .asyncExpirationListener(LogExpirationListener())
                 .build();
