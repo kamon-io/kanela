@@ -19,6 +19,7 @@ package app.kanela.specs
 import app.kanela.cases.replacer.AwesomeApi
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
+
 class ClassReplacerSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   "Class Replacer" should
     "replace AwesomeAPI with AwesomeApiImplementation" in {

@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,6 @@ package kanela.agent.util.banner;
 import kanela.agent.util.AnsiColor;
 import kanela.agent.util.BuildInfo;
 import kanela.agent.util.conf.KanelaConfiguration;
-import lombok.var;
 import lombok.val;
 
 public class KanelaBanner {
@@ -46,7 +45,7 @@ public class KanelaBanner {
                 System.out.println(line);
             }
 
-            var version = BuildInfo.version();
+            String version = BuildInfo.version();
 
             version =  (version == null ? "" : " (v" + version + ")");
             val padding = new StringBuilder();

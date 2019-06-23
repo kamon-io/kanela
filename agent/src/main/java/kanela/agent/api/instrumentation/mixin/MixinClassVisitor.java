@@ -25,6 +25,7 @@ import net.bytebuddy.jar.asm.commons.MethodRemapper;
 import net.bytebuddy.jar.asm.commons.SimpleRemapper;
 import net.bytebuddy.jar.asm.tree.ClassNode;
 import net.bytebuddy.jar.asm.tree.MethodNode;
+import net.bytebuddy.utility.OpenedClassReader;
 
 import java.util.function.Predicate;
 
@@ -48,7 +49,7 @@ public class MixinClassVisitor extends ClassVisitor {
     }
 
     private MixinClassVisitor(MixinDescription mixin, String className, ClassVisitor classVisitor) {
-        super(Opcodes.ASM7, classVisitor);
+        super(OpenedClassReader.ASM_API, classVisitor);
         this.mixin = mixin;
         this.type = Type.getObjectType(className);
     }

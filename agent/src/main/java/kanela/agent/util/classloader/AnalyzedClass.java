@@ -28,6 +28,7 @@ import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.jar.asm.tree.ClassNode;
+import net.bytebuddy.utility.OpenedClassReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +118,7 @@ public class AnalyzedClass implements ClassMatcher {
     }
 
     private static ClassNode convertToClassNode(InputStream classBytes) throws IOException {
-        val result = new ClassNode(Opcodes.ASM7);
+        val result = new ClassNode(OpenedClassReader.ASM_API);
         val reader =  new ClassReader(classBytes);
         reader.accept(result, ClassReader.SKIP_FRAMES);
         return result;

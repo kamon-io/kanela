@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 
 package kanela.agent.util;
 
+import io.vavr.control.Try;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
 
@@ -40,15 +40,19 @@ public class BootstrapInjector {
         instrumentation.appendToBootstrapClassLoaderSearch(jarFile);
     }
 
-    public static void inject(File folder, Instrumentation instrumentation, java.util.List<Class<?>> allClasses) {
+    public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
         ClassInjector.UsingInstrumentation
                 .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-                .inject(getCollect(allClasses));
+                .injectRaw(getTypeDefinitions(allClasses));
     }
 
-    private static Map<TypeDescription.ForLoadedType, byte[]> getCollect(List<Class<?>> allClasses) {
-        return allClasses
-                .stream()
-                .collect(Collectors.toMap(TypeDescription.ForLoadedType::new, ClassFileLocator.ForClassLoader::read));
+    private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames)  {
+        return helperClassNames.stream().collect(Collectors.toMap(k -> k, BootstrapInjector::getClassBytes));
+    }
+
+    private static byte[] getClassBytes(String className)  {
+        return Try.of(() -> ClassFileLocator.ForClassLoader.of(ClassLoader.getSystemClassLoader()).locate(className).resolve())
+                .onFailure(error -> Logger.error(error::getMessage, error))
+                .getOrElseThrow((cause) -> new RuntimeException("Could not locate class: " + className));
     }
 }

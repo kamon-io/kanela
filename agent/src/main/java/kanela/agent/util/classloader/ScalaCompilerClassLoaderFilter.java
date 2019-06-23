@@ -1,7 +1,6 @@
 package kanela.agent.util.classloader;
 
 import lombok.val;
-import lombok.var;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -21,8 +20,8 @@ public class ScalaCompilerClassLoaderFilter {
   public static boolean isScalaCompilerClassLoader(ClassLoader classLoader) {
     if(classLoader instanceof URLClassLoader) {
       val urlClassLoader = (URLClassLoader) classLoader;
-      var foundScalaCompiler = false;
-      var foundJLine = false;
+      boolean foundScalaCompiler = false;
+      boolean foundJLine = false;
 
       for(URL url : urlClassLoader.getURLs()) {
         if(url.getFile().contains("scala-compiler"))

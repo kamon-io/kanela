@@ -1,13 +1,25 @@
 language: java
 
+sudo: true
+
 install:
   - ./gradlew :agent:publishToMavenLocal
   - ./gradlew assemble
 
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
+
+matrix:
+  include:
+    - jdk: openjdk8
+#    - jdk: openjdk11
+
 script:
   - ./travis-test.sh
 
-jdk:
-   - oraclejdk8
-
-sudo: false

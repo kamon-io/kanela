@@ -16,14 +16,12 @@
 
 package kanela.agent.api.instrumentation;
 
-import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
-
 import io.vavr.Function0;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
-import kanela.agent.api.instrumentation.legacy.LegacySupportTransformer;
+import kanela.agent.api.instrumentation.legacy.ClassFileVersionValidatorTransformer;
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.ListBuilder;
@@ -39,7 +37,6 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,21 +66,13 @@ public abstract class InstrumentationBuilder {
         val advisors = instrumentationDescription.getAdvisors();
         val transformers  = instrumentationDescription.getTransformers();
 
-        if (moduleConfiguration.shouldSupportLegacyBytecode()) {
-            transformers.add(LegacySupportTransformer.Instance);
+        if (moduleConfiguration.shouldValidateMiniumClassFileVersion()) {
+            transformers.add(ClassFileVersionValidatorTransformer.Instance);
         }
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
-            val bridgeClasses = bridges.stream().map(BridgeDescription::getBridgeInterface).collect(Collectors.toList());
-            val mixinClasses = mixins.stream().map(mixinDescription -> mixinDescription.getMixinClass()).collect(Collectors.toList());
-            val advisorClasses = advisors.stream().map(AdvisorDescription::getAdvisorClass).collect(Collectors.toList());
-
-            val allClasses = new ArrayList<Class<?>>();
-            allClasses.addAll(bridgeClasses);
-            allClasses.addAll(mixinClasses);
-            allClasses.addAll(advisorClasses);
-
-            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, allClasses);
+            val helperClassNames = moduleConfiguration.getBootstrapInjectionConfig().getHelperClassNames();
+            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, helperClassNames.toJavaList());
         }
 
         return TypeTransformation.of(
@@ -220,7 +209,7 @@ public abstract class InstrumentationBuilder {
         }
 
         public Target when(ClassRefiner.Builder... refinerBuilders) {
-            val refiners = io.vavr.collection.List.of(refinerBuilders).map(b -> b.build()).toJavaArray(ClassRefiner.class);
+            val refiners = io.vavr.collection.List.of(refinerBuilders).map(ClassRefiner.Builder::build).toJavaArray(ClassRefiner[]::new);
             builder.withClassLoaderRefiner(() -> ClassLoaderRefiner.from(refiners));
             return this;
         }

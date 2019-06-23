@@ -103,12 +103,24 @@ public class KanelaConfiguration {
                         val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
                         val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
                         val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
-                        val injectInBootstrap = Try.of(() -> moduleConfig.getBoolean("inject-in-bootstrap")).getOrElse(false);
-                        val legacyBytecodeSupport = Try.of(() -> moduleConfig.getBoolean("legacy-bytecode-support")).getOrElse(false);
+                        val bootstrapInjection = getBootstrapInjectionConfiguration(moduleConfig);
+                        val enableClassFileVersionValidator = Try.of(() -> moduleConfig.getBoolean("enable-class-file-version-validator")).getOrElse(true);
                         val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
-                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
+                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(true);
 
-                        return ModuleConfiguration.from(configPath, name, description, instrumentations, within, enabled, order, stoppable, injectInBootstrap, legacyBytecodeSupport, createTempDirectory(tempDirPrefix), disableClassFormatChanges, exclude);
+                        return ModuleConfiguration.from(
+                                configPath, name,
+                                description,
+                                instrumentations,
+                                within,
+                                enabled,
+                                order,
+                                stoppable,
+                                bootstrapInjection,
+                                enableClassFileVersionValidator,
+                                createTempDirectory(tempDirPrefix),
+                                disableClassFormatChanges,
+                                exclude);
                     });
 
                     moduleSettings.failed().forEach(t -> {
@@ -118,8 +130,8 @@ public class KanelaConfiguration {
                     return moduleSettings;
 
                 })
-                .filter(t -> t.isSuccess())
-                .map(t -> t.get())
+                .filter(Try::isSuccess)
+                .map(Try::get)
                 .filter(module -> module.getInstrumentations().nonEmpty() && isEnabled(module))
                 .toList()
                 .sortBy(ModuleConfiguration::getOrder);
@@ -135,20 +147,19 @@ public class KanelaConfiguration {
         boolean enabled;
         int order;
         boolean stoppable;
+        BootstrapInjectionConfig bootstrapInjectionConfig;
         @Getter(AccessLevel.NONE)
-        boolean injectInBootstrap;
-        @Getter(AccessLevel.NONE)
-        boolean legacyBytecodeSupport;
+        boolean enableClassFileVersionValidator;
         File tempDir;
         boolean disableClassFormatChanges;
         String excludePackage;
 
         public boolean shouldInjectInBootstrap() {
-            return injectInBootstrap;
+            return bootstrapInjectionConfig.enabled;
         }
 
-        public boolean shouldSupportLegacyBytecode() {
-            return legacyBytecodeSupport;
+        public boolean shouldValidateMiniumClassFileVersion() {
+            return enableClassFileVersionValidator;
         }
     }
 
@@ -231,6 +242,23 @@ public class KanelaConfiguration {
     }
 
 
+    @Value
+    public class BootstrapInjectionConfig {
+        boolean enabled;
+        List<String> helperClassNames;
+
+        BootstrapInjectionConfig(boolean enabled, List<String> helperClassNames) {
+            this.enabled = enabled;
+            this.helperClassNames = helperClassNames;
+        }
+
+        BootstrapInjectionConfig(Config config) {
+            this.enabled = Try.of(() -> config.getBoolean("enabled")).getOrElse(false);
+            this.helperClassNames = List.ofAll(Try.of(() -> config.getStringList("helper-class-names")).getOrElse(Collections.emptyList()));
+        }
+    }
+
+
     public boolean isDebugMode() {
         return this.debugMode;
     }
@@ -269,13 +297,16 @@ public class KanelaConfiguration {
     }
 
     private String getExcludeConfiguration(Config config) {
-        if(config.hasPath("exclude")) {
+        if(config.hasPath("exclude"))
             return getTypeListPattern(config, "exclude").getOrElse("");
-        } else {
-            return "";
-        }
+        return "";
 
     }
+
+    private BootstrapInjectionConfig getBootstrapInjectionConfiguration(Config moduleConfig) {
+        return Try.of(() -> new BootstrapInjectionConfig(moduleConfig.getConfig("bootstrap-injection"))).getOrElse(() -> new BootstrapInjectionConfig(false, List.empty()));
+    }
+
 
     private Try<String> getTypeListPattern(Config config, String path) {
         return Try.of(() -> List.ofAll(config.getStringList(path)).mkString("|"));

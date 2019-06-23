@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2010 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,20 +14,19 @@
  * =========================================================================================
  */
 
+package app.kanela.specs
 
-package kanela.agent.api.instrumentation.legacy;
+import java.net.{HttpURLConnection, URL}
 
-import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.TypeConstantAdjustment;
+import kanela.agent.attacher.Attacher
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-@Value
-public class LegacySupportTransformer {
+class BootstrapInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+  "The Bootstrap Injection feature" should
+    "provide the necessary helper classes when we instrument the bootstrap class loader" in {
+      Attacher.attach()
 
-    public static final AgentBuilder.Transformer Instance = makeTransformer();
-
-    private static AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) ->
-                builder.visit(TypeConstantAdjustment.INSTANCE);
+      val urlConnection = new URL("http://www.google.com").openConnection.asInstanceOf[HttpURLConnection]
+      urlConnection.getRequestMethod shouldBe "[Intercepted] GET"
     }
 }

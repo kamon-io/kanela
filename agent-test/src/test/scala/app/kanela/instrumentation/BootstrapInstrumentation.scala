@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,22 +14,20 @@
  * =========================================================================================
  */
 
-package kanela.agent.api.advisor;
+package app.kanela.instrumentation
 
-import lombok.Value;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.method.MethodDescription;
-import net.bytebuddy.matcher.ElementMatcher;
+import java.util.concurrent.Callable
 
-@Value(staticConstructor = "of")
-public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> advisorClass;
+import kanela.agent.api.instrumentation.InstrumentationBuilder
+import kanela.agent.libs.net.bytebuddy.implementation.bind.annotation.SuperCall
 
-    public AgentBuilder.Transformer makeTransformer() {
-        return new AgentBuilder.Transformer.ForAdvice()
-                .advice(this.methodMatcher, advisorClass.getName())
-                .include(advisorClass.getClassLoader())
-                .withExceptionHandler(AdviceExceptionHandler.instance());
-    }
+class BootstrapInstrumentation extends InstrumentationBuilder {
+  onType( "java.net.HttpURLConnection")
+    .intercept(method("getRequestMethod"), classOf[BootstrapInterceptor])
+}
+
+class BootstrapInterceptor
+object BootstrapInterceptor {
+  def intercept(@SuperCall zuper: Callable[String]): String =
+    "[Intercepted] " + zuper.call
 }
