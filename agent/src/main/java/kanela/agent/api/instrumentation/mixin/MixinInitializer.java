@@ -21,6 +21,7 @@ import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.jar.asm.commons.AdviceAdapter;
 import net.bytebuddy.jar.asm.commons.Method;
+import net.bytebuddy.utility.OpenedClassReader;
 
 public class MixinInitializer extends AdviceAdapter {
     private static final String ConstructorDescriptor = "<init>";
@@ -31,7 +32,7 @@ public class MixinInitializer extends AdviceAdapter {
 
 
     MixinInitializer(MethodVisitor mv, int access, String name, String desc, Type typeClass, MixinDescription mixinDescription) {
-        super(Opcodes.ASM6, mv, access, name, desc);
+        super(OpenedClassReader.ASM_API, mv, access, name, desc);
         this.typeClass = typeClass;
         this.mixinDescription = mixinDescription;
     }

@@ -23,6 +23,7 @@ import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.jar.asm.commons.Method;
+import net.bytebuddy.utility.OpenedClassReader;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -36,7 +37,7 @@ public class BridgeClassVisitor extends ClassVisitor {
     }
 
     private BridgeClassVisitor(BridgeDescription bridge, String className, ClassVisitor classVisitor) {
-        super(Opcodes.ASM6, classVisitor);
+        super(OpenedClassReader.ASM_API, classVisitor);
         this.bridge = bridge;
         this.type = Type.getObjectType(className);
     }
