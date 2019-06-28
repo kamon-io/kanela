@@ -106,7 +106,7 @@ public class KanelaConfiguration {
                         val bootstrapInjection = getBootstrapInjectionConfiguration(moduleConfig);
                         val enableClassFileVersionValidator = Try.of(() -> moduleConfig.getBoolean("enable-class-file-version-validator")).getOrElse(true);
                         val tempDirPrefix = Try.of(() -> moduleConfig.getString("temp-dir-prefix")).getOrElse("tmp");
-                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(true);
+                        val disableClassFormatChanges = Try.of(() -> moduleConfig.getBoolean("disable-class-format-changes")).getOrElse(false);
 
                         return ModuleConfiguration.from(
                                 configPath, name,
