@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -25,6 +25,9 @@ import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.jar.asm.commons.Method;
 import net.bytebuddy.utility.OpenedClassReader;
 
+import java.lang.annotation.Annotation;
+
+
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class BridgeClassVisitor extends ClassVisitor {
@@ -45,23 +48,44 @@ public class BridgeClassVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
        bridge.getMethods().forEach(reflectMethod -> {
-           val method = Method.getMethod(reflectMethod);
-           val bridge = reflectMethod.getAnnotation(Bridge.class);
-           val targetMethod = Method.getMethod(bridge.value());
-           val mv = cv.visitMethod(Opcodes.ACC_PUBLIC, method.getName(), method.getDescriptor(), null, null);
-           mv.visitCode();
-           int i = 0;
-           mv.visitVarInsn(Opcodes.ALOAD, i++);
-
-           for (Type argument : method.getArgumentTypes()) {
-               mv.visitVarInsn(argument.getOpcode(Opcodes.ILOAD), i++);
+           for(Annotation annotation : reflectMethod.getDeclaredAnnotations()) {
+               if(annotation instanceof Bridge) processBridge(reflectMethod, annotation);
+               else if (annotation instanceof FieldBridge) processFieldBridge(reflectMethod, annotation);
            }
-
-           mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, type.getInternalName(), targetMethod.getName(), targetMethod.getDescriptor(), false);
-           mv.visitInsn(method.getReturnType().getOpcode(Opcodes.IRETURN));
-           mv.visitMaxs(0, 0);
-           mv.visitEnd();
        });
        cv.visitEnd();
+    }
+
+    private void processBridge(java.lang.reflect.Method reflectMethod, Annotation annotation) {
+        val bridge = (Bridge) annotation;
+        val method = Method.getMethod(reflectMethod);
+        val targetMethod = Method.getMethod(bridge.value());
+
+        val mv = cv.visitMethod(Opcodes.ACC_PUBLIC, method.getName(), method.getDescriptor(), null, null);
+        mv.visitCode();
+        int i = 0;
+        mv.visitVarInsn(Opcodes.ALOAD, i++);
+
+        for (Type argument : method.getArgumentTypes()) {
+            mv.visitVarInsn(argument.getOpcode(Opcodes.ILOAD), i++);
+        }
+
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, type.getInternalName(), targetMethod.getName(), targetMethod.getDescriptor(), false);
+        mv.visitInsn(method.getReturnType().getOpcode(Opcodes.IRETURN));
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+    private void processFieldBridge(java.lang.reflect.Method reflectMethod, Annotation annotation) {
+        val fieldBridge = (FieldBridge) annotation;
+        val method = Method.getMethod(reflectMethod);
+
+        val mv = cv.visitMethod(Opcodes.ACC_PUBLIC, method.getName(), method.getDescriptor(), null, null);
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, type.getInternalName(), fieldBridge.value(), method.getReturnType().getDescriptor());
+        mv.visitInsn(Type.getType(type.getDescriptor()).getOpcode(Opcodes.IRETURN));
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
     }
 }

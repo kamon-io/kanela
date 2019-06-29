@@ -42,6 +42,8 @@ dependencies {
 def KamonAgentTestRunning = null
 
 def singleTests = [
+        [taskName: 'bridge-spec', clazz: 'app.kanela.specs.BridgeInstrumentationSpec',
+         jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.BridgeInstrumentation']],
         [taskName: 'bootstrap-injection-spec', clazz: 'BootstrapInstrumentationSpec', attachKamonAgent: false,
          jvmArgs: ['-Dkanela.modules.test-module.instrumentations.0=app.kanela.instrumentation.BootstrapInstrumentation',
                    '-Dkanela.modules.test-module.disable-class-format-changes=false', '-Dkanela.modules.test-module.bootstrap-injection.enabled=true']],

@@ -35,17 +35,14 @@ public class BridgeDescription {
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) -> {
-            return builder
-                .implement(new TypeDescription.ForLoadedType(this.bridgeInterface))
-                .visit(BridgeClassVisitorWrapper.of(this, typeDescription, classLoader));
-        };
-
+        return (builder, typeDescription, classLoader, module) -> builder
+            .implement(new TypeDescription.ForLoadedType(this.bridgeInterface))
+            .visit(BridgeClassVisitorWrapper.of(this, typeDescription, classLoader));
     }
 
     public Set<Method> getMethods() {
         return Arrays.stream(bridgeInterface.getDeclaredMethods())
-            .filter(method -> method.isAnnotationPresent(Bridge.class))
+            .filter(method -> (method.isAnnotationPresent(Bridge.class) || method.isAnnotationPresent(FieldBridge.class)))
             .collect(Collectors.toSet());
     }
 }
