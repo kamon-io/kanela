@@ -113,8 +113,7 @@ public class InstrumentationDescription {
         private ElementMatcher.Junction<MethodDescription> defaultMethodElementMatcher() {
             return not(isAbstract())
                     .and(not(isNative()))
-                    .and(not(isSynthetic()))
-                    .and(not(isTypeInitializer()));
+                    .and(not(isSynthetic()));
         }
     }
 }
