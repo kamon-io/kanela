@@ -16,7 +16,7 @@
 
 package kanela.agent.api.instrumentation.listener;
 
-import static kanela.agent.util.classloader.ScalaCompilerClassLoaderFilter.isScalaCompilerClassLoader;
+import static kanela.agent.util.classloader.ScalaCompilerClassLoaderMatcher.isScalaCompilerClassLoader;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher;
 import kanela.agent.util.conf.KanelaConfiguration;

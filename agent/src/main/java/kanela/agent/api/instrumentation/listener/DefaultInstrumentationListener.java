@@ -22,7 +22,7 @@ import net.bytebuddy.agent.builder.AgentBuilder.Listener;
 import net.bytebuddy.utility.JavaModule;
 
 import static java.text.MessageFormat.format;
-import static kanela.agent.util.classloader.ScalaCompilerClassLoaderFilter.isScalaCompilerClassLoader;
+import static kanela.agent.util.classloader.ScalaCompilerClassLoaderMatcher.isScalaCompilerClassLoader;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
