@@ -122,6 +122,7 @@ class KanelaAgentBuilder {
                 .or(any(), isGroovyClassLoader())
                 .or(any(), isSBTClassLoader())
                 .or(any(), isSBTPluginClassLoader())
+                .or(any(), isSBTCompilerClassLoader())
                 .or(any(), isReflectionClassLoader());
 
         if (moduleDescription.shouldInjectInBootstrap()) return builder;
