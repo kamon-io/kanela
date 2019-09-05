@@ -25,6 +25,7 @@ import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.InstrumentationClassPath;
+import kanela.agent.util.classloader.PreInitializeClasses;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.jvm.OldGarbageCollectorListener;
 import kanela.agent.util.log.Logger;
@@ -61,6 +62,7 @@ final public class Kanela {
 
       // This ensures that we will not load Kanela more than once on the same JVM.
       if(Kanela.instrumentation == null) {
+          PreInitializeClasses.preInitializeClasses();
           // We keep the reference in case we will need to reload the agent.
           Kanela.instrumentation = instrumentation;
 
