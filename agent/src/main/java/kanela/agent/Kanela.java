@@ -91,10 +91,19 @@ final public class Kanela {
    * modules to apply them on the current JVM.
    */
   public static void reload() {
+    Kanela.reload(false);
+  }
+
+  /**
+   * Removes all instrumentation modules already applied by Kanela and re-scans the instrumentation class path for
+   * modules to apply them on the current JVM.
+   */
+  public static void reload(boolean clearRegistry) {
 
     // We will only proceed to reload if Kanela was properly started already.
     if(Kanela.instrumentation != null) {
-        InstrumentationRegistryListener.instance().clear();
+        if(clearRegistry)
+          InstrumentationRegistryListener.instance().clear();
 
         InstrumentationClassPath.build().use(instrumentationClassLoader -> {
             installedTransformers.forEach(transformer -> instrumentation.removeTransformer(transformer.getClassFileTransformer()));
