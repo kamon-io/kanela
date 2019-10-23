@@ -18,7 +18,7 @@ cache:
 matrix:
   include:
     - jdk: openjdk8
-#    - jdk: openjdk11
+    - jdk: openjdk11
 
 script:
   - ./travis-test.sh
