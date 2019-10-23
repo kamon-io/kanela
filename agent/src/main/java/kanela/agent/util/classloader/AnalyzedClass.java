@@ -46,7 +46,8 @@ interface ClassMatcher {
 @Value
 public class AnalyzedClass implements ClassMatcher {
     private ClassRefiner classRefiner;
-    private Set<String> fields;
+    private Map<String, Object> fields;
+//    private Set<String> fields;
     private Map<String, Set<String>> methodsWithArguments;
 
     public static ClassMatcher from(ClassRefiner refiner, ClassLoader loader)  {
@@ -56,7 +57,7 @@ public class AnalyzedClass implements ClassMatcher {
 
             try(InputStream in = loader.getResourceAsStream(resourceName)) {
                 val classNode = convertToClassNode(in);
-                return (ClassMatcher) new AnalyzedClass(refiner, extractFields(classNode), extractMethods(classNode));
+                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(classNode), extractMethods(classNode));
             }
         })
         .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
@@ -70,16 +71,14 @@ public class AnalyzedClass implements ClassMatcher {
     }
 
     private Boolean containsFields(String... fields) {
-        return this.fields.containsAll(Arrays.asList(fields));
+        return this.fields.keySet().containsAll(Arrays.asList(fields));
     }
 
     private Boolean containsMethod(String methodName, String... parameters) {
-        if(methodsWithArguments.containsKey(methodName)) {
-            val parameterSet = methodsWithArguments.get(methodName);
-            if(parameters.length > 0) return Arrays.asList(parameters).containsAll(parameterSet);
-            return true;
-        }
-        return false;
+        if (!methodsWithArguments.containsKey(methodName)) return false;
+        val parameterSet = methodsWithArguments.get(methodName);
+        if(parameters.length > 0) return Arrays.asList(parameters).containsAll(parameterSet);
+        return true;
     }
 
     private Predicate<Boolean> buildClassRefinerPredicate(ClassRefiner classRefiner) {
@@ -99,11 +98,18 @@ public class AnalyzedClass implements ClassMatcher {
                 .contains(false);
     }
 
-    private static Set<String> extractFields(ClassNode classNode) {
+//    private static Set<String> extractFields(ClassNode classNode) {
+//        return List.ofAll(classNode.fields)
+//                .map(fieldNode -> fieldNode.name)
+//                .toJavaSet();
+//    }
+
+    private static Map<String, Object> extractFieldsAndValues(ClassNode classNode) {
         return List.ofAll(classNode.fields)
-                .map(fieldNode -> fieldNode.name)
-                .toJavaSet();
+                .filter(fieldNode -> (fieldNode.access & Opcodes.ACC_SYNTHETIC) == 0)
+                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, fieldNode.value));
     }
+
 
     private static Map<String, Set<String>> extractMethods(ClassNode classNode) {
         return List.ofAll(classNode.methods)
