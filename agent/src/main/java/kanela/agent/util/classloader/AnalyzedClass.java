@@ -19,6 +19,7 @@ package kanela.agent.util.classloader;
 import io.vavr.Tuple;
 import io.vavr.collection.Array;
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
 import kanela.agent.util.log.Logger;
@@ -47,7 +48,6 @@ interface ClassMatcher {
 public class AnalyzedClass implements ClassMatcher {
     private ClassRefiner classRefiner;
     private Map<String, Object> fields;
-//    private Set<String> fields;
     private Map<String, Set<String>> methodsWithArguments;
 
     public static ClassMatcher from(ClassRefiner refiner, ClassLoader loader)  {
@@ -57,7 +57,7 @@ public class AnalyzedClass implements ClassMatcher {
 
             try(InputStream in = loader.getResourceAsStream(resourceName)) {
                 val classNode = convertToClassNode(in);
-                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(classNode), extractMethods(classNode));
+                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(refiner.getTarget(), classNode, loader), extractMethods(classNode));
             }
         })
         .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
@@ -70,8 +70,18 @@ public class AnalyzedClass implements ClassMatcher {
         return evaluated;
     }
 
-    private Boolean containsFields(String... fields) {
-        return this.fields.keySet().containsAll(Arrays.asList(fields));
+    private Boolean containsFields(Map<String, Option<Object>> fieldsAndValues) {
+        if(fieldsAndValues.isEmpty()) return true;
+        return !fieldsAndValues
+                .entrySet()
+                .stream()
+                .map((entry) -> containsField(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toSet())
+                .contains(false);
+    }
+
+    private Boolean containsField(String fieldName, Option<Object> value) {
+        return value.map(v -> v == fields.get(fieldName)).getOrElse(() -> fields.containsKey(fieldName));
     }
 
     private Boolean containsMethod(String methodName, String... parameters) {
@@ -83,7 +93,7 @@ public class AnalyzedClass implements ClassMatcher {
 
     private Predicate<Boolean> buildClassRefinerPredicate(ClassRefiner classRefiner) {
         java.util.List<Predicate<Boolean>> allPredicates = Arrays.asList(
-                p -> containsFields(classRefiner.getFields().toArray(new String[0])),
+                p -> containsFields(classRefiner.getFields()),
                 p -> containsMethodWithParameters(classRefiner.getMethods())
         );
         return allPredicates.stream().reduce(p -> true, Predicate::and);
@@ -98,18 +108,22 @@ public class AnalyzedClass implements ClassMatcher {
                 .contains(false);
     }
 
-//    private static Set<String> extractFields(ClassNode classNode) {
-//        return List.ofAll(classNode.fields)
-//                .map(fieldNode -> fieldNode.name)
-//                .toJavaSet();
-//    }
-
-    private static Map<String, Object> extractFieldsAndValues(ClassNode classNode) {
+    private static Map<String, Object> extractFieldsAndValues(String targetClass, ClassNode classNode, ClassLoader loader) {
         return List.ofAll(classNode.fields)
                 .filter(fieldNode -> (fieldNode.access & Opcodes.ACC_SYNTHETIC) == 0)
-                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, fieldNode.value));
+                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, extractFieldValue(targetClass, fieldNode.name, loader)));
     }
 
+    private static Object extractFieldValue(String targetClass, String fieldName, ClassLoader loader) {
+        return Try.of(() -> {
+            val clazz = Class.forName(targetClass, true, loader);
+            val instance = clazz.newInstance();
+            val field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(instance);
+        }).onFailure((cause) -> Logger.debug(() -> "cannot get field value from: " + targetClass + "." + fieldName))
+          .getOrElse(() -> null);
+    }
 
     private static Map<String, Set<String>> extractMethods(ClassNode classNode) {
         return List.ofAll(classNode.methods)

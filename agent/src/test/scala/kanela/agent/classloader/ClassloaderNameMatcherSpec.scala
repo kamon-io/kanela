@@ -53,6 +53,22 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
       classLoaderMatcher.matches(classOf[InstrumentationBuilder].getClassLoader) shouldBe true
     }
 
+    "refine the search of a class in an classloader through a ClassRefiner with fields and specific values" in {
+      //initialize
+      new PlayVersion$()
+
+      val refiner =  ClassRefiner.builder()
+        .mustContains("kanela.agent.classloader.PlayVersion$")
+        .withFieldAndValue("current", "2.6.0")
+        .withFieldAndValue("scalaVersion", "2.12.2")
+        .withFieldAndValue("sbtVersion", "0.13.15")
+        .build()
+
+      val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiner)))
+
+      classLoaderMatcher.matches(classOf[InstrumentationBuilder].getClassLoader) shouldBe true
+    }
+
     "not match if some of the properties to refine the search not exists" in {
       val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.mustContains("kanela.agent.api.instrumentation.CanelaInstrumentation")))
 

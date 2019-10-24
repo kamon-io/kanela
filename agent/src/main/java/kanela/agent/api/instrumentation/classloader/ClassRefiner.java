@@ -18,6 +18,7 @@
 package kanela.agent.api.instrumentation.classloader;
 
 import io.vavr.Tuple;
+import io.vavr.control.Option;
 import lombok.Value;
 
 import java.util.*;
@@ -25,8 +26,8 @@ import java.util.*;
 @Value
 public class ClassRefiner {
     private String target;
-    private Set<String> fields;
     private Map<String, Set<String>> methods;
+    private Map<String, Option<Object>> fields;
 
     private ClassRefiner(Builder builder) {
         this.target= builder.target;
@@ -40,7 +41,7 @@ public class ClassRefiner {
 
     public static class Builder {
         private String target;
-        private Set<String> fields = new HashSet<>();
+        private Map<String, Option<Object>> fields = new HashMap<>();
         private Map<String, Set<String>> methods = new HashMap<>();
 
         public Builder mustContains(String clazz) {
@@ -49,7 +50,12 @@ public class ClassRefiner {
         }
 
         public Builder withFields(String... fields) {
-            this.fields.addAll(Arrays.asList(fields));
+            Arrays.asList(fields).forEach(k -> withFieldAndValue(k, null));
+            return this;
+        }
+
+        public Builder withFieldAndValue(String field, Object value) {
+            this.fields.put(field, Option.of(value));
             return this;
         }
 
