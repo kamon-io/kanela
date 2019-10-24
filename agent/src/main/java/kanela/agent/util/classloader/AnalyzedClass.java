@@ -57,7 +57,7 @@ public class AnalyzedClass implements ClassMatcher {
 
             try(InputStream in = loader.getResourceAsStream(resourceName)) {
                 val classNode = convertToClassNode(in);
-                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(refiner.getTarget(), classNode, loader), extractMethods(classNode));
+                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(refiner, classNode, loader), extractMethods(classNode));
             }
         })
         .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
@@ -108,20 +108,21 @@ public class AnalyzedClass implements ClassMatcher {
                 .contains(false);
     }
 
-    private static Map<String, Object> extractFieldsAndValues(String targetClass, ClassNode classNode, ClassLoader loader) {
+    private static Map<String, Object> extractFieldsAndValues(ClassRefiner refiner, ClassNode classNode, ClassLoader loader) {
         return List.ofAll(classNode.fields)
                 .filter(fieldNode -> (fieldNode.access & Opcodes.ACC_SYNTHETIC) == 0)
-                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, extractFieldValue(targetClass, fieldNode.name, loader)));
+                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, extractFieldValue(refiner, fieldNode.name, loader)));
     }
 
-    private static Object extractFieldValue(String targetClass, String fieldName, ClassLoader loader) {
+    private static Object extractFieldValue(ClassRefiner refiner, String fieldName, ClassLoader loader) {
+        if(!refiner.getFields().getOrDefault(fieldName, Option.none()).isDefined()) return null;
         return Try.of(() -> {
-            val clazz = Class.forName(targetClass, true, loader);
+            val clazz = Class.forName(refiner.getTarget(), true, loader);
             val instance = clazz.newInstance();
             val field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.get(instance);
-        }).onFailure((cause) -> Logger.debug(() -> "cannot get field value from: " + targetClass + "." + fieldName))
+        }).onFailure((cause) -> Logger.debug(() -> "cannot get field value from: " + refiner.getTarget() + "." + fieldName))
           .getOrElse(() -> null);
     }
 

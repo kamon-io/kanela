@@ -147,7 +147,6 @@ public abstract class InstrumentationBuilder {
     public void when(final ClassRefiner.Builder refiner, final Runnable thunk) {
         val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiner.build())));
 
-
         if(classLoaderMatcher.matches(ClassLoader.getSystemClassLoader())) {
             try { thunk.run(); }
             catch (Throwable e) { Logger.error(() -> "Error evaluating the instrumentation block", e); }
@@ -187,7 +186,7 @@ public abstract class InstrumentationBuilder {
     }
 
     public ClassRefiner.Builder classIsPresent(String className) {
-        return ClassRefiner.builder().mustContains(className);
+        return ClassRefiner.builder().mustContain(className);
     }
 
     public static class Target {

@@ -44,7 +44,13 @@ public class ClassRefiner {
         private Map<String, Option<Object>> fields = new HashMap<>();
         private Map<String, Set<String>> methods = new HashMap<>();
 
+        @Deprecated
         public Builder mustContains(String clazz) {
+            this.target = clazz;
+            return this;
+        }
+
+        public Builder mustContain(String clazz) {
             this.target = clazz;
             return this;
         }

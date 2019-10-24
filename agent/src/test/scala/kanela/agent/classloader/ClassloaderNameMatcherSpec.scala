@@ -26,7 +26,7 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
   "The ClassloaderNameMatcher" should {
     "refine the search of a class in an classloader through a ClassRefiner" in {
       val refiner = ClassRefiner.builder()
-        .mustContains("kanela.agent.api.instrumentation.InstrumentationBuilder")
+        .mustContain("kanela.agent.api.instrumentation.InstrumentationBuilder")
         .withFields("targets", "notDeclaredByObject")
         .withMethod("buildTransformations", "kanela.agent.api.instrumentation.InstrumentationDescription", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
         .build()
@@ -39,12 +39,12 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
     "refine the search of a class in an classloader through a list of ClassRefiners" in {
       val refiners = Array[ClassRefiner](
         ClassRefiner.builder()
-          .mustContains("kanela.agent.api.instrumentation.InstrumentationBuilder")
+          .mustContain("kanela.agent.api.instrumentation.InstrumentationBuilder")
           .withFields("targets", "notDeclaredByObject")
           .withMethod("buildTransformations", "kanela.agent.api.instrumentation.InstrumentationDescription", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
           .build(),
         ClassRefiner.builder()
-          .mustContains("kanela.agent.api.instrumentation.InstrumentationDescription")
+          .mustContain("kanela.agent.api.instrumentation.InstrumentationDescription")
           .withFields("classLoaderRefiner")
           .build())
 
@@ -58,7 +58,7 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
       new PlayVersion$()
 
       val refiner =  ClassRefiner.builder()
-        .mustContains("kanela.agent.classloader.PlayVersion$")
+        .mustContain("kanela.agent.classloader.PlayVersion$")
         .withFieldAndValue("current", "2.6.0")
         .withFieldAndValue("scalaVersion", "2.12.2")
         .withFieldAndValue("sbtVersion", "0.13.15")
@@ -75,7 +75,7 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
       classLoaderMatcher.matches(classOf[InstrumentationBuilder].getClassLoader) shouldBe false
 
       val fieldRefiner = ClassRefiner.builder()
-        .mustContains("kanela.agent.api.instrumentation.InstrumentationBuilder")
+        .mustContain("kanela.agent.api.instrumentation.InstrumentationBuilder")
         .withFields("targets", "declaredByObject")
         .build()
 
@@ -84,7 +84,7 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
 
 
       val methodRefiner = ClassRefiner.builder()
-        .mustContains("kanela.agent.api.instrumentation.InstrumentationBuilder")
+        .mustContain("kanela.agent.api.instrumentation.InstrumentationBuilder")
         .withFields("targets", "notDeclaredByObject")
         .withMethod("buildTransformations", "kanela.agent.api.instrumentation.Instrumentation", "kanela.agent.util.conf.KanelaConfiguration$ModuleConfiguration", "java.lang.instrument.Instrumentation")
         .build()
