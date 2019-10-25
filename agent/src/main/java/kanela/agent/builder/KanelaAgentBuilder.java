@@ -30,7 +30,6 @@ import lombok.Value;
 import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.AgentBuilder.InjectionStrategy;
 import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
@@ -110,7 +109,7 @@ class KanelaAgentBuilder {
     private AgentBuilder withBootstrapAttaching(AgentBuilder agentBuilder) {
         if(moduleDescription.shouldInjectInBootstrap()){
             Logger.info(() -> "Bootstrap Injection activated.");
-            agentBuilder = agentBuilder.with(new InjectionStrategy.UsingInstrumentation(instrumentation, moduleDescription.getTempDir()));
+            agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
         }
         return agentBuilder;
     }
