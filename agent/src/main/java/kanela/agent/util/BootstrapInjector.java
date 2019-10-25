@@ -41,9 +41,10 @@ public class BootstrapInjector {
     }
 
     public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
-        ClassInjector.UsingInstrumentation
-                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
-                .injectRaw(getTypeDefinitions(allClasses));
+        ClassInjector.UsingUnsafe.ofBootLoader().injectRaw(getTypeDefinitions(allClasses));
+//        ClassInjector.UsingInstrumentation
+//                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
+//                .injectRaw(getTypeDefinitions(allClasses));
     }
 
     private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames)  {

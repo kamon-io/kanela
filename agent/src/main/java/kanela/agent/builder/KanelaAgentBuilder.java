@@ -109,7 +109,7 @@ class KanelaAgentBuilder {
     private AgentBuilder withBootstrapAttaching(AgentBuilder agentBuilder) {
         if(moduleDescription.shouldInjectInBootstrap()){
             Logger.info(() -> "Bootstrap Injection activated.");
-            agentBuilder = agentBuilder.enableBootstrapInjection(instrumentation, moduleDescription.getTempDir());
+            agentBuilder = agentBuilder.with(new AgentBuilder.InjectionStrategy.UsingInstrumentation(instrumentation, moduleDescription.getTempDir()));
         }
         return agentBuilder;
     }
