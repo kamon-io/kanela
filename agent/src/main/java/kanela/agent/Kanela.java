@@ -18,7 +18,6 @@ package kanela.agent;
 
 import io.vavr.collection.List;
 import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
-import kanela.agent.api.instrumentation.replacer.ClassReplacer;
 import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
@@ -79,7 +78,6 @@ final public class Kanela {
                   Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
                   OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
                   SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
-                  ClassReplacer.attach(instrumentation, configuration.getClassReplacerConfig());
                   updateLoadedSystemProperty();
               });
           });

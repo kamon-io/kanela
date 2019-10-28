@@ -20,7 +20,7 @@ matrix:
     - jdk: openjdk8
     - jdk: openjdk10
     - jdk: openjdk11
-    #- jdk: openjdk12
+    #- jdk: openjdk12 // gradle issue with jdk 12
 
 script:
   - ./travis-test.sh
