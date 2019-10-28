@@ -41,11 +41,15 @@ public class BootstrapInjector {
     }
 
     public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
-        ClassInjector.UsingUnsafe.ofBootLoader().injectRaw(getTypeDefinitions(allClasses));
+        ClassInjector.UsingUnsafe.Factory factory = ClassInjector.UsingUnsafe.Factory.resolve(instrumentation);
+        factory.make(null, null).injectRaw(getTypeDefinitions(allClasses));
+    }
+//    public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
+//        ClassInjector.UsingUnsafe.ofBootLoader().injectRaw(getTypeDefinitions(allClasses));
 //        ClassInjector.UsingInstrumentation
 //                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
 //                .injectRaw(getTypeDefinitions(allClasses));
-    }
+//    }
 
     private static Map<String, byte[]> getTypeDefinitions(List<String> helperClassNames)  {
         return helperClassNames.stream().collect(Collectors.toMap(k -> k, BootstrapInjector::getClassBytes));
