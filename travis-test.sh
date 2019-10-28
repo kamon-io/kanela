@@ -7,7 +7,7 @@ runTests () {
     && ./gradlew :agent-test:test \
     && ./gradlew :agent-test:bridge-spec \
     && ./gradlew :agent-test:bootstrap-injection-spec \
-    && ./gradlew :agent-test:class-replacer-spec \
+#    && ./gradlew :agent-test:class-replacer-spec \
     && ./gradlew :agent-test:multi-mixins-spec \
     && ./gradlew :agent-test:simple-instrumentation-spec \
     && ./gradlew :agent-test:attach-in-runtime-spec \
