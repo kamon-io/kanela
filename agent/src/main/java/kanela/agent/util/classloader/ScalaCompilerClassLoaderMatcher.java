@@ -5,8 +5,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ScalaCompilerClassLoaderMatcher extends ElementMatcher.Junction.AbstractBase<ClassLoader> {
@@ -16,13 +15,15 @@ public class ScalaCompilerClassLoaderMatcher extends ElementMatcher.Junction.Abs
     return isScalaCompilerClassLoader(classLoader);
   }
 
-  private static Set<ClassLoader> knownScalaClassLoaders = Collections.newSetFromMap(new ConcurrentHashMap<>());
+  private static Map<ClassLoader, Boolean> knownClassLoaders = new ConcurrentHashMap<>();
 
   /**
-   * Tries to determine whether the ClassLoader causing errors belongs to the Scala Compiler on SBT. Since there is
-   * no special naming or treatment of this particular ClassLoader it is impossible to filter it out from the
-   * instrumentation process, but given that the jars found on it are quite particular (the compiler and jline) we can
-   * assume that any instrumentation errors happening on that ClassLoader should be dismissed.
+   * Tries to determine whether a ClassLoader is the Scala Compiler ClassLoader on SBT. Since there is no special naming
+   * or treatment of this particular ClassLoader it is impossible to have a 100% reliable way to filter it out from the
+   * instrumentation process, but given that the jars found on it are quite particular (the compiler and jline) and
+   * there are usually just a handful of jars in that ClassLoader, we can have a level of certainty that if a
+   * ClassLoader has less than 6 jars and some of those are the compiler-related libraries then it must be the compiler
+   * ClassLoader.
    *
    * We are doing this check here instead of using a ClassLoaderNameMatcher because this is a relatively expensive
    * check which might only be necessary in a few cases, so we rather filter the error than putting the burden of this
@@ -30,24 +31,28 @@ public class ScalaCompilerClassLoaderMatcher extends ElementMatcher.Junction.Abs
    */
   public static boolean isScalaCompilerClassLoader(ClassLoader classLoader) {
     if(classLoader instanceof URLClassLoader) {
-      if(knownScalaClassLoaders.contains(classLoader))
-        return true;
+      Boolean isScalaCompilerLoader = knownClassLoaders.get(classLoader);
+
+      if(isScalaCompilerLoader != null)
+        return isScalaCompilerLoader;
       else {
         val urlClassLoader = (URLClassLoader) classLoader;
         boolean foundScalaCompiler = false;
         boolean foundJLine = false;
+        boolean hasLessThanSixJars = urlClassLoader.getURLs().length < 6;
 
-        for (URL url : urlClassLoader.getURLs()) {
-          if (url.getFile().contains("scala-compiler"))
-            foundScalaCompiler = true;
-          if (url.getFile().contains("jline"))
-            foundJLine = true;
+        if(hasLessThanSixJars) {
+          for (URL url : urlClassLoader.getURLs()) {
+            if (url.getFile().contains("scala-compiler"))
+              foundScalaCompiler = true;
+
+            if (url.getFile().contains("jline"))
+              foundJLine = true;
+          }
         }
 
-        val isScalaCompiler = foundScalaCompiler && foundJLine;
-        if (isScalaCompiler)
-          knownScalaClassLoaders.add(classLoader);
-
+        val isScalaCompiler = hasLessThanSixJars && foundScalaCompiler && foundJLine;
+        knownClassLoaders.put(classLoader, isScalaCompiler);
         return isScalaCompiler;
       }
     } else return false;
