@@ -293,7 +293,9 @@ public class KanelaConfiguration {
     }
 
     private String getWithinConfiguration(Config config) {
-        return getTypeListPattern(config, "within").getOrElse(DefaultConfiguration.withinPackage);
+        if(config.hasPath("within"))
+          return getTypeListPattern(config, "within").getOrElse("");
+        return "";
     }
 
     private String getExcludeConfiguration(Config config) {
@@ -349,24 +351,5 @@ public class KanelaConfiguration {
         if (module.enabled) return true;
         Logger.info(() -> "The Module: " + module.getName() + " is disabled");
         return false;
-    }
-
-    private static class DefaultConfiguration {
-        static final String withinPackage = List.of(
-                    "(?!sun\\..*)",
-                    "(?!com\\.sun\\..*)",
-                    "(?!java\\..*)",
-                    "(?!javax\\..*)",
-                    "(?!org\\.aspectj.\\..*)",
-                    "(?!com\\.newrelic.\\..*)",
-                    "(?!org\\.groovy.\\..*)",
-                    "(?!net\\.bytebuddy.\\..*)",
-                    "(?!\\.asm.\\..*)",
-                    "(?!kanela\\.agent\\..*)",
-                    "(?!kamon\\.testkit\\..*)",
-                    "(?!kamon\\.instrumentation\\..*)",
-                    "(?!akka\\.testkit\\..*)",
-                    "(?!org\\.scalatest\\..*)",
-                    "(?!scala\\.(?!concurrent).*)").mkString("", "", ".*");
     }
 }
