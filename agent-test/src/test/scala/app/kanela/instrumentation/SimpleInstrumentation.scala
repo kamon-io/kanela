@@ -16,7 +16,6 @@
 
 package app.kanela.instrumentation
 
-import app.kanela.instrumentation.advisor.{SpyAdvisor, TestMethodAdvisor}
 import app.kanela.instrumentation.mixin.SpyMixin
 import kanela.agent.api.instrumentation.InstrumentationBuilder
 
@@ -25,8 +24,7 @@ class SimpleInstrumentation extends InstrumentationBuilder {
 
   onType("app.kanela.cases.simple.TestClass")
     .mixin(classOf[SpyMixin])
-    .advise(methodName, classOf[TestMethodAdvisor])
-    .advise(methodName, classOf[SpyAdvisor])
-
+    .advise(methodName, "app.kanela.instrumentation.advisor.TestMethodAdvisor")
+    .advise(methodName, "app.kanela.instrumentation.advisor.SpyAdvisor")
 }
 

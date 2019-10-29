@@ -49,7 +49,6 @@ public class KanelaConfiguration {
     CircuitBreakerConfig circuitBreakerConfig;
     InstrumentationRegistryConfig instrumentationRegistryConfig;
     OldGarbageCollectorConfig oldGarbageCollectorConfig;
-    ClassReplacerConfig classReplacerConfig;
     Boolean showBanner;
     HashMap extraParams;
     Level logLevel;
@@ -82,7 +81,6 @@ public class KanelaConfiguration {
         this.circuitBreakerConfig = new CircuitBreakerConfig(config);
         this.instrumentationRegistryConfig = new InstrumentationRegistryConfig(config);
         this.oldGarbageCollectorConfig =  new OldGarbageCollectorConfig(config);
-        this.classReplacerConfig =  new ClassReplacerConfig(config);
         this.logLevel = getLoggerLevel(config);
     }
 
@@ -220,27 +218,6 @@ public class KanelaConfiguration {
             return (boolean) KanelaConfiguration.this.getExtraParameter("circuit-breaker-running").getOrElse(false);
         }
     }
-
-    @Value
-    public class ClassReplacerConfig {
-        List<String> classesToReplace;
-
-        ClassReplacerConfig(Config config) {
-            this.classesToReplace = List.ofAll(Try.of(() -> config.getStringList("class-replacer.replace")).getOrElse(Collections.emptyList()));
-        }
-
-        public io.vavr.collection.Map<String, String> classesToReplace() {
-            return classesToReplace
-                    .map(s -> s.split("=>"))
-                    .map(classes -> Tuple.of(toInternalName(classes[0]), toInternalName(classes[1])))
-                    .toMap(Function.identity());
-        }
-
-        private String toInternalName(String b) {
-            return b.replace('.', '/');
-        }
-    }
-
 
     @Value
     public class BootstrapInjectionConfig {

@@ -41,8 +41,8 @@ public class BootstrapInjector {
     }
 
     public static void inject(File folder, Instrumentation instrumentation, List<String>  allClasses) {
-        ClassInjector.UsingInstrumentation
-                .of(folder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
+        ClassInjector.UsingUnsafe.Factory.resolve(instrumentation)
+                .make(null, null)
                 .injectRaw(getTypeDefinitions(allClasses));
     }
 
