@@ -101,7 +101,7 @@ public class AnalyzedClass implements ClassMatcher {
 
     private Boolean containsMethodWithParameters(Map<String, Set<String>> methods) {
         if (methods.isEmpty()) return true;
-        return !methods.entrySet()
+            return !methods.entrySet()
                 .stream()
                 .map((entry) ->  containsMethod(entry.getKey(), entry.getValue().toArray(new String[0])))
                 .collect(Collectors.toSet())
