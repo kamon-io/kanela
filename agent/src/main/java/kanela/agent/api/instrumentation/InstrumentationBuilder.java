@@ -17,6 +17,7 @@
 package kanela.agent.api.instrumentation;
 
 import io.vavr.Function0;
+import io.vavr.control.Option;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
@@ -25,7 +26,10 @@ import kanela.agent.api.instrumentation.legacy.ClassFileVersionValidatorTransfor
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.ListBuilder;
+import kanela.agent.util.classloader.ClassLoaderNameMatcher;
+import kanela.agent.util.classloader.ClassLoaderNameMatcher.RefinedClassLoaderMatcher;
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
+import kanela.agent.util.log.Logger;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.ByteCodeElement;
@@ -140,6 +144,15 @@ public abstract class InstrumentationBuilder {
         return target;
     }
 
+    public void when(final ClassRefiner.Builder refiner, final Runnable thunk) {
+        val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiner.build())));
+
+        if(classLoaderMatcher.matches(ClassLoader.getSystemClassLoader())) {
+            try { thunk.run(); }
+            catch (Throwable e) { Logger.error(() -> "Error evaluating the instrumentation block", e); }
+        } else { Logger.info(() -> "Nothing to do"); }
+    }
+
     public ElementMatcher.Junction<MethodDescription> method(String name){ return named(name);}
 
     public ElementMatcher.Junction<MethodDescription> isConstructor() { return ElementMatchers.isConstructor();}
@@ -173,7 +186,7 @@ public abstract class InstrumentationBuilder {
     }
 
     public ClassRefiner.Builder classIsPresent(String className) {
-        return ClassRefiner.builder().mustContains(className);
+        return ClassRefiner.builder().mustContain(className);
     }
 
     public static class Target {
