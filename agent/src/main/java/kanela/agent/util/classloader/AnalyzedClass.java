@@ -60,7 +60,7 @@ public class AnalyzedClass implements ClassMatcher {
                 return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(refiner, classNode, loader), extractMethods(classNode));
             }
         })
-        .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
+        .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass of type: " + refiner.getTarget() + " with error: " + cause.getMessage()))
         .getOrElse(new NoOpAnalyzedClass());
     }
 
@@ -118,7 +118,7 @@ public class AnalyzedClass implements ClassMatcher {
         if(!refiner.getFields().getOrDefault(fieldName, Option.none()).isDefined()) return null;
         return Try.of(() -> {
             val clazz = Class.forName(refiner.getTarget(), true, loader);
-            val instance = clazz.newInstance();
+            val instance = clazz.getDeclaredConstructor().newInstance();
             val field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.get(instance);

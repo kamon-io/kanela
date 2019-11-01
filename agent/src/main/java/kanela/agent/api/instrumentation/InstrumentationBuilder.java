@@ -26,7 +26,6 @@ import kanela.agent.api.instrumentation.legacy.ClassFileVersionValidatorTransfor
 import kanela.agent.api.instrumentation.mixin.MixinDescription;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.ListBuilder;
-import kanela.agent.util.classloader.ClassLoaderNameMatcher;
 import kanela.agent.util.classloader.ClassLoaderNameMatcher.RefinedClassLoaderMatcher;
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
 import kanela.agent.util.log.Logger;
@@ -146,11 +145,10 @@ public abstract class InstrumentationBuilder {
 
     public void when(final ClassRefiner.Builder refiner, final Runnable thunk) {
         val classLoaderMatcher = RefinedClassLoaderMatcher.from(Option.of(ClassLoaderRefiner.from(refiner.build())));
-
         if(classLoaderMatcher.matches(ClassLoader.getSystemClassLoader())) {
             try { thunk.run(); }
             catch (Throwable e) { Logger.error(() -> "Error evaluating the instrumentation block", e); }
-        } else { Logger.info(() -> "Nothing to do"); }
+        }
     }
 
     public ElementMatcher.Junction<MethodDescription> method(String name){ return named(name);}

@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -18,6 +18,7 @@ package kanela.agent;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import kanela.agent.api.instrumentation.InstrumentationBuilder;
 import kanela.agent.builder.AgentInstaller;
 import kanela.agent.builder.KanelaFileTransformer;
@@ -52,12 +53,10 @@ public class InstrumentationLoader {
     }
 
     private static Option<InstrumentationBuilder> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
-        Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
-        try {
-            return Option.some((InstrumentationBuilder) Class.forName(instrumentationClassName, true, classLoader).newInstance());
-        } catch (Throwable cause) {
-            Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
-            return Option.none();
-        }
+        return Try.of(() -> {
+            Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
+            return (InstrumentationBuilder) Class.forName(instrumentationClassName, true, classLoader).newInstance();
+        }).onFailure((cause) -> Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause))
+        ).toOption();
     }
 }
