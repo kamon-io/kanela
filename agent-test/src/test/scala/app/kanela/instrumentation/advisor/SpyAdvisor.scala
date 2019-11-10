@@ -19,6 +19,7 @@ package app.kanela.instrumentation.advisor
 import app.kanela.cases.simple.SpyAware
 import kanela.agent.libs.net.bytebuddy.asm.Advice.{ OnMethodEnter, OnMethodExit, This }
 
+class SpyAdvisor
 object SpyAdvisor {
 
   @OnMethodEnter
@@ -32,4 +33,3 @@ object SpyAdvisor {
   }
 }
 
-class   SpyAdvisor

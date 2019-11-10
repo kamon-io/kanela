@@ -44,7 +44,6 @@ public class Logger {
         Try.run(() -> {
             val configurator = Configurator
                 .fromResource("kanela-log.properties")
-                .writingThread("main")
                 .level(config.getLogLevel());
 
             if(config.isDebugMode()) {

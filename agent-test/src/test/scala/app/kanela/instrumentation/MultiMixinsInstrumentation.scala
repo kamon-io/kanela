@@ -22,9 +22,9 @@ import kanela.agent.api.instrumentation.InstrumentationBuilder
 class MultiMixinsInstrumentation extends InstrumentationBuilder {
   import app.kanela.instrumentation.mixin.MixinOverMixin._
 
-  onType("app.kanela.cases.multimixins.WithMultiMixinsClass")
-    .when(classIsPresent("kanela.agent.api.instrumentation.InstrumentationBuilder"))
-    .mixin(classOf[MixinOverMixin1])
-    .mixin(classOf[MixinOverMixin2])
-    .mixin(classOf[MixinOverMixin3])
+    onType("app.kanela.cases.multimixins.WithMultiMixinsClass")
+      .when(classIsPresent("kanela.agent.api.instrumentation.InstrumentationBuilder"))
+      .mixin(classOf[MixinOverMixin1])
+      .mixin(classOf[MixinOverMixin2])
+      .mixin(classOf[MixinOverMixin3])
 }

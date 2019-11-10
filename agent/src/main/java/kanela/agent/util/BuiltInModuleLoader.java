@@ -42,9 +42,8 @@ public class BuiltInModuleLoader {
         return io.vavr.collection.List.ofAll(urls)
                 .map(url -> Jar.getEmbeddedFile("/" + url))
                 .flatMap(Function.identity())
-                .toJavaArray(URL.class);
+                .toJavaArray(URL[]::new);
     }
-
     private static List<String> collectAll(List<String> modules) {
         return Lang.getRunningScalaVersion()
                 .map(scalaVersion -> filterScalaModules(scalaVersion, modules))

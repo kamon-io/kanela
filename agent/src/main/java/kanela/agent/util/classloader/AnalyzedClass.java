@@ -19,6 +19,7 @@ package kanela.agent.util.classloader;
 import io.vavr.Tuple;
 import io.vavr.collection.Array;
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
 import kanela.agent.util.log.Logger;
@@ -46,7 +47,7 @@ interface ClassMatcher {
 @Value
 public class AnalyzedClass implements ClassMatcher {
     private ClassRefiner classRefiner;
-    private Set<String> fields;
+    private Map<String, Object> fields;
     private Map<String, Set<String>> methodsWithArguments;
 
     public static ClassMatcher from(ClassRefiner refiner, ClassLoader loader)  {
@@ -56,10 +57,10 @@ public class AnalyzedClass implements ClassMatcher {
 
             try(InputStream in = loader.getResourceAsStream(resourceName)) {
                 val classNode = convertToClassNode(in);
-                return (ClassMatcher) new AnalyzedClass(refiner, extractFields(classNode), extractMethods(classNode));
+                return (ClassMatcher) new AnalyzedClass(refiner, extractFieldsAndValues(refiner, classNode, loader), extractMethods(classNode));
             }
         })
-        .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass: " + cause.getMessage()))
+        .onFailure((cause) -> Logger.debug(() -> "Error trying to build an AnalyzedClass of type: " + refiner.getTarget() + " with error: " + cause.getMessage()))
         .getOrElse(new NoOpAnalyzedClass());
     }
 
@@ -69,22 +70,30 @@ public class AnalyzedClass implements ClassMatcher {
         return evaluated;
     }
 
-    private Boolean containsFields(String... fields) {
-        return this.fields.containsAll(Arrays.asList(fields));
+    private Boolean containsFields(Map<String, Option<Object>> fieldsAndValues) {
+        if(fieldsAndValues.isEmpty()) return true;
+        return !fieldsAndValues
+                .entrySet()
+                .stream()
+                .map((entry) -> containsField(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toSet())
+                .contains(false);
+    }
+
+    private Boolean containsField(String fieldName, Option<Object> value) {
+        return value.map(v -> v == fields.get(fieldName)).getOrElse(() -> fields.containsKey(fieldName));
     }
 
     private Boolean containsMethod(String methodName, String... parameters) {
-        if(methodsWithArguments.containsKey(methodName)) {
-            val parameterSet = methodsWithArguments.get(methodName);
-            if(parameters.length > 0) return Arrays.asList(parameters).containsAll(parameterSet);
-            return true;
-        }
-        return false;
+        if (!methodsWithArguments.containsKey(methodName)) return false;
+        val parameterSet = methodsWithArguments.get(methodName);
+        if(parameters.length > 0) return Arrays.asList(parameters).containsAll(parameterSet);
+        return true;
     }
 
     private Predicate<Boolean> buildClassRefinerPredicate(ClassRefiner classRefiner) {
         java.util.List<Predicate<Boolean>> allPredicates = Arrays.asList(
-                p -> containsFields(classRefiner.getFields().toArray(new String[0])),
+                p -> containsFields(classRefiner.getFields()),
                 p -> containsMethodWithParameters(classRefiner.getMethods())
         );
         return allPredicates.stream().reduce(p -> true, Predicate::and);
@@ -92,17 +101,29 @@ public class AnalyzedClass implements ClassMatcher {
 
     private Boolean containsMethodWithParameters(Map<String, Set<String>> methods) {
         if (methods.isEmpty()) return true;
-        return !methods.entrySet()
+            return !methods.entrySet()
                 .stream()
                 .map((entry) ->  containsMethod(entry.getKey(), entry.getValue().toArray(new String[0])))
                 .collect(Collectors.toSet())
                 .contains(false);
     }
 
-    private static Set<String> extractFields(ClassNode classNode) {
+    private static Map<String, Object> extractFieldsAndValues(ClassRefiner refiner, ClassNode classNode, ClassLoader loader) {
         return List.ofAll(classNode.fields)
-                .map(fieldNode -> fieldNode.name)
-                .toJavaSet();
+                .filter(fieldNode -> (fieldNode.access & Opcodes.ACC_SYNTHETIC) == 0)
+                .toJavaMap(fieldNode -> Tuple.of(fieldNode.name, extractFieldValue(refiner, fieldNode.name, loader)));
+    }
+
+    private static Object extractFieldValue(ClassRefiner refiner, String fieldName, ClassLoader loader) {
+        if(!refiner.getFields().getOrDefault(fieldName, Option.none()).isDefined()) return null;
+        return Try.of(() -> {
+            val clazz = Class.forName(refiner.getTarget(), true, loader);
+            val instance = clazz.getDeclaredConstructor().newInstance();
+            val field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(instance);
+        }).onFailure((cause) -> Logger.debug(() -> "cannot get field value from: " + refiner.getTarget() + "." + fieldName))
+          .getOrElse(() -> null);
     }
 
     private static Map<String, Set<String>> extractMethods(ClassNode classNode) {

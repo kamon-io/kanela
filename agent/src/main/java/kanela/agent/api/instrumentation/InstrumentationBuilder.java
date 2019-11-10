@@ -173,7 +173,7 @@ public abstract class InstrumentationBuilder {
     }
 
     public ClassRefiner.Builder classIsPresent(String className) {
-        return ClassRefiner.builder().mustContains(className);
+        return ClassRefiner.builder().mustContain(className);
     }
 
     public static class Target {
@@ -193,8 +193,25 @@ public abstract class InstrumentationBuilder {
             return this;
         }
 
+        /**
+         *
+         * @param method
+         * @param implementation
+         * @return
+         */
         public Target advise(ElementMatcher.Junction<MethodDescription> method, Class<?> implementation) {
             builder.withAdvisorFor(method, () -> implementation);
+            return this;
+        }
+
+        /**
+         *
+         * @param method
+         * @param implementation
+         * @return
+         */
+        public Target advise(ElementMatcher.Junction<MethodDescription> method, String implementation) {
+            builder.withAdvisorFor(method, implementation);
             return this;
         }
 

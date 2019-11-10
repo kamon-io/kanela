@@ -89,6 +89,11 @@ public class InstrumentationDescription {
             return this;
         }
 
+        public Builder withAdvisorFor(ElementMatcher.Junction<MethodDescription> methodDescription , String advisorClassName) {
+            advisors.add(AdvisorDescription.of(methodDescription.and(defaultMethodElementMatcher()), advisorClassName));
+            return this;
+        }
+
         public Builder withInterceptorFor(ElementMatcher.Junction<MethodDescription> method, Supplier<Class<?>> delegate) {
             withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate.get())));
             return this;
