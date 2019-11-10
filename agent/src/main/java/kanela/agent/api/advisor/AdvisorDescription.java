@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -16,20 +16,32 @@
 
 package kanela.agent.api.advisor;
 
+import io.vavr.control.Option;
 import lombok.Value;
+import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
-@Value(staticConstructor = "of")
+@Value
 public class AdvisorDescription {
-    ElementMatcher<? super MethodDescription> methodMatcher;
-    Class<?> advisorClass;
+    private final ElementMatcher<? super MethodDescription> methodMatcher;
+    private final Class<?> advisorClass;
+    private final String advisorClassName;
+
+    public static AdvisorDescription of(ElementMatcher.Junction<MethodDescription> methodMatcher, String advisorClassName) {
+        return new AdvisorDescription(methodMatcher, null, advisorClassName);
+    }
+
+    public static AdvisorDescription of(ElementMatcher.Junction<MethodDescription> methodMatcher, Class<?> advisorClass) {
+        return new AdvisorDescription(methodMatcher, advisorClass, null);
+    }
 
     public AgentBuilder.Transformer makeTransformer() {
+        val name = Option.of(advisorClassName).getOrElse(() -> advisorClass.getName());
         return new AgentBuilder.Transformer.ForAdvice()
-                .advice(this.methodMatcher, advisorClass.getName())
-                .include(advisorClass.getClassLoader())
+                .advice(this.methodMatcher, name)
+                .include(Thread.currentThread().getContextClassLoader())
                 .withExceptionHandler(AdviceExceptionHandler.instance());
     }
 }
