@@ -16,6 +16,7 @@
 
 package kanela.agent.api.instrumentation.mixin;
 
+import kanela.agent.util.classloader.InstrumentationClassPath;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -67,10 +68,14 @@ public class MixinClassVisitor extends ClassVisitor {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public void visitEnd() {
+
         // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
-        // that all classes are loaded with Kanela's ClassLoader (which some times might be the System ClassLoader and
-        // some others will be an Attach ClassLoader).
-        val classLoader = Thread.currentThread().getContextClassLoader();
+        // that all classes are loaded with Kanela's Instrumentation ClassLoader (which some times might be the
+        // System ClassLoader and some others will be an Attach ClassLoader).
+        val classLoader = InstrumentationClassPath.last()
+            .map(icp -> icp.getClassLoader())
+            .getOrElse(() -> Thread.currentThread().getContextClassLoader());
+
         val mixinClassFileName = mixin.getMixinClass().getName().replace('.', '/') + ".class";
         val classStream = classLoader.getResourceAsStream(mixinClassFileName);
 
