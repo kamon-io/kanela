@@ -48,6 +48,7 @@ public class InstrumentationClassPath {
 
     private final ClassLoader classLoader;
     private static final String SecondaryClassLoaderPropertyName = "kanela.instrumentation.classLoader";
+    private static volatile InstrumentationClassPath lastClassPath = null;
 
     private InstrumentationClassPath() {
         val builtInModules = BuiltInModuleLoader.findModules();
@@ -64,7 +65,16 @@ public class InstrumentationClassPath {
     }
 
     public static InstrumentationClassPath build() {
-        return new InstrumentationClassPath();
+        lastClassPath = new InstrumentationClassPath();
+        return lastClassPath;
+    }
+
+    public static Option<InstrumentationClassPath> last() {
+      return Option.of(lastClassPath);
+    }
+
+    public ClassLoader getClassLoader() {
+      return classLoader;
     }
 
     public void use(Consumer<ClassLoader> thunk) {
