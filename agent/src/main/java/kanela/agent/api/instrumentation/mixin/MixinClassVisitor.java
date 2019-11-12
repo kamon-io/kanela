@@ -78,7 +78,7 @@ public class MixinClassVisitor extends ClassVisitor {
             val mixinClassFileName = mixin.getMixinClass().getName().replace('.', '/') + ".class";
 
             try (val classStream = classLoader.getResourceAsStream(mixinClassFileName)) {
-                val cr = new ClassReader(Option.of(classStream).getOrElseThrow(() -> new RuntimeException("")));
+                val cr = new ClassReader(classStream);
                 val cn = new ClassNode();
                 cr.accept(cn, ClassReader.EXPAND_FRAMES);
 
