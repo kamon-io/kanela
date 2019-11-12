@@ -54,10 +54,8 @@ class KanelaAgentBuilder {
     final ListBuilder<TypeTransformation> typeTransformations = ListBuilder.builder();
 
     public void addTypeTransformation(TypeTransformation typeTransformation) {
-        if (typeTransformation.isActive()) {
-            InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
-            typeTransformations.add(typeTransformation);
-        }
+        InstrumentationRegistryListener.instance().register(moduleDescription, typeTransformation);
+        typeTransformations.add(typeTransformation);
     }
 
     AgentBuilder build() {
