@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -36,14 +36,14 @@ import java.util.function.Supplier;
  */
 public class Logger {
 
-    static {
-        configureLogger(KanelaConfiguration.instance());
-    }
+    static { configureLogger(KanelaConfiguration.instance()); }
 
     public static void configureLogger(KanelaConfiguration config) {
         Try.run(() -> {
             val configurator = Configurator
                 .fromResource("kanela-log.properties")
+                .writingThread("main")
+                .maxStackTraceElements(400) // stack traces
                 .level(config.getLogLevel());
 
             if(config.isDebugMode()) {
@@ -54,7 +54,6 @@ public class Logger {
             configurator.activate();
 
         }).andThen(() -> {
-
             //sets the logger provider in order to be able to access from advisors/interceptors
             LoggerHandler.setLoggerProvider(new LoggerProvider() {
                 public void error(String msg, Throwable t) { Logger.error(() -> msg, t); }

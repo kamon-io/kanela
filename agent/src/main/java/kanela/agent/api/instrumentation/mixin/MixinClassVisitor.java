@@ -16,9 +16,10 @@
 
 package kanela.agent.api.instrumentation.mixin;
 
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import kanela.agent.util.classloader.InstrumentationClassPath;
 import lombok.EqualsAndHashCode;
-import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.jar.asm.*;
@@ -65,34 +66,31 @@ public class MixinClassVisitor extends ClassVisitor {
     }
 
     @Override
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
     public void visitEnd() {
+        Try.run(() -> {
+            // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
+            // that all classes are loaded with Kanela's Instrumentation ClassLoader (which some times might be the
+            // System ClassLoader and some others will be an Attach ClassLoader).
+            val classLoader = InstrumentationClassPath.last()
+                    .map(InstrumentationClassPath::getClassLoader)
+                    .getOrElse(() -> Thread.currentThread().getContextClassLoader());
 
-        // By default, ClassReader will try to use the System ClassLoader to load the classes but we need to make sure
-        // that all classes are loaded with Kanela's Instrumentation ClassLoader (which some times might be the
-        // System ClassLoader and some others will be an Attach ClassLoader).
-        val classLoader = InstrumentationClassPath.last()
-            .map(icp -> icp.getClassLoader())
-            .getOrElse(() -> Thread.currentThread().getContextClassLoader());
+            val mixinClassFileName = mixin.getMixinClass().getName().replace('.', '/') + ".class";
 
-        val mixinClassFileName = mixin.getMixinClass().getName().replace('.', '/') + ".class";
-        val classStream = classLoader.getResourceAsStream(mixinClassFileName);
+            try (val classStream = classLoader.getResourceAsStream(mixinClassFileName)) {
+                val cr = new ClassReader(classStream);
+                val cn = new ClassNode();
+                cr.accept(cn, ClassReader.EXPAND_FRAMES);
 
-        val cr = new ClassReader(classStream);
-        classStream.close();
-
-        val cn = new ClassNode();
-        cr.accept(cn, ClassReader.EXPAND_FRAMES);
-
-        cn.fields.forEach(fieldNode -> fieldNode.accept(this));
-        cn.methods.stream().filter(isConstructor()).forEach(mn -> {
-            String[] exceptions = new String[mn.exceptions.size()];
-            MethodVisitor mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions);
-            mn.accept(new MethodRemapper(mv, new SimpleRemapper(cn.name, type.getInternalName())));
+                cn.fields.forEach(fieldNode -> fieldNode.accept(this));
+                cn.methods.stream().filter(isConstructor()).forEach(mn -> {
+                    String[] exceptions = new String[mn.exceptions.size()];
+                    MethodVisitor mv = cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions);
+                    mn.accept(new MethodRemapper(mv, new SimpleRemapper(cn.name, type.getInternalName())));
+                });
+            }
+            super.visitEnd();
         });
-
-        super.visitEnd();
     }
 
     private static Predicate<MethodNode> isConstructor() {
