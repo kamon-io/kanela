@@ -47,9 +47,7 @@ public class PreInitializeClasses {
     // only called a single time, but just to be safe ...
     public static volatile Object toPreventDeadCodeElimination;
 
-    public static void preInitializeClasses() {
-        val loader = Thread.currentThread().getContextClassLoader();
-
+    public static void preInitializeClasses(ClassLoader loader) {
         for (String type : usedTypes()) {
             initialize(type, loader);
         }

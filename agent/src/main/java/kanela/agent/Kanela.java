@@ -66,7 +66,7 @@ final public class Kanela {
 
           runWithTimeSpent(() -> {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
-                  PreInitializeClasses.preInitializeClasses();
+                  PreInitializeClasses.preInitializeClasses(instrumentationClassLoader);
 
                   BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
