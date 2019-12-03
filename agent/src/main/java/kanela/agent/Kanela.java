@@ -61,12 +61,12 @@ final public class Kanela {
 
       // This ensures that we will not load Kanela more than once on the same JVM.
       if(Kanela.instrumentation == null) {
-          PreInitializeClasses.preInitializeClasses();
           // We keep the reference in case we will need to reload the agent.
           Kanela.instrumentation = instrumentation;
 
           runWithTimeSpent(() -> {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+                  PreInitializeClasses.preInitializeClasses();
 
                   BootstrapInjector.injectJar(instrumentation, "bootstrap");
 
