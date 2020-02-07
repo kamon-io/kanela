@@ -56,6 +56,10 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         return new ClassLoaderNameMatcher("sbt.internal.PluginManagement$PluginClassLoader");
     }
 
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isSBTCachedClassLoader() {
+        return new ClassLoaderNameMatcher("sbt.internal.classpath.ClassLoaderCache$Key$CachedClassLoader");
+    }
+
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> isSBTCompilerClassLoader() {
         return new ScalaCompilerClassLoaderMatcher();
     }
