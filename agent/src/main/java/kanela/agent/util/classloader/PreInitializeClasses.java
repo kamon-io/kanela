@@ -74,6 +74,7 @@ public class PreInitializeClasses {
         val types = new ArrayList<String>();
         types.add("java.util.concurrent.locks.LockSupport");
         types.add("java.util.concurrent.ThreadLocalRandom");
+        types.add("java.util.concurrent.locks.AbstractQueuedSynchronizer$Node");
         return types;
     }
 
