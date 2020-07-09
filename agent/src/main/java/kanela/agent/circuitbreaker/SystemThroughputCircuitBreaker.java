@@ -38,18 +38,18 @@ public class SystemThroughputCircuitBreaker {
     KanelaConfiguration.CircuitBreakerConfig config;
     Jvm jvm;
 
-    @NonFinal private volatile int tripped = 0;
+    @NonFinal volatile int tripped = 0;
 
     public static void attach(KanelaConfiguration.CircuitBreakerConfig config) { attach(config, Jvm.instance()); }
 
     public static void attach(KanelaConfiguration.CircuitBreakerConfig config, Jvm jvm) {
         if(config.isEnabled()){
-            Try.of(() -> new SystemThroughputCircuitBreaker(config, jvm))
-                    .andThen(config::circuitBreakerRunning)
-                    .andThen(() -> Logger.info(() -> "System Throughput CircuitBreaker activated."))
-                    .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
-                    .andThen(() -> Logger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
-                    .onFailure((cause) -> Logger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
+            Try.run(() -> new SystemThroughputCircuitBreaker(config, jvm))
+               .andThen(config::circuitBreakerRunning)
+               .andThen(() -> Logger.info(() -> "System Throughput CircuitBreaker activated."))
+               .andThen(circuitBreaker ->  EventBroker.instance().add(circuitBreaker))
+               .andThen(() -> Logger.debug(() -> "System Throughput CircuitBreaker is listening for GCEvents."))
+               .onFailure((cause) -> Logger.error(() -> "Error when trying to activate System Throughput CircuitBreaker.", cause));
         }
     }
 

@@ -67,7 +67,7 @@ public class OldGarbageCollectorListener {
      */
     public static void attach(KanelaConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         if(configuration.isCircuitBreakerRunning()) {
-            Try.of(() -> new OldGarbageCollectorListener(configuration, jvm))
+            Try.run(() -> new OldGarbageCollectorListener(configuration, jvm))
                .andThen(() -> Logger.info(() -> format("Old Garbage Collector Listener activated.")))
                .onFailure((cause) -> Logger.error(() -> format("Error when trying to activate Old Garbage Collector Listener."), cause));
         }

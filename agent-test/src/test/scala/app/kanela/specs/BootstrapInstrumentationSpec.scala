@@ -28,5 +28,6 @@ class BootstrapInstrumentationSpec extends FlatSpec with Matchers with BeforeAnd
 
       val urlConnection = new URL("http://www.google.com").openConnection.asInstanceOf[HttpURLConnection]
       urlConnection.getRequestMethod shouldBe "[Intercepted] GET"
+      ClassRegistry.exist("java.net.HttpURLConnection") shouldBe true
     }
 }

@@ -18,6 +18,7 @@ package kanela.agent;
 
 import io.vavr.collection.List;
 import kanela.agent.api.instrumentation.listener.InstrumentationRegistryListener;
+import kanela.agent.api.instrumentation.registry.ClassRegistry;
 import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
@@ -34,9 +35,9 @@ import java.lang.instrument.Instrumentation;
 
 import static kanela.agent.util.Execution.runWithTimeSpent;
 
-final public class Kanela {
+public final  class Kanela {
 
-  private static String loadedPropertyName = "kanela.loaded";
+  private static final String loadedPropertyName = "kanela.loaded";
   private static volatile Instrumentation instrumentation;
   private static volatile List<KanelaFileTransformer> installedTransformers = List.empty();
 
@@ -75,6 +76,8 @@ final public class Kanela {
 
                   if (isRuntimeAttach) configuration.runtimeAttach();
                   KanelaBanner.show(configuration);
+
+                  ClassRegistry.attach(instrumentation, configuration.getClassRegistryConfig());
 
                   installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
                   Reinstrumenter.attach(instrumentation, configuration, installedTransformers);
