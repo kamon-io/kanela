@@ -23,27 +23,30 @@ import kanela.agent.util.bloom.Key;
 import kanela.agent.util.conf.KanelaConfiguration.ClassRegistryConfig;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
+import lombok.val;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.ref.SoftReference;
 import java.security.ProtectionDomain;
 
 @Value
 @Experimental
 public class ClassRegistry {
 
-    public static DynamicBloomFilter bloomFilter;
+    public static SoftReference<DynamicBloomFilter> bloomFilterReference;
 
     public synchronized static void attach(Instrumentation instrumentation, ClassRegistryConfig config) {
-        Try.run(() -> bloomFilter = DynamicBloomFilter.create(config.getSize(), config.getErrorRate(), config.getHashCount()))
+        Try.run(() -> bloomFilterReference = new SoftReference<>(DynamicBloomFilter.create(config.getSize(), config.getErrorRate(), config.getHashCount())))
            .andThen(() -> instrumentation.addTransformer(new ClassRegistryTransformer()))
            .andThen(() -> Logger.info(() -> "Class Registry activated."))
            .onFailure((cause) -> Logger.warn(() -> "Error when trying to activate Class Registry.", cause));
     }
 
     public static boolean exist(String clazz) {
-        if (bloomFilter == null) return false;
-        return bloomFilter.membershipTest(new Key(clazz.getBytes()));
+        val bloomReference = bloomFilterReference.get();
+        if (bloomReference == null) return false;
+        return bloomReference.membershipTest(new Key(clazz.getBytes()));
     }
 
     @Value
@@ -55,8 +58,10 @@ public class ClassRegistry {
                                 ProtectionDomain protectionDomain,
                                 byte[] classfileBuffer) {
 
-            if (className != null && bloomFilter != null) {
-                bloomFilter.add(new Key(className.replace('/', '.').getBytes()));
+            if (className != null) {
+                val bloomReference = bloomFilterReference.get();
+                if(bloomReference != null)
+                    bloomReference.add(new Key(className.replace('/', '.').getBytes()));
             }
             return classfileBuffer;
         }
