@@ -163,7 +163,7 @@ public class KanelaConfiguration {
     }
 
     @Value
-    public class DumpConfig {
+    public static class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
         Boolean createJar;
@@ -223,14 +223,16 @@ public class KanelaConfiguration {
 
     @Value
     public static class ClassRegistryConfig {
+        boolean enabled;
         int size;
         double errorRate;
         int hashCount;
 
         ClassRegistryConfig(Config config) {
-            this.size = Try.of(() -> config.getInt("class-register.size")).getOrElse(50000);
-            this.errorRate = Try.of(() -> config.getDouble("class-register.error-rate")).getOrElse(0.0000001);
-            this.hashCount = Try.of(() -> config.getInt("class-register.hash-count")).getOrElse(23);
+            this.enabled = Try.of(() -> config.getBoolean("class-registry.enabled")).getOrElse(false);
+            this.size = Try.of(() -> config.getInt("class-registry.size")).getOrElse(50000);
+            this.errorRate = Try.of(() -> config.getDouble("class-registry.error-rate")).getOrElse(0.0000001);
+            this.hashCount = Try.of(() -> config.getInt("class-registry.hash-count")).getOrElse(23);
         }
     }
 

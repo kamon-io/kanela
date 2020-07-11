@@ -21,7 +21,7 @@ import io.vavr.collection.List;
 import java.util.ArrayList;
 
 public class ListBuilder<T> {
-    private java.util.List<T> list = new ArrayList<>();
+    private final java.util.List<T> list = new ArrayList<>();
 
     public ListBuilder add(T element) {
         this.list.add(element);
