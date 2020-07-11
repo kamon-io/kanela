@@ -32,10 +32,10 @@ import java.security.ProtectionDomain;
 @Experimental
 public class ClassRegistry {
 
-    public static volatile DynamicBloomFilter bloomFilter;
+    public static DynamicBloomFilter bloomFilter;
 
-    public static void attach(Instrumentation instrumentation, ClassRegistryConfig config) {
-        Try.run(() -> ClassRegistry.bloomFilter = DynamicBloomFilter.create(config.getSize(), config.getErrorRate(), config.getHashCount()))
+    public synchronized static void attach(Instrumentation instrumentation, ClassRegistryConfig config) {
+        Try.run(() -> bloomFilter = DynamicBloomFilter.create(config.getSize(), config.getErrorRate(), config.getHashCount()))
            .andThen(() -> instrumentation.addTransformer(new ClassRegistryTransformer()))
            .andThen(() -> Logger.info(() -> "Class Registry activated."))
            .onFailure((cause) -> Logger.warn(() -> "Error when trying to activate Class Registry.", cause));
@@ -56,7 +56,6 @@ public class ClassRegistry {
                                 byte[] classfileBuffer) {
 
             if (className != null && bloomFilter != null) {
-                System.out.println(className.replace('/', '.'));
                 bloomFilter.add(new Key(className.replace('/', '.').getBytes()));
             }
             return classfileBuffer;

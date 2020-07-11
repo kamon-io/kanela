@@ -25,9 +25,9 @@ import java.util.*;
 
 @Value
 public class ClassRefiner {
-    private String target;
-    private Map<String, Set<String>> methods;
-    private Map<String, Option<Object>> fields;
+    String target;
+    Map<String, Set<String>> methods;
+    Map<String, Option<Object>> fields;
 
     private ClassRefiner(Builder builder) {
         this.target= builder.target;
@@ -41,8 +41,8 @@ public class ClassRefiner {
 
     public static class Builder {
         private String target;
-        private Map<String, Option<Object>> fields = new HashMap<>();
-        private Map<String, Set<String>> methods = new HashMap<>();
+        private final Map<String, Option<Object>> fields = new HashMap<>();
+        private final Map<String, Set<String>> methods = new HashMap<>();
 
         @Deprecated
         public Builder mustContains(String clazz) {

@@ -228,7 +228,7 @@ public class KanelaConfiguration {
         int hashCount;
 
         ClassRegistryConfig(Config config) {
-            this.size = Try.of(() -> config.getInt("class-register.size")).getOrElse(100000);
+            this.size = Try.of(() -> config.getInt("class-register.size")).getOrElse(50000);
             this.errorRate = Try.of(() -> config.getDouble("class-register.error-rate")).getOrElse(0.0000001);
             this.hashCount = Try.of(() -> config.getInt("class-register.hash-count")).getOrElse(23);
         }

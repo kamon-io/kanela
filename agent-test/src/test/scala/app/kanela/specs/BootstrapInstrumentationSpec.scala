@@ -18,6 +18,7 @@ package app.kanela.specs
 
 import java.net.{HttpURLConnection, URL}
 
+import kanela.agent.api.instrumentation.registry.ClassRegistry
 import kanela.agent.attacher.Attacher
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
