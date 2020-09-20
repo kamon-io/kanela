@@ -19,11 +19,11 @@ package kanela.agent.util.classloader;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.vavr.control.Try;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
-import net.jodah.expiringmap.ExpiringMap;
 
 // This implementation is adapted from:
 // https://github.com/glowroot/glowroot/blob/v0.9.20/agent/core/src/main/java/org/glowroot/agent/weaving/PreInitializeWeavingClasses.java
@@ -56,7 +56,7 @@ public class PreInitializeClasses {
 
     private static void initialize(String type, ClassLoader loader) {
         Try.of(() -> Class.forName(type, true, loader))
-           .onFailure((cause) -> Logger.warn(() -> "class not found: " + type, cause));
+                .onFailure((cause) -> Logger.warn(() -> "class not found: " + type, cause));
     }
 
     public static List<String> usedTypes() {
@@ -127,7 +127,7 @@ public class PreInitializeClasses {
     }
 
     private static void preExpiryMapKeySetAndKeySetIterator() {
-        toPreventDeadCodeElimination = ExpiringMap.builder().build().keySet().iterator();
+        toPreventDeadCodeElimination = Caffeine.newBuilder().build().asMap().keySet().iterator();
     }
 
 }

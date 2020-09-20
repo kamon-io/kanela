@@ -16,18 +16,16 @@
 
 package kanela.agent.cache;
 
-import kanela.agent.util.NamedThreadFactory;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import kanela.agent.util.log.Logger;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
-import net.jodah.expiringmap.ExpirationListener;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Value
@@ -36,18 +34,15 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
 
     private static final PoolStrategyCache Instance = new PoolStrategyCache();
 
-    Map<ClassLoader, TypePool.CacheProvider> cache;
+    LoadingCache<Object, TypePool.CacheProvider> cache;
 
     private PoolStrategyCache() {
         super(TypePool.Default.ReaderMode.FAST);
-        ExpiringMap.setThreadFactory(NamedThreadFactory.instance("strategy-cache-listener"));
-        this.cache = ExpiringMap
-                .builder()
-                .entryLoader((key) -> TypePool.CacheProvider.Simple.withObjectType())
-                .expiration(1, TimeUnit.MINUTES)
-                .expirationPolicy(ExpirationPolicy.ACCESSED)
-                .asyncExpirationListener(LogExpirationListener())
-                .build();
+
+        this.cache = Caffeine.newBuilder()
+                .expireAfterAccess(1, TimeUnit.MINUTES)
+                .removalListener(LogExpirationListener())
+                .build((key) -> TypePool.CacheProvider.Simple.withObjectType());
     }
 
     @Override
@@ -55,9 +50,8 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
         val mapKey = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
         return cache.get(mapKey);
     }
-
-    private ExpirationListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value) ->   Logger.debug(() -> "Expiring key: " + key + "with value" + value);
+    private RemovalListener<Object, TypePool.CacheProvider> LogExpirationListener() {
+        return (key, value, cause) ->  Logger.debug(() -> "Removing key: " + key + " with value " + value + " for reason " + cause);
     }
 
     public static PoolStrategyCache instance() {
