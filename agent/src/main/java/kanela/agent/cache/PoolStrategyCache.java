@@ -16,16 +16,15 @@
 
 package kanela.agent.cache;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.github.benmanes.caffeine.cache.RemovalListener;
-import kanela.agent.util.log.Logger;
+import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
+import kanela.agent.util.NamedThreadFactory;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Value
@@ -34,24 +33,34 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
 
     private static final PoolStrategyCache Instance = new PoolStrategyCache();
 
-    LoadingCache<Object, TypePool.CacheProvider> cache;
+    WeakConcurrentMap<Object, TypePool.CacheProvider> cache;
+
 
     private PoolStrategyCache() {
         super(TypePool.Default.ReaderMode.FAST);
 
-        this.cache = Caffeine.newBuilder()
-                .expireAfterAccess(1, TimeUnit.MINUTES)
-                .removalListener(LogExpirationListener())
-                .build((key) -> TypePool.CacheProvider.Simple.withObjectType());
+
+        Executors.newScheduledThreadPool(1, NamedThreadFactory.instance("strategy-cache-listener"))
+                .scheduleWithFixedDelay(new Runnable() {
+                    @Override
+                    public void run() {
+                        cache.expungeStaleEntries();
+                    }
+                }, 1, 1, TimeUnit.MINUTES);
+
+        this.cache = new WeakConcurrentMap<>(false);
     }
 
     @Override
     protected TypePool.CacheProvider locate(ClassLoader classLoader) {
         val mapKey = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
-        return cache.get(mapKey);
-    }
-    private RemovalListener<Object, TypePool.CacheProvider> LogExpirationListener() {
-        return (key, value, cause) ->  Logger.debug(() -> "Removing key: " + key + " with value " + value + " for reason " + cause);
+        val mapValue = cache.getIfPresent(mapKey);
+        if (mapValue == null) {
+            cache.put(mapKey, TypePool.CacheProvider.Simple.withObjectType());
+            return cache.get(mapKey);
+        } else {
+            return mapValue;
+        }
     }
 
     public static PoolStrategyCache instance() {

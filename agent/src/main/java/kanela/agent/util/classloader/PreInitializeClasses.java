@@ -19,7 +19,7 @@ package kanela.agent.util.classloader;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.vavr.control.Try;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
@@ -127,7 +127,7 @@ public class PreInitializeClasses {
     }
 
     private static void preExpiryMapKeySetAndKeySetIterator() {
-        toPreventDeadCodeElimination = Caffeine.newBuilder().build().asMap().keySet().iterator();
+        toPreventDeadCodeElimination = new WeakConcurrentMap<Object, Object>(false).iterator();
     }
 
 }
