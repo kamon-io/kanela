@@ -25,7 +25,6 @@ import kanela.agent.util.NamedThreadFactory;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.val;
-import lombok.var;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
 
