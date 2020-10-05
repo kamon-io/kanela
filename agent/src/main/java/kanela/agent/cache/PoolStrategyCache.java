@@ -51,7 +51,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     @Override
     protected TypePool.CacheProvider locate(ClassLoader classLoader) {
         val loader = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
-        var providerRef = cache.getIfPresent(loader);
+        SoftReferenceCacheProvider providerRef = cache.getIfPresent(loader);
 
         if (providerRef == null || providerRef.get() == null) {
             providerRef = SoftReferenceCacheProvider.newOne();
