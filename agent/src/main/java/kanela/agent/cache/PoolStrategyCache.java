@@ -29,7 +29,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
 
 /**
- * WeakReference over the ClassLoaders and SoftReference for TypePolCache in order to avoid OOMEs
+ * WeakReference for the ClassLoaders and SoftReference for TypePolCache in order to avoid OOMEs
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -43,7 +43,7 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
         super(TypePool.Default.ReaderMode.FAST);
         Executors.newScheduledThreadPool(1, NamedThreadFactory.instance("cache-pool-cleaner"))
                  .scheduleWithFixedDelay(() -> {
-                     removeAfterAccess(1);
+                     removeAfterLastMinuteAccess();
                      cache.expungeStaleEntries();
                  }, 1, 1, TimeUnit.MINUTES);
     }
@@ -68,9 +68,9 @@ public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCac
     }
 
 
-    private void removeAfterAccess(final long sinceMinutes) {
+    private void removeAfterLastMinuteAccess() {
         cache.forEach(entry -> {
-            if (System.currentTimeMillis() >= entry.getValue().getLastAccess() + TimeUnit.MINUTES.toMillis(sinceMinutes)) {
+            if (System.currentTimeMillis() >= entry.getValue().getLastAccess() + TimeUnit.MINUTES.toMillis(1)) {
                 cache.remove(entry.getKey());
             }
         });
