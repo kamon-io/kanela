@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2020 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,6 +17,10 @@
 package kanela.agent.cache;
 
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
+import java.lang.ref.SoftReference;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import kanela.agent.util.NamedThreadFactory;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -24,46 +28,65 @@ import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.pool.TypePool;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+/**
+ * WeakReference for the ClassLoaders and SoftReference for TypePolCache in order to avoid OOMEs
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class PoolStrategyCache extends AgentBuilder.PoolStrategy.WithTypePoolCache {
 
     private static final PoolStrategyCache Instance = new PoolStrategyCache();
 
-    WeakConcurrentMap<Object, TypePool.CacheProvider> cache;
-
+    WeakConcurrentMap<ClassLoader, SoftReferenceCacheProvider> cache = new WeakConcurrentMap<>(false);
 
     private PoolStrategyCache() {
         super(TypePool.Default.ReaderMode.FAST);
-
-
-        Executors.newScheduledThreadPool(1, NamedThreadFactory.instance("strategy-cache-listener"))
-                .scheduleWithFixedDelay(new Runnable() {
-                    @Override
-                    public void run() {
-                        cache.expungeStaleEntries();
-                    }
-                }, 1, 1, TimeUnit.MINUTES);
-
-        this.cache = new WeakConcurrentMap<>(false);
+        Executors.newScheduledThreadPool(1, NamedThreadFactory.instance("cache-pool-cleaner"))
+                 .scheduleWithFixedDelay(() -> {
+                     removeAfterLastMinuteAccess();
+                     cache.expungeStaleEntries();
+                 }, 1, 1, TimeUnit.MINUTES);
     }
 
     @Override
     protected TypePool.CacheProvider locate(ClassLoader classLoader) {
-        val mapKey = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
-        val mapValue = cache.getIfPresent(mapKey);
-        if (mapValue == null) {
-            cache.put(mapKey, TypePool.CacheProvider.Simple.withObjectType());
-            return cache.get(mapKey);
-        } else {
-            return mapValue;
+        val loader = (classLoader == null) ? ClassLoader.getSystemClassLoader() : classLoader;
+        SoftReferenceCacheProvider providerRef = cache.getIfPresent(loader);
+
+        if (providerRef == null || providerRef.get() == null) {
+            providerRef = SoftReferenceCacheProvider.newOne();
+            cache.put(loader, providerRef);
+            providerRef =  cache.get(loader);
         }
+
+        val cacheProvider = providerRef.get();
+        return cacheProvider != null ? cacheProvider : TypePool.CacheProvider.Simple.withObjectType();
     }
 
     public static PoolStrategyCache instance() {
         return Instance;
+    }
+
+
+    private void removeAfterLastMinuteAccess() {
+        cache.forEach(entry -> {
+            if (System.currentTimeMillis() >= entry.getValue().getLastAccess() + TimeUnit.MINUTES.toMillis(1)) {
+                cache.remove(entry.getKey());
+            }
+        });
+    }
+
+    @Value(staticConstructor = "newOne")
+    private static class SoftReferenceCacheProvider {
+        AtomicLong lastAccess = new AtomicLong(System.currentTimeMillis());
+        SoftReference<TypePool.CacheProvider> delegate = new SoftReference<>(new TypePool.CacheProvider.Simple());
+
+        long getLastAccess() {
+            return lastAccess.get();
+        }
+
+        TypePool.CacheProvider get() {
+            return delegate.get();
+        }
     }
 }
