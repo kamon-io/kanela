@@ -60,6 +60,14 @@ public class ClassLoaderNameMatcher extends ElementMatcher.Junction.AbstractBase
         return new ClassLoaderNameMatcher("sbt.internal.classpath.ClassLoaderCache$Key$CachedClassLoader");
     }
 
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isLagomClassLoader() {
+        return new ClassLoaderNameMatcher("com.lightbend.lagom.dev.NamedURLClassLoader");
+    }
+
+    public static ElementMatcher.Junction.AbstractBase<ClassLoader> isLagomServiceLocatorClassLoader() {
+        return new ClassLoaderNameMatcher("com.lightbend.lagom.sbt.SbtKanelaRunnerLagom$LagomServiceLocatorClassLoader");
+    }
+
     public static ElementMatcher.Junction.AbstractBase<ClassLoader> isSBTCompilerClassLoader() {
         return new ScalaCompilerClassLoaderMatcher();
     }
