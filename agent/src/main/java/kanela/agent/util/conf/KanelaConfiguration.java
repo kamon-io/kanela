@@ -99,7 +99,7 @@ public class KanelaConfiguration {
                         val within = getWithinConfiguration(moduleConfig);
                         val exclude = getExcludeConfiguration(moduleConfig);
                         val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
-                        val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(1);
+                        val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(Integer.MAX_VALUE);
                         val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
                         val bootstrapInjection = getBootstrapInjectionConfiguration(moduleConfig);
                         val enableClassFileVersionValidator = Try.of(() -> moduleConfig.getBoolean("enable-class-file-version-validator")).getOrElse(true);
