@@ -25,18 +25,18 @@ plugins {
 mainClassName = 'app.kanela.JavaMainWithAgent'
 
 dependencies {
-    compile "org.scala-lang:scala-library:${scala_version}"
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile 'ch.qos.logback:logback-core:1.2.3'
-    compile 'ch.qos.logback:logback-classic:1.2.3'
+    implementation "org.scala-lang:scala-library:${scala_version}"
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'ch.qos.logback:logback-core:1.2.3'
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
 
-    compile "io.kamon:kanela-agent:${agent_version}"
+    implementation "io.kamon:kanela-agent:${agent_version}"
 
     provided(kamon_agent_dep)
 
-    testCompile 'org.mockito:mockito-core:2.28.2'
-    testCompile 'org.scalatest:scalatest_2.12:3.0.8'
-    testRuntime 'org.pegdown:pegdown:1.4.2'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'org.scalatest:scalatest_2.12:3.0.8'
+    testRuntimeOnly 'org.pegdown:pegdown:1.4.2'
 }
 
 def KamonAgentTestRunning = null

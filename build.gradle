@@ -53,7 +53,7 @@ allprojects {
     }
 
     dependencies {
-        compile 'io.vavr:vavr:0.10.3'
+        implementation 'io.vavr:vavr:0.10.3'
         compileOnly 'org.projectlombok:lombok:1.18.12'
         annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
