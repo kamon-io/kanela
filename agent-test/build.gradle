@@ -19,7 +19,7 @@ plugins {
     id 'java'
     id 'application'
     id 'scala'
-    id 'com.github.maiflai.scalatest' version '0.25'
+    id 'com.github.maiflai.scalatest' version '0.31'
 }
 
 mainClassName = 'app.kanela.JavaMainWithAgent'
