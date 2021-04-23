@@ -40,7 +40,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.28.2'
     testImplementation 'org.scalatest:scalatest_2.12:3.0.1'
     testImplementation "org.scala-lang:scala-library:${scala_version}"
-    testImplementation 'org.pegdown:pegdown:1.4.2'
+    testImplementation 'org.pegdown:pegdown:1.6.0'
 }
 
 def agentBootstrapClasses = 'kanela/agent/bootstrap/**'
@@ -203,3 +203,5 @@ task createBuildInfoFile(dependsOn: processResources) {
 classes {
     dependsOn createBuildInfoFile
 }
+
+test.reports.html.enabled = false
