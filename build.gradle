@@ -53,9 +53,9 @@ allprojects {
     }
 
     dependencies {
-        compile 'io.vavr:vavr:0.10.3'
-        compileOnly 'org.projectlombok:lombok:1.18.12'
-        annotationProcessor 'org.projectlombok:lombok:1.18.12'
+        implementation 'io.vavr:vavr:0.10.3'
+        compileOnly 'org.projectlombok:lombok:1.18.20'
+        annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
         agent(kamon_agent_dep)
     }

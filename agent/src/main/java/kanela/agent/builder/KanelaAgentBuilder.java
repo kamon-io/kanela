@@ -101,7 +101,7 @@ class KanelaAgentBuilder {
 
             agentBuilder = agentBuilder
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .withResubmission(PeriodicResubmitter.instance());
+                .withResubmission(PeriodicResubmitter.instance()).resubmitOnError();
         }
         return agentBuilder;
     }
