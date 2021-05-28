@@ -19,6 +19,7 @@ plugins {
     id 'java'
     id 'scala'
     id 'maven-publish'
+    id 'signing'
     id 'com.github.maiflai.scalatest' version '0.31'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
@@ -118,25 +119,6 @@ jar {
 
 jar.finalizedBy shadowJar
 
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['shadowPublication']
-
-    pkg {
-        repo = 'releases'
-        name = 'kanela'
-        userOrg = 'kamon-io'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/kamon-io/kanela'
-
-        version {
-            name = "${project.version}"
-            desc = 'Kanela'
-            released  = new Date()
-        }
-    }
-}
 
 def pomConfig = {
     licenses {
@@ -188,6 +170,25 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            credentials {
+                username project.ossrhUsername
+                password project.ossrhPassword
+            }
+
+            def releasesRepoUrl =  'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+
+    }
+}
+
+signing {
+    sign publishing.publications.shadowPublication
 }
 
 task createBuildInfoFile(dependsOn: processResources) {

@@ -21,19 +21,12 @@ buildscript {
 
     repositories {
         mavenCentral()
-        jcenter()
-    }
-
-
-    dependencies {
-       classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
 
 
 allprojects {
     apply plugin: 'java'
-    apply plugin: 'com.jfrog.bintray'
 
     configurations {
         provided
