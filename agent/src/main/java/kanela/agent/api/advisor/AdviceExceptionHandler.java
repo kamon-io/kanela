@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2021 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -26,8 +26,7 @@ import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;
 
-import static net.bytebuddy.jar.asm.Opcodes.GOTO;
-import static net.bytebuddy.jar.asm.Opcodes.INVOKESTATIC;
+import static net.bytebuddy.jar.asm.Opcodes.*;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -70,6 +69,8 @@ public class AdviceExceptionHandler extends Advice.ExceptionHandler.Simple {
                 methodVisitor.visitJumpInsn(GOTO, endCatchBlock);
                 // ending catch block
                 methodVisitor.visitLabel(endCatchBlock);
+                methodVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+
                 return new StackManipulation.Size(-1, 1);
             }
         };

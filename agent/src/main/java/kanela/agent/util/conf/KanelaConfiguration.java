@@ -20,7 +20,6 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigResolveOptions;
-import io.vavr.Tuple;
 import io.vavr.collection.List;
 import io.vavr.collection.List.Nil;
 import io.vavr.control.Option;
@@ -36,7 +35,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.function.Function;
 
 import static io.vavr.API.*;
 import static java.text.MessageFormat.format;
@@ -98,6 +96,7 @@ public class KanelaConfiguration {
                         val instrumentations = getInstrumentations(moduleConfig);
                         val within = getWithinConfiguration(moduleConfig);
                         val exclude = getExcludeConfiguration(moduleConfig);
+                        val exceptionHandlerStrategy = Try.of(() -> moduleConfig.getString("exception-handler-strategy")).getOrElse("LOG");
                         val enabled = Try.of(() -> moduleConfig.getBoolean("enabled")).getOrElse(true);
                         val order = Try.of(() -> moduleConfig.getInt("order")).getOrElse(Integer.MAX_VALUE);
                         val stoppable = Try.of(() -> moduleConfig.getBoolean("stoppable")).getOrElse(false);
@@ -118,7 +117,8 @@ public class KanelaConfiguration {
                                 enableClassFileVersionValidator,
                                 createTempDirectory(tempDirPrefix),
                                 disableClassFormatChanges,
-                                exclude);
+                                exclude,
+                                exceptionHandlerStrategy);
                     });
 
                     moduleSettings.failed().forEach(t -> {
@@ -151,18 +151,19 @@ public class KanelaConfiguration {
         File tempDir;
         boolean disableClassFormatChanges;
         String excludePackage;
+        String exceptionHandlerStrategy;
 
         public boolean shouldInjectInBootstrap() {
             return bootstrapInjectionConfig.enabled;
         }
 
-        public boolean shouldValidateMiniumClassFileVersion() {
+        public boolean shouldValidateMinimumClassFileVersion() {
             return enableClassFileVersionValidator;
         }
     }
 
     @Value
-    public class DumpConfig {
+    public static class DumpConfig {
         Boolean dumpEnabled;
         String dumpDir;
         Boolean createJar;
@@ -198,7 +199,7 @@ public class KanelaConfiguration {
     }
 
     @Value
-    public class InstrumentationRegistryConfig {
+    public static class InstrumentationRegistryConfig {
         boolean enabled;
 
         InstrumentationRegistryConfig(Config config) {
@@ -220,7 +221,7 @@ public class KanelaConfiguration {
     }
 
     @Value
-    public class BootstrapInjectionConfig {
+    public static class BootstrapInjectionConfig {
         boolean enabled;
         List<String> helperClassNames;
 

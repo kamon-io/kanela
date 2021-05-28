@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2019 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2021 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -23,11 +23,15 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
+import static io.vavr.API.*;
+import static kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
+import static net.bytebuddy.asm.Advice.ExceptionHandler;
+
 @Value
 public class AdvisorDescription {
-    private final ElementMatcher<? super MethodDescription> methodMatcher;
-    private final Class<?> advisorClass;
-    private final String advisorClassName;
+    ElementMatcher<? super MethodDescription> methodMatcher;
+    Class<?> advisorClass;
+    String advisorClassName;
 
     public static AdvisorDescription of(ElementMatcher.Junction<MethodDescription> methodMatcher, String advisorClassName) {
         return new AdvisorDescription(methodMatcher, null, advisorClassName);
@@ -37,11 +41,20 @@ public class AdvisorDescription {
         return new AdvisorDescription(methodMatcher, advisorClass, null);
     }
 
-    public AgentBuilder.Transformer makeTransformer() {
-        val name = Option.of(advisorClassName).getOrElse(() -> advisorClass.getName());
+    public AgentBuilder.Transformer makeTransformer(ModuleConfiguration configuration) {
+        val name = Option.of(advisorClassName).getOrElse(advisorClass::getName);
+
         return new AgentBuilder.Transformer.ForAdvice()
                 .advice(this.methodMatcher, name)
                 .include(Thread.currentThread().getContextClassLoader())
-                .withExceptionHandler(AdviceExceptionHandler.instance());
+                .withExceptionHandler(getHandler(configuration.getExceptionHandlerStrategy()));
+    }
+
+    private ExceptionHandler getHandler(String strategy){
+        return Match(strategy).of(
+                Case($("LOG"), AdviceExceptionHandler.instance()),
+                Case($("SUPPRESS"), ExceptionHandler.Default.SUPPRESSING),
+                Case($("PRINT_STACK_TRACE"), ExceptionHandler.Default.PRINTING)
+        );
     }
 }
