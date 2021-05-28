@@ -17,6 +17,7 @@
 package kanela.agent.api.advisor;
 
 import io.vavr.control.Option;
+import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
 import lombok.Value;
 import lombok.val;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -24,7 +25,6 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
 
 import static io.vavr.API.*;
-import static kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration;
 import static net.bytebuddy.asm.Advice.ExceptionHandler;
 
 @Value
@@ -42,19 +42,19 @@ public class AdvisorDescription {
     }
 
     public AgentBuilder.Transformer makeTransformer(ModuleConfiguration configuration) {
-        val name = Option.of(advisorClassName).getOrElse(advisorClass::getName);
+        val name = Option.of(advisorClassName).getOrElse(() -> advisorClass.getName());
+        val exceptionHandler = getExceptionHandler(configuration.getExceptionHandlerStrategy());
 
         return new AgentBuilder.Transformer.ForAdvice()
                 .advice(this.methodMatcher, name)
                 .include(Thread.currentThread().getContextClassLoader())
-                .withExceptionHandler(getHandler(configuration.getExceptionHandlerStrategy()));
+                .withExceptionHandler(exceptionHandler);
     }
 
-    private ExceptionHandler getHandler(String strategy){
+    private ExceptionHandler getExceptionHandler(String strategy){
         return Match(strategy).of(
-                Case($("LOG"), AdviceExceptionHandler.instance()),
-                Case($("SUPPRESS"), ExceptionHandler.Default.SUPPRESSING),
-                Case($("PRINT_STACK_TRACE"), ExceptionHandler.Default.PRINTING)
+                Case($("LOG"), AdviceExceptionHandler::instance),
+                Case($("SUPPRESS"), () -> ExceptionHandler.Default.SUPPRESSING)
         );
     }
 }
