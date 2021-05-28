@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2021 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 package kanela.agent.api.instrumentation;
 
 import io.vavr.Function0;
-import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
@@ -66,7 +65,7 @@ public abstract class InstrumentationBuilder {
         val advisors = instrumentationDescription.getAdvisors();
         val transformers  = instrumentationDescription.getTransformers();
 
-        if (moduleConfiguration.shouldValidateMiniumClassFileVersion()) {
+        if (moduleConfiguration.shouldValidateMinimumClassFileVersion()) {
             transformers.add(ClassFileVersionValidatorTransformer.Instance);
         }
 
@@ -81,7 +80,7 @@ public abstract class InstrumentationBuilder {
                 instrumentationDescription.getClassLoaderRefiner(),
                 collect(bridges, BridgeDescription::makeTransformer),
                 collect(mixins, MixinDescription::makeTransformer),
-                collect(advisors, AdvisorDescription::makeTransformer),
+                collect(advisors, advisorDescription -> advisorDescription.makeTransformer(moduleConfiguration)),
                 collect(transformers, Function.identity()));
     }
 
