@@ -119,7 +119,6 @@ jar {
 
 jar.finalizedBy shadowJar
 
-
 def pomConfig = {
     licenses {
         license {
@@ -174,8 +173,11 @@ publishing {
     repositories {
         maven {
             credentials {
-                username project.ossrhUsername
-                password project.ossrhPassword
+                def user = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : System.getenv('SONATYPE_USER')
+                def pass = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : System.getenv('SONATYPE_PASS')
+
+                username user as String
+                password pass as String
             }
 
             def releasesRepoUrl =  'https://oss.sonatype.org/service/local/staging/deploy/maven2'
