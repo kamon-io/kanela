@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2021 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -38,7 +38,7 @@ public class SystemThroughputCircuitBreaker {
     KanelaConfiguration.CircuitBreakerConfig config;
     Jvm jvm;
 
-    @NonFinal private volatile int tripped = 0;
+    @NonFinal volatile int tripped = 0;
 
     public static void attach(KanelaConfiguration.CircuitBreakerConfig config) { attach(config, Jvm.instance()); }
 
