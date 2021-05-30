@@ -39,7 +39,7 @@ dependencies {
     implementation files('libs/byte-buddy-1.11.0.jar')
 
     testImplementation 'org.mockito:mockito-core:2.28.2'
-    testImplementation 'org.scalatest:scalatest_2.12:3.0.1'
+    testImplementation 'org.scalatest:scalatest_2.12:3.3.0-SNAP3'
     testImplementation "org.scala-lang:scala-library:${scala_version}"
     testImplementation 'org.pegdown:pegdown:1.6.0'
 }
