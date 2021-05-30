@@ -88,7 +88,7 @@ shadowJar {
     }
 
     dependencies {
-        exclude('org.projectlombok:lombok:1.18.12')
+        exclude('org.projectlombok:lombok:1.18.20')
     }
 
     doLast {
