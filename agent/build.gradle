@@ -30,11 +30,11 @@ configurations {
 
 dependencies {
     implementation 'com.typesafe:config:1.3.4'
-    implementation 'com.blogspot.mydailyjava:weak-lock-free:0.16'
+    implementation 'com.blogspot.mydailyjava:weak-lock-free:0.18'
 
     implementation 'org.tinylog:tinylog:1.3.6'
     implementation 'com.github.tobiasrm:tinylog-coloredconsole:1.3.1'
-    implementation 'net.bytebuddy:byte-buddy-agent:1.10.11'
+    implementation 'net.bytebuddy:byte-buddy-agent:1.11.0'
 
     implementation files('libs/byte-buddy-1.11.0.jar')
 
@@ -88,7 +88,7 @@ shadowJar {
     }
 
     dependencies {
-        exclude('org.projectlombok:lombok:1.18.12')
+        exclude('org.projectlombok:lombok:1.18.20')
     }
 
     doLast {
