@@ -17,12 +17,12 @@
 package kanela.agent
 
 import java.lang.instrument.{ClassFileTransformer, Instrumentation}
-
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import io.vavr.collection.{List => JList}
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import kanela.agent.util.conf.KanelaConfiguration
+import net.bytebuddy.agent.builder.AgentBuilder.Default.ExecutingTransformer
 import org.mockito.ArgumentMatchers._
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
@@ -85,6 +85,6 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
 
-    verify(instrumentationMock, times(1)).addTransformer(any(classOf[ClassFileTransformer]), anyBoolean())
+    verify(instrumentationMock, times(1)).addTransformer(any())
   }
 }
