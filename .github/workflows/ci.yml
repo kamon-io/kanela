@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK ${{ matrix.java }}
-      - uses: actions/cache@v2
+        uses: actions/cache@v2
         with:
           path: |
             ~/.gradle/caches
@@ -20,6 +20,6 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-      - run: ./gradlew :agent:publishToMavenLocal && ./travis-test.sh
-      - run: ./gradlew assemble
-      - run: ./travis-test.sh
+      - name: Test
+        run: ./gradlew :agent:publishToMavenLocal && ./gradlew assemble && ./travis-test.sh
+
