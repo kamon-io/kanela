@@ -24,6 +24,7 @@ matrix:
     - jdk: openjdk12
     - jdk: openjdk13
     - jdk: openjdk16
+    - jdk: openjdk17
 
 script:
   - ./travis-test.sh
