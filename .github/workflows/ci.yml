@@ -1,0 +1,27 @@
+name: Test all the things
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    name: Java ${{ matrix.java }}
+    strategy:
+      matrix:
+        java: [ 8, 11, 17 ]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Test
+        run: ./gradlew wrapper --gradle-version=7.2-20210715231856+0000 :agent:publishToMavenLocal && ./gradlew wrapper --gradle-version=7.2-20210715231856+0000 assemble && ./travis-test.sh
+
