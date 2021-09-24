@@ -23,5 +23,5 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Test
-        run: ./gradlew :agent:publishToMavenLocal && ./gradlew assemble && ./travis-test.sh
+        run: ./gradlew wrapper --gradle-version=7.2-20210715231856+0000 :agent:publishToMavenLocal && ./gradlew wrapper --gradle-version=7.2-20210715231856+0000 assemble && ./travis-test.sh
 
