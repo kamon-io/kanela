@@ -42,7 +42,7 @@ public class Logger {
         Try.run(() -> {
             val configurator = Configurator
                 .fromResource("kanela-log.properties")
-                .writingThread("main")
+                .writingThread(null) //disables automatic shutdown of writing thread
                 .maxStackTraceElements(400) // stack traces
                 .level(config.getLogLevel());
 
