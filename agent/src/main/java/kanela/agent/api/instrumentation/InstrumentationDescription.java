@@ -104,12 +104,12 @@ public class InstrumentationDescription {
             return this;
         }
 
-        public Builder withTransformation(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) {
+        public Builder withTransformation(Function4<DynamicType.Builder<?>, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder<?>> f) {
             transformers.add(withTransformer(f));
             return this;
         }
 
-        private AgentBuilder.Transformer withTransformer(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) { return f::apply; }
+        private AgentBuilder.Transformer withTransformer(Function4<DynamicType.Builder<?>, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder<?>> f) { return f::apply; }
 
         public InstrumentationDescription build() {
             return new InstrumentationDescription(this);

@@ -35,13 +35,13 @@ public class InstrumentationLoader {
      * Load from the current classpath all defined instrumentations {@link InstrumentationBuilder}.
      *
      * @param instrumentation {@link Instrumentation}
-     * @param ctxClassloader {@link ClassLoader}
-     * @param configuration {@link KanelaConfiguration}
+     * @param ctxClassloader  {@link ClassLoader}
+     * @param configuration   {@link KanelaConfiguration}
      * @return a list of {@link KanelaFileTransformer}
      */
     public static List<KanelaFileTransformer> load(Instrumentation instrumentation, ClassLoader ctxClassloader, KanelaConfiguration configuration) {
         return configuration.getAgentModules().map((moduleConfiguration) -> {
-            Logger.info(() -> format("Loading {0} ",  moduleConfiguration.getName()));
+            Logger.info(() -> format("Loading {0}", moduleConfiguration.getName()));
             return moduleConfiguration.getInstrumentations()
                     .flatMap(instrumentationClassName -> loadInstrumentation(instrumentationClassName, ctxClassloader))
                     .filter(kanelaInstrumentation -> kanelaInstrumentation.isEnabled(moduleConfiguration))
@@ -55,7 +55,7 @@ public class InstrumentationLoader {
     private static Option<InstrumentationBuilder> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
         return Try.of(() -> {
             Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
-            return (InstrumentationBuilder) Class.forName(instrumentationClassName, true, classLoader).newInstance();
+            return (InstrumentationBuilder) Class.forName(instrumentationClassName, true, classLoader).getConstructors()[0].newInstance();
         }).onFailure((cause) -> Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause))
         ).toOption();
     }
