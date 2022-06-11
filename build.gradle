@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    ext.scala_version = '2.12.11'
+    ext.scala_version = '2.12.16'
     ext.agent_version = project(":agent").version
     ext.kamon_agent_dep = "io.kamon:kanela-agent:${agent_version}"
 
@@ -42,13 +42,12 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
-        implementation 'io.vavr:vavr:0.10.3'
-        compileOnly 'org.projectlombok:lombok:1.18.20'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+        implementation 'io.vavr:vavr:0.10.4'
+        compileOnly 'org.projectlombok:lombok:1.18.24'
+        annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
         agent(kamon_agent_dep)
     }
