@@ -19,22 +19,20 @@ plugins {
     id 'java'
     id 'application'
     id 'scala'
-    id 'com.github.maiflai.scalatest' version '0.31'
+    id 'com.github.maiflai.scalatest' version '0.32'
 }
 
 mainClassName = 'app.kanela.JavaMainWithAgent'
 
 dependencies {
     implementation "org.scala-lang:scala-library:${scala_version}"
-    implementation 'org.slf4j:slf4j-api:1.7.25'
-    implementation 'ch.qos.logback:logback-core:1.2.3'
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'ch.qos.logback:logback-classic:1.2.11'
 
     implementation "io.kamon:kanela-agent:${agent_version}"
 
     provided(kamon_agent_dep)
 
-    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'org.mockito:mockito-core:4.6.1'
     testImplementation 'org.scalatest:scalatest_2.12:3.2.12'
     testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
 }
@@ -106,5 +104,5 @@ gradle.taskGraph.whenReady { taskGraph ->
     KamonAgentTestRunning = result
 }
 
-test.reports.html.enabled = false
+test.reports.html.required = false
 

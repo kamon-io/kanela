@@ -68,7 +68,7 @@ class InstrumentationLoaderSpec extends AnyFlatSpec with Matchers {
       InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
     }
 
-    verifyZeroInteractions(instrumentationMock)
+    verifyNoInteractions(instrumentationMock)
   }
 
   "with an existing instrumentation" should "register it correctly" in {
