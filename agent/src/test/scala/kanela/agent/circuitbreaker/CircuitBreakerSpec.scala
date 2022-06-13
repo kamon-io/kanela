@@ -21,14 +21,15 @@ import kanela.agent.util.jvm.{GcEvent, Jvm}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.duration._
 
-class CircuitBreakerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll with Eventually  {
+class CircuitBreakerSpec extends AnyWordSpecLike with Matchers with Eventually  {
   "The CircuitBreaker" should {
     "trip when the thresholds are exceeded" in {
-      eventually(timeout(10 seconds)) {
+      eventually(timeout(10.seconds)) {
         val circuitBreakerConfig = spy(KanelaConfiguration.instance().getCircuitBreakerConfig)
         when(circuitBreakerConfig.getFreeMemoryThreshold).thenReturn(20.0)
         when(circuitBreakerConfig.getGcProcessCPUThreshold).thenReturn(20.0)

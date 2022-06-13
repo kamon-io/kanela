@@ -18,9 +18,10 @@ package kanela.agent.broker
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class EventBrokerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
+class EventBrokerSpec extends AnyWordSpecLike with Matchers {
   "The EventBroker" should {
     "add an observer" in {
       val broker = spy(classOf[EventBroker])

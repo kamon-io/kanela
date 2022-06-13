@@ -16,17 +16,17 @@
 
 package kanela.agent
 
-import java.lang.instrument.{ClassFileTransformer, Instrumentation}
-import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import io.vavr.collection.{List => JList}
-import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import kanela.agent.util.conf.KanelaConfiguration
-import net.bytebuddy.agent.builder.AgentBuilder.Default.ExecutingTransformer
+import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+import java.lang.instrument.Instrumentation
 
+class InstrumentationLoaderSpec extends AnyFlatSpec with Matchers {
   "with the config empty kamon.agent.modules.x-module.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
 

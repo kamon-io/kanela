@@ -21,14 +21,15 @@ import kanela.agent.util.conf.KanelaConfiguration
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
 import org.scalatest.concurrent.Eventually
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.duration._
 
-class OldGarbageCollectorListenerSpec extends Matchers with WordSpecLike with BeforeAndAfterAll with Eventually{
+class OldGarbageCollectorListenerSpec extends AnyWordSpecLike with Matchers with Eventually {
   "The OldGarbageCollectorListener" should {
     "receive a event when the GC is triggered" in {
-      eventually(timeout(10 seconds)) {
+      eventually(timeout(10.seconds)) {
         val oldGarbageCollectorConfig = spy(KanelaConfiguration.instance().getOldGarbageCollectorConfig)
         when(oldGarbageCollectorConfig.isCircuitBreakerRunning).thenReturn(true)
         when(oldGarbageCollectorConfig.isShouldLogAfterGc).thenReturn(false)

@@ -18,10 +18,10 @@ package app.kanela.specs
 
 import app.kanela.cases.bridge.PrivateClass
 import app.kanela.instrumentation.PrivateClassBridge
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-
-class BridgeInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+class BridgeInstrumentationSpec extends AnyFlatSpec with Matchers {
   "The Bridge" should
     "generate an accessor method for a private field or method" in {
         val privateClass = new PrivateClass()

@@ -35,7 +35,7 @@ dependencies {
     provided(kamon_agent_dep)
 
     testImplementation 'org.mockito:mockito-core:2.28.2'
-    testImplementation 'org.scalatest:scalatest_2.12:3.0.8'
+    testImplementation 'org.scalatest:scalatest_2.12:3.2.12'
     testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
 }
 
