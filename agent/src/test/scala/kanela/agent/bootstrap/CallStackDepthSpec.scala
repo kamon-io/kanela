@@ -17,9 +17,10 @@
 package kanela.agent.bootstrap
 
 import kanela.agent.bootstrap.stack.CallStackDepth
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class CallStackDepth extends Matchers with WordSpecLike with BeforeAndAfterAll {
+class CallStackDepthSpec extends AnyWordSpecLike with Matchers {
   "The CallStackDepth" should {
     "increment the value in successive calls and then reset" in {
       val a = new Object

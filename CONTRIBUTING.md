@@ -30,6 +30,6 @@ please squash them into a single commit. Let the PR rain begin!
 
 
 [open an issue]: https://github.com/kamon-io/Kamon/issues/new
-[mailing list]: https://groups.google.com/forum/#!forum/kamon-user
+[mailing list]: https://groups.google.com/g/kamon-user
 [commit message conventions]: http://spray.io/project-info/contributing/
 [CLA]: https://docs.google.com/forms/d/1G_IDrBTFzOMwHvhxfKRBwNtpRelSa_MZ6jecH8lpTlc/viewform

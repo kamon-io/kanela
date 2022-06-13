@@ -20,11 +20,12 @@ import app.kanela.cases.simple.TestClass
 import kanela.agent.attacher.Attacher
 import kanela.agent.broker.EventBroker
 import kanela.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.collection.mutable.ListBuffer
 
-class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+class StoppableInstrumentationSpec extends AnyFlatSpec with Matchers {
 
   "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {
     val testClass = new TestClass()

@@ -16,17 +16,17 @@
 
 package kanela.agent
 
-import java.lang.instrument.{ClassFileTransformer, Instrumentation}
-import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import io.vavr.collection.{List => JList}
-import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import kanela.agent.util.conf.KanelaConfiguration
-import net.bytebuddy.agent.builder.AgentBuilder.Default.ExecutingTransformer
+import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
+import java.lang.instrument.Instrumentation
 
+class InstrumentationLoaderSpec extends AnyFlatSpec with Matchers {
   "with the config empty kamon.agent.modules.x-module.instrumentations " should "not break" in {
     val instrumentationMock = mock(classOf[Instrumentation])
 
@@ -41,6 +41,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.empty[String]())
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
+    when(agentModuleDescriptionMock.getExcludePackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
@@ -48,6 +49,9 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     verify(agentConfiguration, times(1)).getAgentModules
   }
 
+  // TODO FIXME: This test is useless since it explodes before getting to InstrumentationLoader.load
+  // It should be refactored to expect a specific exception and not a generic RuntimeException
+  // (currently blowing up due to errorneous spy+mock combo)
   "with an unknown instrumentation" should "blow up" in {
     val instrumentationMock = mock(classOf[Instrumentation])
     val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
@@ -64,7 +68,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
       InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
     }
 
-    verifyZeroInteractions(instrumentationMock)
+    verifyNoInteractions(instrumentationMock)
   }
 
   "with an existing instrumentation" should "register it correctly" in {
@@ -81,6 +85,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kanela.agent.instrumentation.KamonFakeInstrumentationBuilder"))
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
+    when(agentModuleDescriptionMock.getExcludePackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)

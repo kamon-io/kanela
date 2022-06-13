@@ -6,5 +6,5 @@
 **Kanela** is a Java Agent written in Java 8+ and powered by [ByteBuddy] with some additionally [ASM] features to provide a simple way to instrument applications running on the JVM and allow introduce Kamon features such as context propagation and metrics.
 
 
-[ByteBuddy]:http://bytebuddy.net/#/
-[ASM]:http://asm.ow2.org/
+[ByteBuddy]:https://bytebuddy.net/#/
+[ASM]:https://asm.ow2.io/

@@ -20,9 +20,10 @@ import io.vavr.control.Option
 import kanela.agent.api.instrumentation.InstrumentationBuilder
 import kanela.agent.api.instrumentation.classloader.{ClassLoaderRefiner, ClassRefiner}
 import kanela.agent.util.classloader.ClassLoaderNameMatcher.RefinedClassLoaderMatcher
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeAndAfterAll {
+class ClassloaderNameMatcherSpec extends AnyWordSpecLike with Matchers {
   "The ClassloaderNameMatcher" should {
     "refine the search of a class in an classloader through a ClassRefiner" in {
       val refiner = ClassRefiner.builder()
@@ -94,4 +95,3 @@ class ClassloaderNameMatcherSpec extends Matchers with WordSpecLike with BeforeA
     }
   }
 }
-
