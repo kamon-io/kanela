@@ -24,6 +24,7 @@ import kanela.agent.api.instrumentation.listener.dumper.ClassDumperListener;
 import kanela.agent.cache.PoolStrategyCache;
 import kanela.agent.resubmitter.PeriodicResubmitter;
 import kanela.agent.util.ListBuilder;
+import kanela.agent.util.PatternMatcher;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
 import lombok.Value;
@@ -36,6 +37,7 @@ import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.NameMatcher;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -141,10 +143,20 @@ class KanelaAgentBuilder {
     }
 
     private ElementMatcher.Junction<NamedElement> ignoreMatches() {
-        return not(nameMatches(moduleDescription.getWithinPackage()));
+        final String withinPackage = moduleDescription.getWithinPackage();
+        if (withinPackage.isEmpty()) {
+            return any();
+        } else {
+            return not(new NameMatcher<>(new PatternMatcher(withinPackage)));
+        }
     }
 
     private ElementMatcher.Junction<NamedElement> moduleExcludes() {
-        return nameMatches(moduleDescription.getExcludePackage());
+        final String moduleExcludes = moduleDescription.getExcludePackage();
+        if (moduleExcludes.isEmpty()) {
+            return none();
+        } else {
+            return new NameMatcher<>(new PatternMatcher(moduleExcludes));
+        }
     }
 }

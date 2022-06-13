@@ -41,6 +41,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.empty[String]())
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
+    when(agentModuleDescriptionMock.getExcludePackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
@@ -48,6 +49,9 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
     verify(agentConfiguration, times(1)).getAgentModules
   }
 
+  // TODO FIXME: This test is useless since it explodes before getting to InstrumentationLoader.load
+  // It should be refactored to expect a specific exception and not a generic RuntimeException
+  // (currently blowing up due to errorneous spy+mock combo)
   "with an unknown instrumentation" should "blow up" in {
     val instrumentationMock = mock(classOf[Instrumentation])
     val agentModuleDescriptionMock = mock(classOf[ModuleConfiguration])
@@ -81,6 +85,7 @@ class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAft
 
     when(agentModuleDescriptionMock.getInstrumentations).thenReturn(JList.of[String]("kanela.agent.instrumentation.KamonFakeInstrumentationBuilder"))
     when(agentModuleDescriptionMock.getWithinPackage).thenReturn("")
+    when(agentModuleDescriptionMock.getExcludePackage).thenReturn("")
     when(agentModuleDescriptionMock.getName).thenReturn("x-module")
 
     InstrumentationLoader.load(instrumentationMock, Thread.currentThread().getContextClassLoader, agentConfiguration)
