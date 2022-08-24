@@ -19,6 +19,7 @@ package kanela.agent.util.log;
 import io.vavr.control.Try;
 import kanela.agent.bootstrap.log.LoggerHandler;
 import kanela.agent.bootstrap.log.LoggerProvider;
+import kanela.agent.util.ShutdownHook;
 import kanela.agent.util.conf.KanelaConfiguration;
 import lombok.val;
 import org.pmw.tinylog.Configurator;
@@ -62,6 +63,8 @@ public class Logger {
                 }
             });
         }).getOrElseThrow((error) -> new RuntimeException("Error when trying to load configuration: " + error.getMessage()));
+
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> Configurator.shutdownWritingThread(true)));
     }
 
     private Logger(){}

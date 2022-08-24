@@ -8,7 +8,7 @@ jobs:
     name: Java ${{ matrix.java }}
     strategy:
       matrix:
-        java: [ 8, 11, 17 ]
+        java: [ 8, 11, 17, 19 ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
