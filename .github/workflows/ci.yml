@@ -39,7 +39,7 @@ jobs:
         with:
           java-version: 8
           distribution: zulu
-          cache: maven
+          cache: gradle
       - name: Build project
         run: ./gradlew wrapper --gradle-version=7.5.1 :agent:publishToMavenLocal
         continue-on-error: false
