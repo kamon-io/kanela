@@ -17,6 +17,7 @@
 package kanela.agent.api.instrumentation;
 
 import io.vavr.Function4;
+import io.vavr.Function5;
 import io.vavr.control.Option;
 import kanela.agent.api.advisor.AdvisorDescription;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
@@ -31,6 +32,7 @@ import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.utility.JavaModule;
 
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -95,21 +97,21 @@ public class InstrumentationDescription {
         }
 
         public Builder withInterceptorFor(ElementMatcher.Junction<MethodDescription> method, Supplier<Class<?>> delegate) {
-            withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate.get())));
+            withTransformation((builder, typeDescription, classLoader, javaModule, domain) -> builder.method(method).intercept(MethodDelegation.to(delegate.get())));
             return this;
         }
 
         public Builder withInterceptorFor(ElementMatcher.Junction<MethodDescription> method, Object delegate) {
-            withTransformation((builder, typeDescription, classLoader, javaModule) -> builder.method(method).intercept(MethodDelegation.to(delegate)));
+            withTransformation((builder, typeDescription, classLoader, javaModule, domain) -> builder.method(method).intercept(MethodDelegation.to(delegate)));
             return this;
         }
 
-        public Builder withTransformation(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) {
+        public Builder withTransformation(Function5<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, ProtectionDomain, DynamicType.Builder> f) {
             transformers.add(withTransformer(f));
             return this;
         }
 
-        private AgentBuilder.Transformer withTransformer(Function4<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, DynamicType.Builder> f) { return f::apply; }
+        private AgentBuilder.Transformer withTransformer(Function5<DynamicType.Builder, TypeDescription, ClassLoader, JavaModule, ProtectionDomain,  DynamicType.Builder> f) { return f::apply; }
 
         public InstrumentationDescription build() {
             return new InstrumentationDescription(this);

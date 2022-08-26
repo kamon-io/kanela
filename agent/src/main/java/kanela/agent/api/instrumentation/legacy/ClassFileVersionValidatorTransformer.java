@@ -25,7 +25,7 @@ public class ClassFileVersionValidatorTransformer {
     public static final AgentBuilder.Transformer Instance = makeTransformer();
 
     private static AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) ->
+        return (builder, typeDescription, classLoader, module, domain) ->
                 builder.visit(ClassFileVersionValidatorWrapper.Instance);
     }
 }

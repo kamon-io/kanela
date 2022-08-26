@@ -38,7 +38,7 @@ public class MixinDescription {
     }
 
     public AgentBuilder.Transformer makeTransformer() {
-        return (builder, typeDescription, classLoader, module) -> {
+        return (builder, typeDescription, classLoader, module, domain) -> {
             val interfaces = List.ofAll(Arrays.asList(mixinClass.getInterfaces()))
                 .toSet()
                 .map(TypeDescription.ForLoadedType::new)

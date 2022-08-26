@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2019 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2022 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,6 @@ import kanela.agent.bootstrap.log.LoggerProvider;
 import kanela.agent.util.conf.KanelaConfiguration;
 import lombok.val;
 import org.pmw.tinylog.Configurator;
-import org.pmw.tinylog.Level;
 import org.pmw.tinylog.labelers.TimestampLabeler;
 import org.pmw.tinylog.policies.SizePolicy;
 import org.pmw.tinylog.policies.StartupPolicy;
@@ -42,7 +41,6 @@ public class Logger {
         Try.run(() -> {
             val configurator = Configurator
                 .fromResource("kanela-log.properties")
-                .writingThread(null) //disables automatic shutdown of writing thread
                 .maxStackTraceElements(400) // stack traces
                 .level(config.getLogLevel());
 
