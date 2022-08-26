@@ -1,6 +1,6 @@
 /*
  * =========================================================================================
- * Copyright © 2013-2018 the kamon project <http://kamon.io/>
+ * Copyright © 2013-2022 the kamon project <http://kamon.io/>
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -121,9 +121,7 @@ public class KanelaConfiguration {
                                 exceptionHandlerStrategy);
                     });
 
-                    moduleSettings.failed().forEach(t -> {
-                        Logger.warn(() -> "Malformed configuration for module on path: " + configPath + ". The module will be ignored.");
-                    });
+                    moduleSettings.failed().forEach(cause -> Logger.warn(() -> "Malformed configuration for module on path: " + configPath + ". The module will be ignored.", cause));
 
                     return moduleSettings;
 
@@ -309,7 +307,7 @@ public class KanelaConfiguration {
     private static File createTempDirectory(String tempDirPrefix) {
         return Try
                 .of(() -> Files.createTempDirectory(tempDirPrefix).toFile())
-                .getOrElseThrow(() -> new RuntimeException(format("Cannot build the temporary directory: {0}", tempDirPrefix)));
+                .getOrElseThrow((cause) -> new RuntimeException(format("Cannot build the temporary directory: {0}", tempDirPrefix), cause));
     }
 
 

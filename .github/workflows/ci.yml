@@ -13,6 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK ${{ matrix.java }}
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
       - uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
