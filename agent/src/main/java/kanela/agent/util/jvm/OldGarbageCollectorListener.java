@@ -24,7 +24,6 @@ import kanela.agent.broker.EventBroker;
 import kanela.agent.util.annotation.Experimental;
 import kanela.agent.util.conf.KanelaConfiguration;
 import kanela.agent.util.log.Logger;
-import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 
@@ -48,7 +47,6 @@ public class OldGarbageCollectorListener {
     Option<MemoryPoolMXBean> oldGenPool;
     KanelaConfiguration.OldGarbageCollectorConfig config;
 
-    @SneakyThrows
     private OldGarbageCollectorListener(KanelaConfiguration.OldGarbageCollectorConfig configuration, Jvm jvm) {
         val memoryBeans = List.ofAll(ManagementFactory.getMemoryPoolMXBeans());
 
