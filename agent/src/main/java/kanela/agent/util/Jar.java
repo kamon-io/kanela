@@ -23,6 +23,7 @@ import lombok.val;
 
 import java.io.File;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -60,7 +61,7 @@ public class Jar {
     public static Try<List<String>> searchWith(Pattern pattern) {
        return getKanelaJar().mapTry(kanelaJar -> {
             val names = new ArrayList<String>();
-            try (JarFile jarFile = new JarFile(kanelaJar.getFile())) {
+            try (JarFile jarFile = new JarFile(kanelaJar)) {
                 Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements()) {
                     JarEntry jarEntry = entries.nextElement();
@@ -78,10 +79,13 @@ public class Jar {
                 .collect(Collectors.toMap(k -> k[0], v -> v[1])));
     }
 
-    public static Try<URL> getKanelaJar() {
+    public static Try<String> getKanelaJar() {
         return Try.of(() -> {
-            val location = Kanela.class.getProtectionDomain().getCodeSource().getLocation();
-            return Paths.get(location.toURI()).toUri().toURL();
+            val filePath = Kanela.class.getProtectionDomain().getCodeSource()
+                .getLocation()
+                .getFile();
+
+            return URLDecoder.decode(filePath, "UTF-8");
         });
     }
 
