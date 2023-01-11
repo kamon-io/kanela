@@ -67,14 +67,15 @@ final public class Kanela {
           runWithTimeSpent(() -> {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
                   PreInitializeClasses.preInitializeClasses(instrumentationClassLoader);
-
-                  BootstrapInjector.injectJar(instrumentation, "bootstrap");
-
                   val configuration = KanelaConfiguration.from(instrumentationClassLoader);
+                  KanelaBanner.show(configuration);
                   Logger.configureLogger(configuration);
 
-                  if (isRuntimeAttach) configuration.runtimeAttach();
-                  KanelaBanner.show(configuration);
+                  if(configuration.requiresBootstrapInjection())
+                      BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
+                  if (isRuntimeAttach)
+                      configuration.runtimeAttach();
 
                   installedTransformers = InstrumentationLoader.load(instrumentation, instrumentationClassLoader, configuration);
                   Reinstrumenter.attach(instrumentation, configuration, installedTransformers);

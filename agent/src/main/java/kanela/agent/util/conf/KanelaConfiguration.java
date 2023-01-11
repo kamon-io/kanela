@@ -31,13 +31,10 @@ import lombok.Value;
 import lombok.val;
 import org.pmw.tinylog.Level;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 
 import static io.vavr.API.*;
-import static java.text.MessageFormat.format;
 
 
 @Value
@@ -115,7 +112,7 @@ public class KanelaConfiguration {
                                 stoppable,
                                 bootstrapInjection,
                                 enableClassFileVersionValidator,
-                                createTempDirectory(tempDirPrefix),
+                                tempDirPrefix,
                                 disableClassFormatChanges,
                                 exclude,
                                 exceptionHandlerStrategy);
@@ -133,6 +130,10 @@ public class KanelaConfiguration {
                 .sortBy(ModuleConfiguration::getOrder);
     }
 
+    public boolean requiresBootstrapInjection() {
+        return getAgentModules().exists(m -> m.isEnabled() && m.shouldInjectInBootstrap());
+    }
+
     @Value(staticConstructor = "from")
     public static class ModuleConfiguration {
         String configPath;
@@ -146,7 +147,7 @@ public class KanelaConfiguration {
         BootstrapInjectionConfig bootstrapInjectionConfig;
         @Getter(AccessLevel.NONE)
         boolean enableClassFileVersionValidator;
-        File tempDir;
+        String tempDirPrefix;
         boolean disableClassFormatChanges;
         String excludePackage;
         String exceptionHandlerStrategy;
@@ -302,12 +303,6 @@ public class KanelaConfiguration {
         return ConfigFactory
                 .load(classLoader, ConfigParseOptions.defaults(), ConfigResolveOptions.defaults()
                 .setAllowUnresolved(true));
-    }
-
-    private static File createTempDirectory(String tempDirPrefix) {
-        return Try
-                .of(() -> Files.createTempDirectory(tempDirPrefix).toFile())
-                .getOrElseThrow((cause) -> new RuntimeException(format("Cannot build the temporary directory: {0}", tempDirPrefix), cause));
     }
 
 
