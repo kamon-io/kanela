@@ -117,6 +117,20 @@ final public class Kanela {
   }
 
   /**
+   * Removes all the currently installed transformers without re-scanning to find new transformers. This is meant to be
+   * called during Kamon's initialization when kamon.enabled=no.
+   */
+  public static void disable() {
+      if(Kanela.instrumentation != null) {
+          InstrumentationRegistryListener.instance().clear();
+          InstrumentationClassPath.build().use(instrumentationClassLoader -> {
+              installedTransformers.forEach(transformer -> instrumentation.removeTransformer(transformer.getClassFileTransformer()));
+              installedTransformers = List.empty();
+          });
+      }
+  }
+
+  /**
    * Sets a System property indicating that Kanela has been loaded. That property is meant to be used by external
    * libraries that might want to check whether Kanela was loaded or not.
    */
