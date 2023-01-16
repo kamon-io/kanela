@@ -17,6 +17,7 @@
 package kanela.agent.api.instrumentation;
 
 import io.vavr.Function0;
+import io.vavr.control.Try;
 import kanela.agent.api.instrumentation.bridge.BridgeDescription;
 import kanela.agent.api.instrumentation.classloader.ClassLoaderRefiner;
 import kanela.agent.api.instrumentation.classloader.ClassRefiner;
@@ -34,12 +35,15 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 import net.bytebuddy.matcher.ElementMatchers;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.text.MessageFormat.format;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class InstrumentationBuilder {
@@ -71,7 +75,8 @@ public abstract class InstrumentationBuilder {
 
         if (moduleConfiguration.shouldInjectInBootstrap()) {
             val helperClassNames = moduleConfiguration.getBootstrapInjectionConfig().getHelperClassNames();
-            BootstrapInjector.inject(moduleConfiguration.getTempDir(), instrumentation, helperClassNames.toJavaList());
+            val tempDir = createTempDirectory(moduleConfiguration.getTempDirPrefix());
+            BootstrapInjector.inject(tempDir, instrumentation, helperClassNames.toJavaList());
         }
 
         return TypeTransformation.of(
@@ -82,6 +87,12 @@ public abstract class InstrumentationBuilder {
                 collect(mixins, MixinDescription::makeTransformer),
                 collect(advisors, advisorDescription -> advisorDescription.makeTransformer(moduleConfiguration)),
                 collect(transformers, Function.identity()));
+    }
+
+    private static File createTempDirectory(String tempDirPrefix) {
+        return Try
+                .of(() -> Files.createTempDirectory(tempDirPrefix).toFile())
+                .getOrElseThrow((cause) -> new RuntimeException(format("Cannot build the temporary directory: {0}", tempDirPrefix), cause));
     }
 
     private <T> List<AgentBuilder.Transformer> collect(List<T> transformerList, Function<T, AgentBuilder.Transformer> f) {
