@@ -22,7 +22,6 @@ import kanela.agent.builder.KanelaFileTransformer;
 import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
 import kanela.agent.reinstrument.Reinstrumenter;
 import kanela.agent.util.BootstrapInjector;
-import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.InstrumentationClassPath;
 import kanela.agent.util.classloader.PreInitializeClasses;
 import kanela.agent.util.conf.KanelaConfiguration;
@@ -68,7 +67,6 @@ final public class Kanela {
               InstrumentationClassPath.build().use(instrumentationClassLoader -> {
                   PreInitializeClasses.preInitializeClasses(instrumentationClassLoader);
                   val configuration = KanelaConfiguration.from(instrumentationClassLoader);
-                  KanelaBanner.show(configuration);
                   Logger.configureLogger(configuration);
 
                   if(configuration.requiresBootstrapInjection())
