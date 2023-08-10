@@ -106,5 +106,5 @@ gradle.taskGraph.whenReady { taskGraph ->
     KamonAgentTestRunning = result
 }
 
-test.reports.html.enabled = false
+test.reports.html.required = false
 
