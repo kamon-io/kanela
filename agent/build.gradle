@@ -59,7 +59,7 @@ shadowJar.dependsOn bootstrapJar
 
 shadowJar {
     archiveBaseName = 'kanela-agent'
-    archiveVersion = null
+    archiveClassifier = null
 
     mergeServiceFiles {
        path = 'META-INF/services/org.pmw.tinylog.*'
