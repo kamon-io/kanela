@@ -15,6 +15,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 8
+          distribution: 'zulu'
       - name: Build agent with Java 8
         run: ./gradlew wrapper --gradle-version=7.6.2 :agent:publishToMavenLocal
 
@@ -30,6 +31,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
+          distribution: 'zulu'
       - name: Test
         run: |
           ./gradlew wrapper --gradle-version=7.6.2 assemble
