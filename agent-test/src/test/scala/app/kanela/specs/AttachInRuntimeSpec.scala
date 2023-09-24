@@ -18,10 +18,13 @@ package app.kanela.specs
 
 import app.kanela.cases.simple.TestClass
 import kanela.agent.attacher.Attacher
+import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
 
 import scala.collection.mutable.ListBuffer
 
+@RunWith(classOf[JUnitRunner])
 class AttachInRuntimeSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "Kanela agent" should "be able to attach in runtime and instrument the loaded classes" in {

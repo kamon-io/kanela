@@ -15,7 +15,7 @@
  */
 
 buildscript {
-    ext.scala_version = '2.12.11'
+    ext.scala_version = '2.12.18'
     ext.agent_version = project(":agent").version
     ext.kamon_agent_dep = "io.kamon:kanela-agent:${agent_version}"
 

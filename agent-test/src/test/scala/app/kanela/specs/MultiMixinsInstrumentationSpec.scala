@@ -18,8 +18,12 @@ package app.kanela.specs
 
 import app.kanela.cases.multimixins.MixinAware.{MixinAware1, MixinAware2, MixinAware3}
 import app.kanela.cases.multimixins.WithMultiMixinsClass
+import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
 
+
+@RunWith(classOf[JUnitRunner])
 class MultiMixinsInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "Multiple Mixins over a single subType" should

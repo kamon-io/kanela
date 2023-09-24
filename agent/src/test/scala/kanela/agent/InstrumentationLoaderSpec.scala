@@ -16,13 +16,12 @@
 
 package kanela.agent
 
-import java.lang.instrument.{ClassFileTransformer, Instrumentation}
+import java.lang.instrument.Instrumentation
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 import io.vavr.collection.{List => JList}
 import kanela.agent.util.conf.KanelaConfiguration.ModuleConfiguration
 import kanela.agent.util.conf.KanelaConfiguration
-import net.bytebuddy.agent.builder.AgentBuilder.Default.ExecutingTransformer
 import org.mockito.ArgumentMatchers._
 
 class InstrumentationLoaderSpec extends FlatSpec with Matchers with BeforeAndAfterAll {

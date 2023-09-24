@@ -3,8 +3,7 @@
 # Adapted from https://github.com/paulp/psp-std/blob/master/bin/test
 
 runTests () {
-  ./gradlew :agent:test \
-    && ./gradlew :agent-test:test \
+  ./gradlew :agent:spec \
     && ./gradlew :agent-test:bridge-spec \
     && ./gradlew :agent-test:bootstrap-injection-spec \
     && ./gradlew :agent-test:multi-mixins-spec \

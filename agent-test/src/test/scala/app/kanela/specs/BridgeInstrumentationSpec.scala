@@ -18,9 +18,12 @@ package app.kanela.specs
 
 import app.kanela.cases.bridge.PrivateClass
 import app.kanela.instrumentation.PrivateClassBridge
+import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
 
 
+@RunWith(classOf[JUnitRunner])
 class BridgeInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   "The Bridge" should
     "generate an accessor method for a private field or method" in {

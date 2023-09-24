@@ -20,10 +20,13 @@ import app.kanela.cases.simple.TestClass
 import kanela.agent.attacher.Attacher
 import kanela.agent.broker.EventBroker
 import kanela.agent.reinstrument.Reinstrumenter.ReinstrumentationProtocol._
+import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
 
 import scala.collection.mutable.ListBuffer
 
+@RunWith(classOf[JUnitRunner])
 class StoppableInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   "A module stoppable" should "be able to retransform and reset instrumentation under critical state" in {

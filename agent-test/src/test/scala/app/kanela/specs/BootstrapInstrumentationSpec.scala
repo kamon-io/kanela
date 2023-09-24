@@ -17,10 +17,14 @@
 package app.kanela.specs
 
 import java.net.{HttpURLConnection, URL}
-
 import kanela.agent.attacher.Attacher
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
+import org.junit.runner.RunWith
 
+
+
+@RunWith(classOf[JUnitRunner])
 class BootstrapInstrumentationSpec extends FlatSpec with Matchers with BeforeAndAfterAll {
   "The Bootstrap Injection feature" should
     "provide the necessary helper classes when we instrument the bootstrap class loader" in {

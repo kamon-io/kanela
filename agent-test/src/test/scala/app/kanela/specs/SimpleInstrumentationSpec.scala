@@ -17,10 +17,13 @@
 package app.kanela.specs
 
 import app.kanela.cases.simple.{SpyAware, TestClass}
+import org.junit.runner.RunWith
 import org.scalatest.{FlatSpec, Matchers}
+import org.scalatestplus.junit.JUnitRunner
 
 import scala.collection.mutable.ListBuffer
 
+@RunWith(classOf[JUnitRunner])
 class SimpleInstrumentationSpec extends FlatSpec with Matchers {
 
   "An Advisor with OnMethodEnter and OnMethodExit" should "be able to instrument a specific method of a class" in {
