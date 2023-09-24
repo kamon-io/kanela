@@ -16,6 +16,7 @@ jobs:
         with:
           java-version: 8
           distribution: 'zulu'
+          cache: maven
       - name: Build agent with Java 8
         run: ./gradlew wrapper --gradle-version=8.4-rc-1 :agent:publishToMavenLocal
 
@@ -33,6 +34,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: 'zulu'
+          cache: maven
       - name: Test
         run: |
           ./travis-test.sh
