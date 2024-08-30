@@ -28,7 +28,7 @@ jobs:
         run: |
           # Conditionally run different commands based on the Java version
           if [[ "${{ matrix.java }}" == "8" ]]; then
-            ./gradlew wrapper --gradle-version=8.4-rc-1 :agent:spec && ./gradlew wrapper --gradle-version=8.4-rc-1 agent:publishToMavenLocal 
+            ./gradlew wrapper --gradle-version=8.10 :agent:spec && ./gradlew wrapper --gradle-version=8.10 agent:publishToMavenLocal
           else
             ./travis-test.sh
           fi
