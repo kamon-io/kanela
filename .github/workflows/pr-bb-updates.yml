@@ -1,7 +1,10 @@
 name: "Byte Buddy Update"
 
 on:
-  pull_request:
+  push:
+    branches:
+      - master
+      - automate_byte_buddy_updates
 
 permissions:
   pull-requests: write
@@ -39,13 +42,14 @@ jobs:
           rm -rf byte-buddy
           perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
           echo updated byte buddy and reference
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.actor }}/kanela
-          echo set origin url to https://github.com/${{ github.actor }}/kanela
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          echo set origin url to https://github.com/$GITHUB_REPOSITORY
           git fetch
-          git checkout "${GITHUB_HEAD_REF}"
+          git checkout -b update_byte_buddy-tag-$tag
           git add agent/libs agent/build.gradle
           git config --global user.name "GitHub Actions"
           git config --global user.email "github_actions_bot@kamon.io"
           git commit -m "rebuilt byte buddy"
           git push
+          gh pr create -B automate_byte_buddy_updates -H update_byte_buddy-tag-$tag --fill && echo Update PR successfully made || echo PR is already open
           fi
