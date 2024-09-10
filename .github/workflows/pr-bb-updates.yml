@@ -31,7 +31,7 @@ jobs:
           cd byte-buddy
           git checkout $tag
           git apply bb.patch
-          mvn clean package -Pextras -Dskiptests -q
+          mvn clean package -Pextras -Dskiptests -q -B
           echo Build succeeded
           mv ./byte-buddy/target/$tag.jar ../agent/libs
           mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
@@ -39,6 +39,8 @@ jobs:
           rm -rf byte-buddy
           perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
           echo updated byte buddy and reference
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout "${GITHUB_HEAD_REF}"
           git add agent/libs agent/build.gradle
           git config --global user.name "GitHub Actions"
           git config --global user.email "github_actions_bot@kamon.io"
