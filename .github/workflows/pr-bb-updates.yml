@@ -1,0 +1,44 @@
+name: "Byte Buddy Update"
+
+on:
+  push:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  pr-api-change:
+    name: PR Byte Buddy change
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 8
+      - name: Rebuild byte-buddy if version has changed
+        run: |
+          if [ 'byte-buddy-tag' = $(git diff --diff-filter=d --name-only HEAD^1...HEAD 'byte-buddy-tag' agent/libs | xargs) ]
+          then
+          echo Byte Buddy tag was updated
+          tag=$(cat byte-buddy-tag)
+          rm agent/libs/byte-buddy*
+          git clone git@github.com:raphw/byte-buddy.git
+          cp bb.patch byte-buddy
+          cd byte-buddy
+          git checkout $tag
+          git apply bb.patch
+          mvn clean package -Pextras -Dskiptests
+          mv ./byte-buddy/target/$tag.jar ../agent/libs
+          mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
+          cd ..
+          rm -rf byte-buddy
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github_actions_bot@kamon.io"
+          git add agent/libs
+          git commit -m "rebuilt byte buddy"
+          git push
+          fi
