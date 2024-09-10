@@ -40,6 +40,8 @@ jobs:
           perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
           echo updated byte buddy and reference
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          echo set origin url to https://github.com/$GITHUB_REPOSITORY
+          git fetch
           git checkout "${GITHUB_HEAD_REF}"
           git add agent/libs agent/build.gradle
           git config --global user.name "GitHub Actions"
