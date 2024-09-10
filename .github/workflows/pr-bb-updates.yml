@@ -37,9 +37,9 @@ jobs:
           mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
           cd ..
           rm -rf byte-buddy
-          sed -i "s|libs/byte-buddy-.+jar|libs/$tag.jar|"
+          perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
           echo updated byte buddy and reference
-          git add agent/libs
+          git add agent/libs agent/build.gradle
           git config --global user.name "GitHub Actions"
           git config --global user.email "github_actions_bot@kamon.io"
           git commit -m "rebuilt byte buddy"
