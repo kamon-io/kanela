@@ -31,14 +31,17 @@ jobs:
           cd byte-buddy
           git checkout $tag
           git apply bb.patch
-          mvn clean package -Pextras -Dskiptests
+          mvn clean package -Pextras -Dskiptests -q
+          echo Build succeeded
           mv ./byte-buddy/target/$tag.jar ../agent/libs
           mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
           cd ..
           rm -rf byte-buddy
+          sed -i "s|libs/byte-buddy-.+jar|libs/$tag.jar|"
+          echo updated byte buddy and reference
+          git add agent/libs
           git config --global user.name "GitHub Actions"
           git config --global user.email "github_actions_bot@kamon.io"
-          git add agent/libs
           git commit -m "rebuilt byte buddy"
           git push
           fi
