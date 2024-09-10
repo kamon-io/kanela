@@ -62,4 +62,4 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/$GITHUB_REPOSITORY/check-runs \
             -f "name=Test all the things / Java ${{ matrix.java }}" -f "head_sha=${{ steps.comment-branch.outputs.head_ref }}" -f "status=completed" \
-            -f "output[title]=Requested test" -f "conclusion=success" -f "details_url=https://github.com/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}" -f "output[summary]=Manually triggered test succeeded"
+            -f "output[title]=Requested test" -f "conclusion=success" -f "target_url=https://github.com/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}" -f "output[summary]=Manually triggered test succeeded"
