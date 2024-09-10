@@ -26,7 +26,7 @@ jobs:
           echo Byte Buddy tag was updated
           tag=$(cat byte-buddy-tag)
           rm agent/libs/byte-buddy*
-          git clone git@github.com:raphw/byte-buddy.git
+          git clone https://github.com/raphw/byte-buddy.git
           cp bb.patch byte-buddy
           cd byte-buddy
           git checkout $tag
