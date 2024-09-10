@@ -1,7 +1,7 @@
 name: "Byte Buddy Update"
 
 on:
-  push:
+  pull_request:
 
 permissions:
   pull-requests: write
@@ -21,7 +21,7 @@ jobs:
           java-version: 8
       - name: Rebuild byte-buddy if version has changed
         run: |
-          if [ 'byte-buddy-tag' = $(git diff --diff-filter=d --name-only HEAD^1...HEAD 'byte-buddy-tag' agent/libs | xargs) ]
+          if [ 'byte-buddy-tag' = $(git diff --diff-filter=d --name-only master...HEAD 'byte-buddy-tag' agent/libs | xargs) ]
           then
           echo Byte Buddy tag was updated
           tag=$(cat byte-buddy-tag)
