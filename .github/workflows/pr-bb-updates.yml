@@ -25,22 +25,22 @@ jobs:
           then
           echo Byte Buddy tag was updated
           tag=$(cat byte-buddy-tag)
-#          rm agent/libs/byte-buddy*
-#          git clone https://github.com/raphw/byte-buddy.git
-#          cp bb.patch byte-buddy
-#          cd byte-buddy
-#          git checkout $tag
-#          git apply bb.patch
-#          mvn clean package -Pextras -Dskiptests -q -B
-#          echo Build succeeded
-#          mv ./byte-buddy/target/$tag.jar ../agent/libs
-#          mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
-#          cd ..
-#          rm -rf byte-buddy
-#          perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
+          #rm agent/libs/byte-buddy*
+          #git clone https://github.com/raphw/byte-buddy.git
+          #cp bb.patch byte-buddy
+          #cd byte-buddy
+          #git checkout $tag
+          #git apply bb.patch
+          #mvn clean package -Pextras -Dskiptests -q -B
+          #echo Build succeeded
+          #mv ./byte-buddy/target/$tag.jar ../agent/libs
+          #mv ./byte-buddy/target/$tag-sources.jar ../agent/libs
+          #cd ..
+          #rm -rf byte-buddy
+          #perl -pi -e "s|libs/byte-buddy-.+jar|libs/$tag.jar|" agent/build.gradle
           echo updated byte buddy and reference
-#          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-#          echo set origin url to https://github.com/$GITHUB_REPOSITORY
+          # git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          # echo set origin url to https://github.com/$GITHUB_REPOSITORY
           git fetch
           git checkout "${GITHUB_HEAD_REF}"
           git add agent/libs agent/build.gradle
