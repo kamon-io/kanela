@@ -36,7 +36,7 @@ main() {
   )
 
   echo "[info] $(date) - starting gradle test"
-  (set -o pipefail && runTests |& filterOutput)
+  (set -o pipefail && runTests 2>&1 | filterOutput)
 }
 
 main $@
