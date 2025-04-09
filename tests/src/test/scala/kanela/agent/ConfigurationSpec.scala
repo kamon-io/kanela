@@ -38,8 +38,7 @@ class ConfigurationSpec extends munit.FunSuite {
       """
         |
         |kanela {
-        |  log-level = "INFO"
-        |  debug-mode = off
+        |  log-level = INFO
         |}
         |""".stripMargin
     )
@@ -53,8 +52,7 @@ class ConfigurationSpec extends munit.FunSuite {
       """
         |
         |kanela {
-        |  log-level = "INFO"
-        |  debug-mode = off
+        |  log-level = INFO
         |
         |  modules {
         |    tester {
@@ -75,13 +73,37 @@ class ConfigurationSpec extends munit.FunSuite {
     assertEquals(firstModule.order(), 1)
   }
 
+  test("should load modules without a 'within' section") {
+    val loader = classLoaderWithConfig(
+      """
+        |
+        |kanela {
+        |  log-level = INFO
+        |
+        |  modules {
+        |    tester {
+        |      name = "tester module"
+        |      instrumentations = [ "some.type.Instrumentation" ]
+        |    }
+        |  }
+        |}
+        |""".stripMargin
+    )
+
+    val config = Configuration.createFrom(loader)
+    val firstModule = config.modules().get(0)
+    assertEquals(firstModule.name(), "tester module")
+    assertEquals(firstModule.description(), Optional.empty[String]())
+    assertEquals(firstModule.enabled(), true)
+    assertEquals(firstModule.order(), 1)
+  }
+
   test("sohuld load all module configuration settings") {
     val loader = classLoaderWithConfig(
       """
         |
         |kanela {
-        |  log-level = "INFO"
-        |  debug-mode = off
+        |  log-level = INFO
         |
         |  modules {
         |    tester {

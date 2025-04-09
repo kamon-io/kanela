@@ -166,11 +166,18 @@ public class Configuration {
                   boolean enabled = optionalBoolean(moduleConfig, "enabled").orElse(true);
                   int order = optionalNumber(moduleConfig, "order").orElse(1);
                   List<String> instrumentations = moduleConfig.getStringList("instrumentations");
-                  List<String> prefixes = moduleConfig.getStringList("within");
+                  Optional<List<String>> prefixes = optionalStringList(moduleConfig, "within");
                   Optional<List<String>> bootstrapPrefixes =
                       optionalStringList(moduleConfig, "within-bootstrap");
                   Optional<List<String>> excludedPrefixes =
                       optionalStringList(moduleConfig, "exclude");
+
+                  if (!prefixes.isPresent()) {
+                    Logger.warn(
+                        "Module [{}] doesn't have any prefixes in the 'within' setting. The"
+                            + " instrumentations from this module will not have any effect.",
+                        name);
+                  }
 
                   modules.add(
                       new Module(
@@ -180,7 +187,7 @@ public class Configuration {
                           enabled,
                           order,
                           instrumentations,
-                          prefixes,
+                          prefixes.orElse(new ArrayList<>()),
                           bootstrapPrefixes,
                           excludedPrefixes));
                 } catch (Exception e) {
