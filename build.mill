@@ -6,6 +6,9 @@ import javalib.Assembly._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.1`
 import de.tobiasroeser.mill.vcs.version.VcsVersion
 
+import $ivy.`com.lihaoyi::mill-contrib-sonatypecentral:`
+import mill.contrib.sonatypecentral.SonatypeCentralPublishModule
+
 import $ivy.`com.lihaoyi::mill-contrib-buildinfo:`
 import mill.contrib.buildinfo.BuildInfo
 
@@ -46,7 +49,7 @@ object dependencies extends JavaModule {
  * The actual agent build. We are shading everything inside so that Kanela can be added as
  * a javaagent without any additional work in the classpath.
  */
-object agent extends MavenModule with PublishModule with BuildInfo {
+object agent extends MavenModule with SonatypeCentralPublishModule with BuildInfo {
   def artifactName: T[String] = "kanela-agent"
 
   def publishVersion: T[String] = VcsVersion.vcsState().format()

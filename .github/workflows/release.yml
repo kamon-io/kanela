@@ -15,7 +15,7 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
-      - run: ./mill mill.scalalib.PublishModule/ --publishArtifacts agent.publishArtifacts
+      - run: ./mill mill.contrib.sonatypecentral.SonatypeCentralPublishModule/publishAll --publishArtifacts agent.publishArtifacts
         name: Mill Publish
         env:
           MILL_PGP_PASSPHRASE: ${{ secrets.MILL_PGP_PASSPHRASE }}
