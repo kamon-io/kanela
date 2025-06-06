@@ -42,6 +42,11 @@ public class StatusApi {
     registeredModules.put(key, module);
   }
 
+  public static void clearModules() {
+    registeredModules.clear();
+    activeModules.clear();
+  }
+
   public static void onTypeTransformed(String moduleKey, String typeName) {
     if (registeredModules.containsKey(moduleKey)) {
       Set<String> transformedTypes = activeModules.computeIfAbsent(moduleKey, k -> new HashSet<>());

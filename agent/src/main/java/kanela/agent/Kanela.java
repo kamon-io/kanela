@@ -17,7 +17,6 @@
 package kanela.agent;
 
 import static java.util.Comparator.comparing;
-import static kanela.agent.bytebuddy.ClassLoaderClassMatcher.*;
 import static kanela.agent.bytebuddy.ClassPrefixMatcher.*;
 import static kanela.agent.bytebuddy.ScalaCompilerClassLoaderMatcher.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -43,6 +42,7 @@ import kanela.agent.bootstrap.StatusApi;
 import kanela.agent.bytebuddy.AdviceExceptionHandler;
 import kanela.agent.bytebuddy.BridgeClassVisitorWrapper;
 import kanela.agent.bytebuddy.ClassPrefixMatcher;
+import kanela.agent.bytebuddy.IgnoredClassLoaderMatcher;
 import kanela.agent.bytebuddy.MixinClassVisitorWrapper;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -79,11 +79,9 @@ public class Kanela {
       String args, Instrumentation instrumentation, boolean isAttachingAtRuntime) {
     if (currentJvmInstrumentation == null) {
       currentJvmInstrumentation = instrumentation;
-      instrumentationClassLoader = findInstrumentationClassloader();
 
-      ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
       try {
-        Thread.currentThread().setContextClassLoader(instrumentationClassLoader);
+        instrumentationClassLoader = findInstrumentationClassloader();
 
         // Ensures some critical classes are loaded before we start the instrumentation,
         // so that they don't get loaded in the middle of changing some other class.
@@ -115,31 +113,33 @@ public class Kanela {
 
       } catch (Throwable e) {
         throw new RuntimeException("Failed to install the Kanela agent on this JVM", e);
-      } finally {
-        Thread.currentThread().setContextClassLoader(previousClassLoader);
       }
     }
   }
 
   public static void reload() {
+    reload(false);
+  }
+
+  public static void reload(boolean clearRegisteredModules) {
     if (currentJvmInstrumentation != null && currentTransformer != null) {
-
       Logger.info("Reloading the Kanela agent");
-      // Resets any instrumentation that was previously installed
-      currentTransformer.reset(
-          currentJvmInstrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
 
-      instrumentationClassLoader = findInstrumentationClassloader();
-      ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
       try {
-        Thread.currentThread().setContextClassLoader(instrumentationClassLoader);
 
+        // Resets any instrumentation that was previously installed
+        currentTransformer.reset(
+            currentJvmInstrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+
+        instrumentationClassLoader = findInstrumentationClassloader();
         Configuration configuration = Configuration.createFrom(instrumentationClassLoader);
         if (configuration.agent().requiresBootstrapInjection()) {
           // We must do bootstrap injection before anything else because loading the modules
           // might trigger loading classes that should exist in the Boostrap ClassLoader l
           injectBootstapApiClasses(currentJvmInstrumentation);
         }
+
+        if (clearRegisteredModules) StatusApi.clearModules();
 
         // Kamon will access the StatusApi to figure out what modules are available/active
         registerModulesInStatusApi(configuration);
@@ -160,8 +160,6 @@ public class Kanela {
 
       } catch (Throwable e) {
         throw new RuntimeException("Failed to reload the Kanela agent on this JVM", e);
-      } finally {
-        Thread.currentThread().setContextClassLoader(previousClassLoader);
       }
     } else {
       Logger.error("Cannot reload Kanela because it was not installed properly in the current JVM");
@@ -179,6 +177,7 @@ public class Kanela {
   private static ClassLoader findInstrumentationClassloader() {
     Object customClassLoader = System.getProperties().get(InstrumentationClassLoaderPropertyName);
     if (customClassLoader != null && customClassLoader instanceof ClassLoader) {
+      System.getProperties().remove(InstrumentationClassLoaderPropertyName);
       return (ClassLoader) customClassLoader;
     } else {
       return ClassLoader.getSystemClassLoader();
@@ -297,18 +296,6 @@ public class Kanela {
             .with(poolStrategy)
             .with(new InstrumentationEventsLogger());
 
-    agentBuilder =
-        agentBuilder
-            .ignore(any(), isExtensionClassLoader())
-            .or(any(), isGroovyClassLoader())
-            .or(any(), isSBTClassLoader())
-            .or(any(), isSBTPluginClassLoader())
-            .or(any(), isSBTScalaCompilerClassLoader())
-            .or(any(), isSBTCachedClassLoader())
-            .or(any(), isLagomClassLoader())
-            .or(any(), isLagomServiceLocatorClassLoader())
-            .or(any(), isReflectionClassLoader());
-
     List<String> allBootstrapPrefixes =
         modules.stream()
             .flatMap(
@@ -320,13 +307,18 @@ public class Kanela {
                         .stream())
             .collect(Collectors.toList());
 
+    AgentBuilder.Ignored agentBuilderWithIgnores =
+        agentBuilder
+            .ignore(any(), isExtensionClassLoader())
+            .or(any(), new IgnoredClassLoaderMatcher());
+
     if (allBootstrapPrefixes.isEmpty()) {
-      agentBuilder = agentBuilder.ignore(any(), isBootstrapClassLoader());
+      agentBuilder = agentBuilderWithIgnores.or(any(), isBootstrapClassLoader());
     } else {
       File bootstrapClassesDir = Files.createTempDirectory("kanela-bootstrap-classes").toFile();
       agentBuilder =
-          agentBuilder
-              .ignore(not(classPrefix(allBootstrapPrefixes)), isBootstrapClassLoader())
+          agentBuilderWithIgnores
+              .or(not(classPrefix(allBootstrapPrefixes)), isBootstrapClassLoader())
               .with(
                   new InjectionStrategy.UsingInstrumentation(instrumentation, bootstrapClassesDir));
     }

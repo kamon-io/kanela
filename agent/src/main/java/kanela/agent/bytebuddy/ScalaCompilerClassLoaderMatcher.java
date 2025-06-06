@@ -18,13 +18,15 @@ package kanela.agent.bytebuddy;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 public class ScalaCompilerClassLoaderMatcher extends Junction.AbstractBase<ClassLoader> {
 
-  private static Map<ClassLoader, Boolean> knownClassLoaders = new ConcurrentHashMap<>();
+  private static Map<ClassLoader, Boolean> knownClassLoaders =
+      Collections.synchronizedMap(new WeakHashMap<>());
 
   /**
    * Tries to determine whether a ClassLoader is the Scala Compiler ClassLoader on SBT. Since there
@@ -41,28 +43,25 @@ public class ScalaCompilerClassLoaderMatcher extends Junction.AbstractBase<Class
    */
   @Override
   public boolean matches(ClassLoader classLoader) {
-    if (classLoader instanceof URLClassLoader) {
-      Boolean isScalaCompilerLoader = knownClassLoaders.get(classLoader);
+    if (classLoader != null && classLoader instanceof URLClassLoader) {
+      return knownClassLoaders.computeIfAbsent(
+          classLoader,
+          k -> {
+            URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
+            boolean foundScalaCompiler = false;
+            boolean foundJLine = false;
+            boolean hasLessThanSixJars = urlClassLoader.getURLs().length < 6;
 
-      if (isScalaCompilerLoader != null) return isScalaCompilerLoader;
-      else {
-        URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-        boolean foundScalaCompiler = false;
-        boolean foundJLine = false;
-        boolean hasLessThanSixJars = urlClassLoader.getURLs().length < 6;
+            if (hasLessThanSixJars) {
+              for (URL url : urlClassLoader.getURLs()) {
+                if (url.getFile().contains("scala-compiler")) foundScalaCompiler = true;
 
-        if (hasLessThanSixJars) {
-          for (URL url : urlClassLoader.getURLs()) {
-            if (url.getFile().contains("scala-compiler")) foundScalaCompiler = true;
+                if (url.getFile().contains("jline")) foundJLine = true;
+              }
+            }
 
-            if (url.getFile().contains("jline")) foundJLine = true;
-          }
-        }
-
-        boolean isScalaCompiler = hasLessThanSixJars && foundScalaCompiler && foundJLine;
-        knownClassLoaders.put(classLoader, isScalaCompiler);
-        return isScalaCompiler;
-      }
+            return hasLessThanSixJars && foundScalaCompiler && foundJLine;
+          });
     } else return false;
   }
 

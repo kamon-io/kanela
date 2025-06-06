@@ -133,11 +133,19 @@ public class Configuration {
   }
 
   static Configuration createFrom(ClassLoader classLoader) {
-    Config config =
+
+    // The Kanela jar will always be on the system classloader while the
+    // agent is attaching so we can load the base configuration from there
+    // and then overwrite with whatever ClassLoader we are reading the
+    // instrumentation from.
+    Config baseConfig = ConfigFactory.load(ClassLoader.getSystemClassLoader());
+    Config additionalConfig =
         ConfigFactory.load(
             classLoader,
-            ConfigParseOptions.defaults(),
+            ConfigParseOptions.defaults().setClassLoader(classLoader),
             ConfigResolveOptions.defaults().setAllowUnresolved(true));
+
+    Config config = additionalConfig.withFallback(baseConfig);
 
     if (!config.hasPath("kanela")) {
       throw new RuntimeException("Couldn't find kanela configuration in the classpath");
