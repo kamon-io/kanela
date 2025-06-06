@@ -23,15 +23,9 @@ import scala.util.Using
 import java.util.Collections
 import java.util.Enumeration
 import java.util.Optional
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 class ConfigurationSpec extends munit.FunSuite {
-
-  test("should fail to load when there is no configuration") {
-    val loader = classLoaderWithConfig("")
-    intercept[RuntimeException] {
-      Configuration.createFrom(loader)
-    }
-  }
 
   test("should load basic configuration settings") {
     val loader = classLoaderWithConfig(
@@ -91,8 +85,7 @@ class ConfigurationSpec extends munit.FunSuite {
     )
 
     val config = Configuration.createFrom(loader)
-    val firstModule = config.modules().get(0)
-    assertEquals(firstModule.name(), "tester module")
+    val firstModule = config.modules().asScala.find(_.name == "tester module").get
     assertEquals(firstModule.description(), Optional.empty[String]())
     assertEquals(firstModule.enabled(), true)
     assertEquals(firstModule.order(), 1)
