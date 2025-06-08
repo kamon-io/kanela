@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 public class Configuration {
@@ -153,7 +154,10 @@ public class Configuration {
 
     String logLevel = config.getString("kanela.log-level");
     String logFormat = "[{level}] {date} [kanela][{thread}] {message}";
-    Configurator.defaultConfig().formatPattern(logFormat).activate();
+    Configurator.defaultConfig()
+        .formatPattern(logFormat)
+        .level(Level.valueOf(logLevel.toUpperCase()))
+        .activate();
 
     Logger.debug("Reading configuration from {}", () -> config.root().render());
 
