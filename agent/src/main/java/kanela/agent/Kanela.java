@@ -392,7 +392,7 @@ public class Kanela {
 
                 @Override
                 public DynamicType.Builder transform(
-                    DynamicType.Builder builder,
+                    DynamicType.Builder<?> builder,
                     TypeDescription typeDescription,
                     ClassLoader classloader,
                     JavaModule module,
@@ -420,7 +420,7 @@ public class Kanela {
 
                 @Override
                 public DynamicType.Builder transform(
-                    DynamicType.Builder builder,
+                    DynamicType.Builder<?> builder,
                     TypeDescription typeDescription,
                     ClassLoader classloader,
                     JavaModule module,
@@ -442,7 +442,7 @@ public class Kanela {
 
                 @Override
                 public DynamicType.Builder transform(
-                    DynamicType.Builder builder,
+                    DynamicType.Builder<?> builder,
                     TypeDescription typeDescription,
                     ClassLoader classloader,
                     JavaModule module,

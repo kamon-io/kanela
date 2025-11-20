@@ -25,7 +25,7 @@ public class NoopContextApiImplementation implements ContextApiImplementation {
   }
 
   @Override
-  public <A> Callable wrapCallable(Callable<A> callable) {
+  public <A> Callable<A> wrapCallable(Callable<A> callable) {
     return callable;
   }
 }

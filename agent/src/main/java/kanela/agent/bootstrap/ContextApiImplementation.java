@@ -22,5 +22,5 @@ public interface ContextApiImplementation {
 
   Runnable wrapRunnable(Runnable runnable);
 
-  <A> Callable wrapCallable(Callable<A> callable);
+  <A> Callable<A> wrapCallable(Callable<A> callable);
 }
