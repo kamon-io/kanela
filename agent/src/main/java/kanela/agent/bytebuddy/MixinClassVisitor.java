@@ -94,7 +94,10 @@ public class MixinClassVisitor extends ClassVisitor {
                   MethodVisitor mv =
                       cv.visitMethod(mn.access, mn.name, mn.desc, mn.signature, exceptions);
                   mn.accept(
-                      new MethodRemapper(mv, new SimpleRemapper(cn.name, type.getInternalName())));
+                      new MethodRemapper(
+                          mv,
+                          new SimpleRemapper(
+                              OpenedClassReader.ASM_API, cn.name, type.getInternalName())));
                 });
       }
       super.visitEnd();
