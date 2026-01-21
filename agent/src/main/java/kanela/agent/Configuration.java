@@ -184,7 +184,8 @@ public class Configuration {
                   Optional<List<String>> excludedPrefixes =
                       optionalStringList(moduleConfig, "exclude");
 
-                  if (!prefixes.isPresent()) {
+                  boolean hasNoPrefixes = prefixes.isEmpty() || prefixes.get().isEmpty();
+                  if (hasNoPrefixes && !name.equals("annotation")) {
                     Logger.warn(
                         "Module [{}] doesn't have any prefixes in the 'within' setting. The"
                             + " instrumentations from this module will not have any effect.",
