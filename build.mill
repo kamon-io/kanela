@@ -132,7 +132,10 @@ object tests extends SbtModule {
   def unmanagedClasspath = Seq(agent.kanelaShadedJar())
 
   object test extends SbtTests with TestModule.Munit {
-    def forkArgs = Seq("-javaagent:" + agent.kanelaShadedJar().path)
+    def forkArgs = Seq(
+      "-javaagent:" + agent.kanelaShadedJar().path,
+      "-Dkanela.test.agent.jar=" + agent.kanelaShadedJar().path
+    )
     def mvnDeps = Seq(mvn"org.scalameta::munit:1.0.4")
   }
 }

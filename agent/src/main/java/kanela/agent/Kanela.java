@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,9 +64,16 @@ public class Kanela {
   private static volatile Instrumentation currentJvmInstrumentation;
   private static volatile ClassLoader instrumentationClassLoader;
   private static volatile ResettableClassFileTransformer currentTransformer;
+  private static volatile ScheduledExecutorService currentScheduler;
   private static final String InstrumentationClassLoaderPropertyName =
       "kanela.instrumentation.classLoader";
   private static final String LoadedIndicatorPropertyName = "kanela.loaded";
+  private static final ThreadFactory schedulerFactory =
+      r -> {
+        Thread thread = new Thread(r, "kanela-scheduled-executor");
+        thread.setDaemon(true);
+        return thread;
+      };
 
   public static void premain(String args, Instrumentation instrumentation) {
     start(args, instrumentation, false);
@@ -79,6 +87,7 @@ public class Kanela {
       String args, Instrumentation instrumentation, boolean isAttachingAtRuntime) {
     if (currentJvmInstrumentation == null) {
       currentJvmInstrumentation = instrumentation;
+      ScheduledExecutorService scheduler = null;
 
       try {
         instrumentationClassLoader = findInstrumentationClassloader();
@@ -99,19 +108,23 @@ public class Kanela {
         registerModulesInStatusApi(configuration);
 
         Logger.info("Installing the Kanela agent");
+        scheduler = Executors.newScheduledThreadPool(1, schedulerFactory);
         currentTransformer =
             installByteBuddyAgent(
                 configuration,
                 isAttachingAtRuntime,
-                Executors.newScheduledThreadPool(1),
+                scheduler,
                 instrumentation,
                 instrumentationClassLoader,
                 loadConfiguredModules(configuration, instrumentationClassLoader));
+        currentScheduler = scheduler;
+        scheduler = null;
 
         Logger.info("Kanela agent installed");
         System.setProperty(LoadedIndicatorPropertyName, "true");
 
       } catch (Throwable e) {
+        if (scheduler != null) scheduler.shutdownNow();
         throw new RuntimeException("Failed to install the Kanela agent on this JVM", e);
       }
     }
@@ -125,11 +138,14 @@ public class Kanela {
     if (currentJvmInstrumentation != null && currentTransformer != null) {
       Logger.info("Reloading the Kanela agent");
 
+      ScheduledExecutorService scheduler = null;
+
       try {
 
         // Resets any instrumentation that was previously installed
         currentTransformer.reset(
             currentJvmInstrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+        shutdownScheduler(currentScheduler);
 
         instrumentationClassLoader = findInstrumentationClassloader();
         Configuration configuration = Configuration.createFrom(instrumentationClassLoader);
@@ -146,19 +162,23 @@ public class Kanela {
 
         // We treat reloads as if we were attaching the agent at runtime.
         boolean isAttachingAtRuntime = true;
+        scheduler = Executors.newScheduledThreadPool(1, schedulerFactory);
         currentTransformer =
             installByteBuddyAgent(
                 configuration,
                 isAttachingAtRuntime,
-                Executors.newScheduledThreadPool(1),
+                scheduler,
                 currentJvmInstrumentation,
                 instrumentationClassLoader,
                 loadConfiguredModules(configuration, instrumentationClassLoader));
+        currentScheduler = scheduler;
+        scheduler = null;
 
         Logger.debug("Kanela agent reloaded");
         System.setProperty(LoadedIndicatorPropertyName, "true");
 
       } catch (Throwable e) {
+        if (scheduler != null) scheduler.shutdownNow();
         throw new RuntimeException("Failed to reload the Kanela agent on this JVM", e);
       }
     } else {
@@ -181,6 +201,13 @@ public class Kanela {
       return (ClassLoader) customClassLoader;
     } else {
       return ClassLoader.getSystemClassLoader();
+    }
+  }
+
+  private static void shutdownScheduler(ScheduledExecutorService scheduler) {
+    if (scheduler != null) {
+      scheduler.shutdownNow();
+      if (currentScheduler == scheduler) currentScheduler = null;
     }
   }
 
@@ -265,8 +292,6 @@ public class Kanela {
       ClassLoader instrumentationClassLoader,
       List<ModuleTargets> modules)
       throws Exception {
-
-    executor.submit(() -> Thread.currentThread().setName("kanela-scheduled-executor"));
 
     ConcurrentMap<? super ClassLoader, TypePool.CacheProvider> caches = new ConcurrentHashMap<>();
 
